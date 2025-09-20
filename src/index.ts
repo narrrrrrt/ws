@@ -15,8 +15,8 @@ export default {
 
     if (roomId && VALID_IDS.includes(roomId)) {
       try {
-        const id = env.ROOM.idFromName(roomId)
-        const stub = env.ROOM.get(id)
+        const id = env.RoomDO.idFromName(roomId)
+        const stub = env.RoomDO.get(id)
 
         const doUrl = new URL(`http://do${restPath}${url.search}`)
         const doReq = new Request(doUrl.toString(), request)
