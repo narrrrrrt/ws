@@ -25,7 +25,8 @@ export class RoomDO {
     const path = url.pathname.split("/").filter(Boolean)
 
     // --- WebSocket upgrade ---
-    if (path[1] === "ws") {
+    //if (path[1] === "ws") {
+    if (request.headers.get("Upgrade") === "websocket") {
       const [client, server] = Object.values(new WebSocketPair())
       this.room.addSession(server)
 
