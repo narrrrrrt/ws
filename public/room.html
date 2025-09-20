@@ -1,57 +1,26 @@
-<!DOCTYPE html>
-<html>
-  <head><title>Reversi Room</title></head>
-  <body>
-    <h1>Reversi Room</h1>
-    <pre id="log"></pre>
+ws.addEventListener("message", (evt) => {
+  try {
+    const msg = JSON.parse(evt.data)
+    console.log("recv:", msg)
 
-    <script>
-      const params = new URLSearchParams(location.search)
-      const roomId = params.get("id")
-      const seat = params.get("seat")
+    // デバッグ表示を強化
+    const debug = document.getElementById("log")
+    debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
 
-      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
-
-      ws.addEventListener("open", () => {
-        console.log("connected to room", roomId, "as", seat)
-        ws.send(JSON.stringify({ event: "join", seat }))
-      })
-
-      ws.addEventListener("message", (evt) => {
-        try {
-          const msg = JSON.parse(evt.data)
-          console.log("recv:", msg)
-
-          if (msg.event === "join") {
-            const { board, status, black, white } = msg.data
-            renderBoard(board)
-            renderStatus(status, black, white)
-          } else if (msg.event === "move") {
-            const { board, status } = msg.data
-            renderBoard(board)
-            renderStatus(status)
-          } else if (msg.event === "leave") {
-            const { status, black, white } = msg.data
-            renderStatus(status, black, white)
-          }
-
-          // デバッグ表示
-          const log = document.getElementById("log")
-          log.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
-        } catch (e) {
-          console.error("invalid message:", evt.data)
-        }
-      })
-
-      function renderBoard(board) {
-        console.log("draw board:", board)
-        // TODO: DOM に描画処理
-      }
-
-      function renderStatus(status, black, white) {
-        console.log("status:", status, "black:", black, "white:", white)
-        // TODO: ステータス表示
-      }
-    </script>
-  </body>
-</html>
+    if (msg.event === "join") {
+      console.log("join event payload:", msg.data)
+      const { board, status, black, white } = msg.data
+      if (board) renderBoard(board)
+      if (status) renderStatus(status, black, white)
+    } else if (msg.event === "move") {
+      const { board, status } = msg.data
+      renderBoard(board)
+      renderStatus(status)
+    } else if (msg.event === "leave") {
+      const { status, black, white } = msg.data
+      renderStatus(status, black, white)
+    }
+  } catch (e) {
+    console.error("invalid message:", evt.data)
+  }
+})
