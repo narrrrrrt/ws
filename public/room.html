@@ -1,26 +1,77 @@
-ws.addEventListener("message", (evt) => {
-  try {
-    const msg = JSON.parse(evt.data)
-    console.log("recv:", msg)
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reversi Room</title>
+    <style>
+      body { font-family: sans-serif; }
+      #board { display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; margin: 20px 0; }
+      .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .black { background: black; border-radius: 50%; width: 30px; height: 30px; }
+      .white { background: white; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #000; }
+      pre { background: #eee; padding: 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>Reversi Room</h1>
+    <div id="board"></div>
 
-    // デバッグ表示を強化
-    const debug = document.getElementById("log")
-    debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
+    <hr>
+    <h2>Debug Messages</h2>
+    <pre id="debug"></pre>
 
-    if (msg.event === "join") {
-      console.log("join event payload:", msg.data)
-      const { board, status, black, white } = msg.data
-      if (board) renderBoard(board)
-      if (status) renderStatus(status, black, white)
-    } else if (msg.event === "move") {
-      const { board, status } = msg.data
-      renderBoard(board)
-      renderStatus(status)
-    } else if (msg.event === "leave") {
-      const { status, black, white } = msg.data
-      renderStatus(status, black, white)
-    }
-  } catch (e) {
-    console.error("invalid message:", evt.data)
-  }
-})
+    <script>
+      // --- URL パラメータから roomId と seat を取得 ---
+      const params = new URLSearchParams(location.search);
+      const roomId = params.get("id");
+      const seat = params.get("seat") || "observer";
+
+      // --- WebSocket 接続 ---
+      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
+
+      ws.addEventListener("open", () => {
+        console.log("connected to room", roomId, "as", seat);
+        ws.send(JSON.stringify({ event: "join", seat }));
+      });
+
+      ws.addEventListener("message", (evt) => {
+        try {
+          const msg = JSON.parse(evt.data);
+          console.log("recv:", msg);
+
+          // デバッグ表示
+          const debug = document.getElementById("debug");
+          debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
+
+          // join/move のときにボードを描画
+          if (msg.event === "join" || msg.event === "move") {
+            renderBoard(msg.data.board);
+          }
+        } catch (e) {
+          console.error("invalid message:", evt.data);
+        }
+      });
+
+      // --- 盤面描画 ---
+      function renderBoard(board) {
+        const container = document.getElementById("board");
+        container.innerHTML = "";
+        board.forEach((row, y) => {
+          row.forEach((cell, x) => {
+            const div = document.createElement("div");
+            div.className = "cell";
+            if (cell === "B") {
+              div.appendChild(document.createElement("div")).className = "black";
+            } else if (cell === "W") {
+              div.appendChild(document.createElement("div")).className = "white";
+            }
+            // クリックで move を送信
+            div.onclick = () => {
+              ws.send(JSON.stringify({ event: "move", x, y }));
+            };
+            container.appendChild(div);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
