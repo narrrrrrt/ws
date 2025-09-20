@@ -9,25 +9,29 @@
       <h2>Room 1</h2>
       <a href="room.html?id=1&seat=black">Black</a> |
       <a href="room.html?id=1&seat=white">White</a> |
-      <a href="room.html?id=1&seat=observer">Observer</a>
+      <a href="room.html?id=1&seat=observer">Observer</a> |
+      <button onclick="resetRoom(1)">Reset</button>
     </div>
     <div>
       <h2>Room 2</h2>
       <a href="room.html?id=2&seat=black">Black</a> |
       <a href="room.html?id=2&seat=white">White</a> |
-      <a href="room.html?id=2&seat=observer">Observer</a>
+      <a href="room.html?id=2&seat=observer">Observer</a> |
+      <button onclick="resetRoom(2)">Reset</button>
     </div>
     <div>
       <h2>Room 3</h2>
       <a href="room.html?id=3&seat=black">Black</a> |
       <a href="room.html?id=3&seat=white">White</a> |
-      <a href="room.html?id=3&seat=observer">Observer</a>
+      <a href="room.html?id=3&seat=observer">Observer</a> |
+      <button onclick="resetRoom(3)">Reset</button>
     </div>
     <div>
       <h2>Room 4</h2>
       <a href="room.html?id=4&seat=black">Black</a> |
       <a href="room.html?id=4&seat=white">White</a> |
-      <a href="room.html?id=4&seat=observer">Observer</a>
+      <a href="room.html?id=4&seat=observer">Observer</a> |
+      <button onclick="resetRoom(4)">Reset</button>
     </div>
 
     <hr>
@@ -56,6 +60,15 @@
           console.error("invalid message:", evt.data)
         }
       })
+
+      // --- Reset ボタンで部屋をリセット ---
+      function resetRoom(id) {
+        const wsTmp = new WebSocket(`wss://${location.host}/${id}/ws`)
+        wsTmp.addEventListener("open", () => {
+          wsTmp.send(JSON.stringify({ event: "reset" }))
+          wsTmp.close()
+        })
+      }
     </script>
   </body>
 </html>
