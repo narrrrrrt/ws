@@ -4,114 +4,109 @@
     <title>Reversi Room</title>
     <style>
       body { font-family: sans-serif; }
-      #board {
-        display: grid;
-        grid-template-columns: repeat(8, 40px);
-        grid-template-rows: repeat(8, 40px);
-        gap: 2px;
-        margin: 10px 0;
-      }
-      .cell {
-        width: 40px;
-        height: 40px;
-        background: #0a0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-      }
-      .black {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: black;
-      }
-      .white {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: white;
-        border: 1px solid #000;
-      }
-      pre {
-        background: #eee;
-        padding: 10px;
-        height: 200px;
-        overflow-y: auto;
-      }
+      .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
+      .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .disc { width: 30px; height: 30px; border-radius: 50%; }
+      .black { background: black; }
+      .white { background: white; border: 1px solid #000; }
+      pre { background: #f0f0f0; padding: 10px; }
     </style>
   </head>
   <body>
     <h1>Reversi Room</h1>
 
-    <!-- 盤面 -->
-    <div id="board"></div>
+    <div id="status"></div>
+    <div id="board" class="board"></div>
 
     <hr>
     <h2>Debug Messages</h2>
     <pre id="log"></pre>
 
     <script>
-      // --- URL パラメータから roomId と seat を取得 ---
-      const params = new URLSearchParams(location.search);
-      const roomId = params.get("id") || "1";
-      const seat = params.get("seat") || "observer";
+      const params = new URLSearchParams(location.search)
+      const roomId = params.get("id")
+      const seat = params.get("seat") || "observer"
 
-      // --- WebSocket 接続 ---
-      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
+      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
+      let myToken = null   // ★ join でもらった token を保存する変数
+
+      // --- UI 更新関数 ---
+      function renderBoard(board) {
+        const boardEl = document.getElementById("board")
+        boardEl.innerHTML = ""
+        board.forEach((row, y) => {
+          row.split("").forEach((cell, x) => {
+            const cellEl = document.createElement("div")
+            cellEl.className = "cell"
+            if (cell === "B") {
+              const d = document.createElement("div")
+              d.className = "disc black"
+              cellEl.appendChild(d)
+            } else if (cell === "W") {
+              const d = document.createElement("div")
+              d.className = "disc white"
+              cellEl.appendChild(d)
+            }
+
+            // --- クリックで move 送信 ---
+            cellEl.addEventListener("click", () => {
+              if (!myToken) {
+                console.warn("No token, cannot move")
+                return
+              }
+              ws.send(JSON.stringify({
+                event: "move",
+                token: myToken,  // ★ ここで送信
+                x, y
+              }))
+            })
+
+            boardEl.appendChild(cellEl)
+          })
+        })
+      }
+
+      function renderStatus(status, black, white) {
+        const s = document.getElementById("status")
+        s.textContent = `Status: ${status}, Black: ${black}, White: ${white}`
+      }
+
+      // --- WebSocket ---
       ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({ event: "join", seat }));
-      });
+        ws.send(JSON.stringify({ event: "join", seat }))
+      })
 
       ws.addEventListener("message", (evt) => {
         try {
-          const msg = JSON.parse(evt.data);
-          log(`[${msg.event}] ${JSON.stringify(msg.data)}`);
+          const msg = JSON.parse(evt.data)
+          console.log("recv:", msg)
 
-          if (msg.event === "join" || msg.event === "move") {
-            const { board, status, black, white } = msg.data;
-            if (board) renderBoard(board);
+          const debug = document.getElementById("log")
+          debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
+
+          if (msg.event === "join") {
+            if (msg.data.token) {
+              myToken = msg.data.token   // ★ join レスポンスから保存
+            }
+            if (msg.data.board) {
+              renderBoard(msg.data.board)
+            }
+            if (msg.data.status) {
+              renderStatus(msg.data.status, msg.data.black, msg.data.white)
+            }
+          } else if (msg.event === "move") {
+            const { board, status } = msg.data
+            renderBoard(board)
+            renderStatus(status, msg.data.black, msg.data.white)
           } else if (msg.event === "leave") {
-            const { board } = msg.data;
-            if (board) renderBoard(board);
+            const { status, black, white } = msg.data
+            renderStatus(status, black, white)
           }
         } catch (e) {
-          console.error("invalid message:", evt.data);
+          console.error("invalid message:", evt.data)
         }
-      });
-
-      // --- 盤面を描画 ---
-      function renderBoard(board) {
-        const container = document.getElementById("board");
-        container.innerHTML = "";
-        board.forEach((row, y) => {
-          row.split("").forEach((cell, x) => {
-            const div = document.createElement("div");
-            div.className = "cell";
-
-            if (cell === "B") {
-              div.appendChild(document.createElement("div")).className = "black";
-            } else if (cell === "W") {
-              div.appendChild(document.createElement("div")).className = "white";
-            }
-            // "-" は空セルとしてクリック可能
-
-            div.onclick = () => {
-              ws.send(JSON.stringify({ event: "move", x, y }));
-            };
-
-            container.appendChild(div);
-          });
-        });
-      }
-
-      // --- デバッグログ ---
-      function log(text) {
-        const debug = document.getElementById("log");
-        debug.textContent += text + "\n";
-        debug.scrollTop = debug.scrollHeight;
-      }
+      })
     </script>
   </body>
 </html>
