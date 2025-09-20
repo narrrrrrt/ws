@@ -14,8 +14,22 @@ export function joinHandle(room: Room, data: any, ws: WebSocket): void {
 
   room.respond(ws, response)
 
-  // 黒 or 白の場合は全員にブロードキャスト
-  if (role !== "observer") {
+  if (role === "observer") {
+    if (!room.black && !room.white) {
+      // 誰もいないときは observer に初期状態を返す
+      room.respond(ws, {
+        event: "state",
+        data: {
+          board: [...Room.initialBoard],
+          status: "waiting",
+          black: false,
+          white: false
+        }
+      })
+    }
+    // 誰かプレイヤーがいれば、broadcast が流れるので何もしない
+  } else {
+    // 黒・白の join は従来通り broadcast
     room.broadcast("join")
   }
 }
