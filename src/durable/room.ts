@@ -57,8 +57,7 @@ export class Room {
     }
   }
 
-  respond(ws: WebSocket, event: string, data: any) {
-    const payload = { event, data }
+  respond(ws: WebSocket, payload: EventResponse) {
     ws.send(JSON.stringify(payload))
   }
 }
