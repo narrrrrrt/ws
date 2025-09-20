@@ -18,10 +18,12 @@ export function join_l(
   if (seat && !token) {
     if (seat === "black" && room.black === null) {
       newToken = generateToken()
+      room.board = [...Room.initialBoard]
       room.black = newToken
       role = "black"
     } else if (seat === "white" && room.white === null) {
       newToken = generateToken()
+      room.board = [...Room.initialBoard]
       room.white = newToken
       role = "white"
     } else {
