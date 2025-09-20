@@ -25,7 +25,7 @@ export class Room {
     this.sessions.set(ws, null)
     ws.accept()
   }
-
+/*
   removeSession(ws: WebSocket) {
     const token = this.sessions.get(ws)
     if (token) {
@@ -34,6 +34,23 @@ export class Room {
     }
     this.sessions.delete(ws)
   }
+*/
+removeSession(ws: WebSocket) {
+  const token = this.sessions.get(ws)
+
+  console.log("RS_ENTER")             // ここに入った確認
+  console.log("RS_TK", token ?? "NONE")
+
+  if (token) {
+    leave_l(this, token)
+    console.log("RS_LEAVE", token)    // leave_l 呼んだ確認
+    this.broadcast("leave")
+    console.log("RS_BCAST")           // broadcast した確認
+  }
+
+  this.sessions.delete(ws)
+  console.log("RS_DEL")               // sessions.delete 完了
+}
 
   broadcast(event: string) {
     const payload: BroadcastPayload = {
