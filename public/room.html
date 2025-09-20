@@ -3,44 +3,54 @@
   <head><title>Reversi Room</title></head>
   <body>
     <h1>Reversi Room</h1>
-    <pre id="board"></pre>
-    <pre id="debug"></pre>
+    <pre id="log"></pre>
 
     <script>
       const params = new URLSearchParams(location.search)
-      const id = params.get("id")
+      const roomId = params.get("id")
       const seat = params.get("seat")
 
-      const ws = new WebSocket(`wss://${location.host}/${id}/ws`)
+      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
       ws.addEventListener("open", () => {
-        console.log("connected", id, seat)
+        console.log("connected to room", roomId, "as", seat)
         ws.send(JSON.stringify({ event: "join", seat }))
       })
 
       ws.addEventListener("message", (evt) => {
-        const msg = JSON.parse(evt.data)
-        console.log("recv:", msg)
+        try {
+          const msg = JSON.parse(evt.data)
+          console.log("recv:", msg)
 
-        const debug = document.getElementById("debug")
-        debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
-
-        if (msg.event === "state" && seat === "observer") {
-          // observer join 時 → 初期盤面を即描画
-          drawBoard(msg.data.board)
-        }
-
-        if (msg.event === "join" || msg.event === "move" || msg.event === "reset") {
-          // 通常 broadcast → 盤面描画
-          if (msg.data?.board) {
-            drawBoard(msg.data.board)
+          if (msg.event === "join") {
+            const { board, status, black, white } = msg.data
+            renderBoard(board)
+            renderStatus(status, black, white)
+          } else if (msg.event === "move") {
+            const { board, status } = msg.data
+            renderBoard(board)
+            renderStatus(status)
+          } else if (msg.event === "leave") {
+            const { status, black, white } = msg.data
+            renderStatus(status, black, white)
           }
+
+          // デバッグ表示
+          const log = document.getElementById("log")
+          log.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
+        } catch (e) {
+          console.error("invalid message:", evt.data)
         }
       })
 
-      function drawBoard(board) {
-        const out = board.map(row => row.join(" ")).join("\n")
-        document.getElementById("board").textContent = out
+      function renderBoard(board) {
+        console.log("draw board:", board)
+        // TODO: DOM に描画処理
+      }
+
+      function renderStatus(status, black, white) {
+        console.log("status:", status, "black:", black, "white:", white)
+        // TODO: ステータス表示
       }
     </script>
   </body>

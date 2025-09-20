@@ -18,7 +18,7 @@ export function joinHandle(room: Room, data: any, ws: WebSocket): void {
     if (!room.black && !room.white) {
       // 誰もいないときは observer に初期状態を返す
       room.respond(ws, {
-        event: "state",
+        event: "join",
         data: {
           board: [...Room.initialBoard],
           status: "waiting",
