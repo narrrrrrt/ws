@@ -1,59 +1,67 @@
 import { Room } from "../room"
 import { Role } from "../types"
-import { randomUUID } from "crypto"
 
-export function join_l(room: Room, sheet?: Role, token?: string): { role: Role; token?: string } {
-  // --- 1. token だけで来た場合 (相手がリーブして続行したいケース)
-  if (!sheet && token) {
-    if (room.black === token || room.white === token) {
-      // 正しいtoken → boardリセット & waiting
-      room.board = [...Room.initialBoard]
-      room.status = "waiting"
-      return { role: room.black === token ? "black" : "white", token }
-    }
-    // 無効token → observer
-    return { role: "observer" }
-  }
+// 8文字のシンプルトークン
+function generateToken(): string {
+  return Math.random().toString(36).slice(2, 10)
+}
 
-  // --- 2. sheet + token (リロード)
-  if (sheet && token) {
-    if ((sheet === "black" && room.black === token) || (sheet === "white" && room.white === token)) {
-      // 既存プレイヤー → そのままOK
-      return { role: sheet, token }
-    }
-    // 不一致なら observer
-    return { role: "observer" }
-  }
+export function join_l(
+  room: Room,
+  seat?: Role,
+  token?: string
+): { role: Role; token: string | null } {
+  let role: Role = "observer"
+  let newToken: string | null = null
 
-  // --- 3. sheetだけ (新規参加)
-  if (sheet) {
-    let role: Role = "observer"
-    let newToken: string | undefined
-
-    if (sheet === "black" && !room.black) {
-      room.black = newToken = randomUUID()
+  // case 1: 新規参加 (seat のみ)
+  if (seat && !token) {
+    if (seat === "black" && room.black === null) {
+      newToken = generateToken()
+      room.black = newToken
       role = "black"
-    } else if (sheet === "white" && !room.white) {
-      room.white = newToken = randomUUID()
+    } else if (seat === "white" && room.white === null) {
+      newToken = generateToken()
+      room.white = newToken
       role = "white"
     } else {
       role = "observer"
     }
-
-    // ステータス更新
-    if (role !== "observer") {
-      if (room.black && room.white) {
-        room.status = "black"  // ゲーム開始
-        room.board = [...Room.initialBoard]
-      } else {
-        room.status = "waiting"
-        room.board = [...Room.initialBoard]
-      }
-    }
-
-    return { role, token: newToken }
   }
 
-  // どの条件にも当てはまらない → observer
-  return { role: "observer" }
+  // case 2: リロード (seat + token)
+  else if (seat && token) {
+    if (seat === "black" && room.black === token) {
+      role = "black"
+      newToken = token
+    } else if (seat === "white" && room.white === token) {
+      role = "white"
+      newToken = token
+    } else {
+      role = "observer"
+    }
+  }
+
+  // case 3: token のみ（相手が leave した後の継続）
+  else if (!seat && token) {
+    if (token === room.black || token === room.white) {
+      role = token === room.black ? "black" : "white"
+      newToken = token
+      room.board = [...Room.initialBoard]
+      room.status = "waiting"
+    } else {
+      role = "observer"
+    }
+  }
+
+  // ステータス更新（observer 以外の場合）
+  if (role !== "observer") {
+    if (room.black && room.white) {
+      room.status = "black" // ゲーム開始（黒番）
+    } else {
+      room.status = "waiting"
+    }
+  }
+
+  return { role, token: newToken }
 }

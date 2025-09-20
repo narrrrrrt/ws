@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Reversi Room</title></head>
+  <body>
+    <h1>Reversi Room</h1>
+    <pre id="status"></pre>
+    <pre id="board"></pre>
+    <script>
+      const params = new URLSearchParams(window.location.search)
+      const roomId = params.get("id")
+      const seat = params.get("seat")
+
+      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ event: "join", seat }))
+      }
+
+      ws.onmessage = (msg) => {
+        const { event, data } = JSON.parse(msg.data)
+        if (event === "move" || event === "join" || event === "leave" || event === "reset") {
+          document.getElementById("status").textContent = JSON.stringify(data.status)
+          document.getElementById("board").textContent = data.board?.join("\n") || ""
+        }
+        if (data.error) alert(data.error)
+      }
+
+      // 簡単にテスト：盤面クリックで送る
+      document.addEventListener("click", () => {
+        const x = Math.floor(Math.random() * 8)
+        const y = Math.floor(Math.random() * 8)
+        ws.send(JSON.stringify({ event: "move", x, y }))
+      })
+    </script>
+  </body>
+</html>

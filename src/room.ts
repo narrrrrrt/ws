@@ -24,11 +24,6 @@ export class Room {
   addSession(ws: WebSocket) {
     this.sessions.set(ws, null)
     ws.accept()
-
-    // 接続が閉じられた時 → removeSession
-    ws.addEventListener("close", () => {
-      this.removeSession(ws)
-    })
   }
 
   removeSession(ws: WebSocket) {

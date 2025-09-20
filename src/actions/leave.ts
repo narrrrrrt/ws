@@ -1,22 +1,20 @@
 import { Room } from "../room"
-import { EventResponse } from "../types"
 import { leave_l } from "../logic/leave_l"
+import { EventResponse } from "../types"
 
-export async function leaveHandle(room: Room, data: any): Promise<Response> {
-  const token = data?.token
-  if (!token) {
-    // leave は token が必須
-    const res: EventResponse = {
-      event: "leave",
-      data: { errorReason: "missing token" }
-    }
-    return new Response(JSON.stringify(res), { status: 400 })
-  }
+export function leaveHandle(room: Room, data: any, ws: WebSocket): void {
+  const token = data.token
+  if (!token) return
 
-  // ロジックに委譲
   leave_l(room, token)
 
-  // leave はレスポンスを返さない設計
-  // ただし HTTP 的には 200 OK を返す
-  return new Response(null, { status: 200 })
+  // 本人へのレスポンスを返す（型 EventResponse）
+  const response: EventResponse = {
+    event: "leave",
+    data: {} // leave は返すものなし
+  }
+  room.respond(ws, response)
+
+  // 全員にブロードキャスト
+  room.broadcast("leave")
 }

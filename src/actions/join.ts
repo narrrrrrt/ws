@@ -1,24 +1,21 @@
 import { Room } from "../room"
-import { EventResponse } from "../types"
 import { join_l } from "../logic/join_l"
+import { EventResponse } from "../types"
 
-export async function joinHandle(room: Room, data: any): Promise<Response> {
-  const sheet = data?.sheet
-  const token = data?.token
+export function joinHandle(room: Room, data: any, ws: WebSocket): void {
+  const { seat, token } = data
+  const { role, token: newToken } = join_l(room, seat, token)
 
-  // ロジックに委譲
-  const result = join_l(room, sheet, token)
+  // 本人へのレスポンスを型付きで作成
+  const response: EventResponse = {
+    event: "join",
+    data: { role, token: newToken }
+  }
 
-  // 黒 or 白が新規参加した場合のみ broadcast
-  if (result.role === "black" || result.role === "white") {
+  room.respond(ws, response)
+
+  // 黒 or 白の場合は全員にブロードキャスト
+  if (role !== "observer") {
     room.broadcast("join")
   }
-
-  // レスポンス生成
-  const res: EventResponse = {
-    event: "join",
-    data: result
-  }
-
-  return new Response(JSON.stringify(res), { status: 200 })
 }
