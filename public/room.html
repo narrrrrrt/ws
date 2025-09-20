@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Reversi Room</title></head>
+  <head>
+    <title>Reversi Room</title>
+    <style>
+      body { font-family: sans-serif; }
+      #board button {
+        width: 28px; height: 28px;
+        margin: 1px; text-align: center;
+      }
+      #board div { line-height: 0; }
+      pre { background: #eee; padding: 6px; }
+    </style>
+  </head>
   <body>
     <h1>Reversi Room</h1>
-    <pre id="status"></pre>
-    <pre id="board"></pre>
+    <div id="status">waiting...</div>
+
+    <!-- 盤面 -->
+    <div id="board"></div>
+
+    <hr>
+    <h2>Debug</h2>
+    <pre id="debug"></pre>
+
     <script>
-      const params = new URLSearchParams(window.location.search)
-      const roomId = params.get("id")
-      const seat = params.get("seat")
+      const url = new URL(location.href)
+      const roomId = url.searchParams.get("id") || "1"
+      const seat = url.searchParams.get("seat") || "observer"
 
       const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
@@ -18,19 +36,39 @@
 
       ws.onmessage = (msg) => {
         const { event, data } = JSON.parse(msg.data)
-        if (event === "move" || event === "join" || event === "leave" || event === "reset") {
-          document.getElementById("status").textContent = JSON.stringify(data.status)
-          document.getElementById("board").textContent = data.board?.join("\n") || ""
+        logDebug(event, data)
+
+        if (data && data.board) {
+          renderBoard(data.board)
         }
-        if (data.error) alert(data.error)
+        if (data && data.status) {
+          document.getElementById("status").textContent = JSON.stringify(data.status)
+        }
       }
 
-      // 簡単にテスト：盤面クリックで送る
-      document.addEventListener("click", () => {
-        const x = Math.floor(Math.random() * 8)
-        const y = Math.floor(Math.random() * 8)
-        ws.send(JSON.stringify({ event: "move", x, y }))
-      })
+      function renderBoard(board) {
+        const div = document.getElementById("board")
+        div.innerHTML = ""
+
+        board.forEach((row, y) => {
+          const rowDiv = document.createElement("div")
+          row.split("").forEach((cell, x) => {
+            const btn = document.createElement("button")
+            btn.textContent = cell === "." ? "-" : cell
+            btn.onclick = () => {
+              ws.send(JSON.stringify({ event: "move", x, y }))
+            }
+            rowDiv.appendChild(btn)
+          })
+          div.appendChild(rowDiv)
+        })
+      }
+
+      function logDebug(event, data) {
+        const debug = document.getElementById("debug")
+        debug.textContent += `[${event}] ${JSON.stringify(data)}\n`
+        debug.scrollTop = debug.scrollHeight
+      }
     </script>
   </body>
 </html>
