@@ -4,7 +4,7 @@ import { leave_l } from "./logic/leave_l"
 export class Room {
   black: string | null = null
   white: string | null = null
-  board: string[] = [...Room.flatBoard]
+  board: string[] = [...Room.initialBoard]
   status: RoomStatus = "waiting"
   sessions: Map<WebSocket, string | null> = new Map()
 

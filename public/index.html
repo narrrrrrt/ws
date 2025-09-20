@@ -33,18 +33,29 @@
     <hr>
 
     <!-- デバッグ用ブロードキャスト表示 -->
-    <h2>Broadcast Debug</h2>
+    <h2>Broadcast Debug (Room 1 Observer)</h2>
     <pre id="debug"></pre>
 
     <script>
-      // ロビーでも「Room 0」としてWS接続
-      const ws = new WebSocket(`wss://${location.host}/lobby/ws`)
+      // --- Room 1 に observer として接続 ---
+      const ws = new WebSocket(`wss://${location.host}/1/ws`)
 
-      ws.onmessage = (msg) => {
-        const { event, data } = JSON.parse(msg.data)
-        const debug = document.getElementById("debug")
-        debug.textContent += `[${event}] ${JSON.stringify(data)}\n`
-      }
+      ws.addEventListener("open", () => {
+        console.log("connected as observer to room 1")
+        ws.send(JSON.stringify({ event: "join", seat: "observer" }))
+      })
+
+      ws.addEventListener("message", (evt) => {
+        try {
+          const msg = JSON.parse(evt.data)
+          console.log("recv:", msg)
+
+          const debug = document.getElementById("debug")
+          debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
+        } catch (e) {
+          console.error("invalid message:", evt.data)
+        }
+      })
     </script>
   </body>
 </html>
