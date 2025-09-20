@@ -28,7 +28,8 @@ export class RoomDO {
     //if (path[1] === "ws") {
     if (request.headers.get("Upgrade") === "websocket") {
       const [client, server] = Object.values(new WebSocketPair())
-      this.room.addSession(server)
+      
+      server.accept()
 
       // WS メッセージをアクションに振り分け
       server.addEventListener("message", async (evt: MessageEvent) => {

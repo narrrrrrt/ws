@@ -21,10 +21,10 @@ export class Room {
     "--------",
   ]
 
-  addSession(ws: WebSocket) {
+  /*addSession(ws: WebSocket) {
     this.sessions.set(ws, null)
     ws.accept()
-  }
+  }*/
 /*
   removeSession(ws: WebSocket) {
     const token = this.sessions.get(ws)

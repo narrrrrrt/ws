@@ -6,6 +6,8 @@ export function joinHandle(room: Room, data: any, ws: WebSocket): void {
   const { seat, token } = data
   const { role, token: newToken } = join_l(room, seat, token)
 
+  room.sessions.set(ws, newToken)
+
   // 本人へのレスポンスを型付きで作成
   const response: EventResponse = {
     event: "join",
