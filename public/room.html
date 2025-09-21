@@ -200,6 +200,16 @@
         }
         window.location.href = "/"
       })
+
+      // --- ページが閉じる直前に savedAt を更新 ---
+      window.addEventListener("pagehide", () => {
+        if (myToken) {
+          sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
+            token: myToken,
+            savedAt: Date.now()
+          }))
+        }
+      })
     </script>
   </body>
 </html>
