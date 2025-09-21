@@ -7,6 +7,7 @@ export class Room {
   board: string[] = [...Room.initialBoard]
   status: RoomStatus = "waiting"
   sessions: Map<WebSocket, string | null> = new Map()
+  heartbeatTimer: NodeJS.Timeout | null = null  
 
   static readonly flatBoard: string[] = Array(8).fill("--------")
 
@@ -21,11 +22,18 @@ export class Room {
     "--------",
   ]
 
-  /*addSession(ws: WebSocket) {
-    this.sessions.set(ws, null)
-    ws.accept()
-  }*/
-/*
+  constructor() {
+    this.startHeartbeat()
+  }
+
+  startHeartbeat() {
+    this.heartbeatTimer = setInterval(() => {
+      for (const ws of this.sessions.keys()) {
+        ws.send(JSON.stringify({ event: "ping", data: { time: Date.now() } }))
+      }
+    }, 10000)
+  }
+
   removeSession(ws: WebSocket) {
     const token = this.sessions.get(ws)
     if (token) {
@@ -34,23 +42,6 @@ export class Room {
     }
     this.sessions.delete(ws)
   }
-*/
-removeSession(ws: WebSocket) {
-  const token = this.sessions.get(ws)
-
-  console.log("RS_ENTER")             // ここに入った確認
-  console.log("RS_TK", token ?? "NONE")
-
-  if (token) {
-    leave_l(this, token)
-    console.log("RS_LEAVE", token)    // leave_l 呼んだ確認
-    this.broadcast("leave")
-    console.log("RS_BCAST")           // broadcast した確認
-  }
-
-  this.sessions.delete(ws)
-  console.log("RS_DEL")               // sessions.delete 完了
-}
 
 
   broadcast(event: string) {
