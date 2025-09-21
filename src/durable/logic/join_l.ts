@@ -51,27 +51,27 @@ export function join_l(
       newToken = token
       room.board = [...Room.initialBoard]
       room.status = "waiting"
+
+      // ★ 再接続扱い → ステータス更新はここで固定して return
+      if (newToken) {
+        room.touchToken(newToken)
+      }
+      return { role, token: newToken }
     } else {
       role = "observer"
     }
   }
 
-  // ステータス更新（observer 以外の場合）
+  // --- ステータス更新（observer 以外の場合のみ）
   if (role !== "observer") {
     if (room.black && room.white) {
-      // 盤面がフラットなら初回対局開始 → 黒番スタート
-      if (room.board.every(row => row === "--------")) {
-        room.status = "black"
-      } else {
-        // 既に初期配置がある場合は再joinなので waiting
-        room.status = "waiting"
-      }
+      room.status = "black" // ゲーム開始（黒番）
     } else {
       room.status = "waiting"
     }
   }
 
-  // --- ★ token の lastUpdate を記録 ---
+  // --- token 更新記録 ---
   if (newToken) {
     room.touchToken(newToken)
   }
