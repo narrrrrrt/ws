@@ -60,7 +60,22 @@
 
       const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
-      let myToken = sessionStorage.getItem(`room-${roomId}-token`) || null
+      // --- token を 1秒有効にする ---
+      let myToken = null
+      const saved = sessionStorage.getItem(`room-${roomId}-token`)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          if (Date.now() - parsed.savedAt < 1000) {
+            myToken = parsed.token
+          } else {
+            sessionStorage.removeItem(`room-${roomId}-token`)
+          }
+        } catch {
+          sessionStorage.removeItem(`room-${roomId}-token`)
+        }
+      }
+
       let myRole = null
 
       // --- modal utility ---
@@ -136,7 +151,10 @@
           if (msg.event === "join") {
             if (msg.data.token) {
               myToken = msg.data.token
-              sessionStorage.setItem(`room-${roomId}-token`, myToken)
+              sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
+                token: myToken,
+                savedAt: Date.now()
+              }))
             }
             if (msg.data.role) {
               myRole = msg.data.role
@@ -178,7 +196,7 @@
         e.preventDefault()
         if (myToken) {
           ws.send(JSON.stringify({ event: "leave", token: myToken }))
-          sessionStorage.removeItem(`room-${roomId}-token`)  // ★ トークン削除
+          sessionStorage.removeItem(`room-${roomId}-token`)
         }
         window.location.href = "/"
       })
