@@ -49,11 +49,9 @@ export class RoomDO {
       })
 
       // セッションが閉じたら削除処理
-      /*
       server.addEventListener("close", () => {
         this.room.removeSession(server)
       })
-      */
 
       return new Response(null, { status: 101, webSocket: client })
     }

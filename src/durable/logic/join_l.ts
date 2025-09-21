@@ -65,5 +65,10 @@ export function join_l(
     }
   }
 
+  // --- ★ ここで token を更新記録 ---
+  if (newToken) {
+    room.touchToken(newToken)
+  }
+
   return { role, token: newToken }
 }
