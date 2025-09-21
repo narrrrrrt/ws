@@ -10,32 +10,10 @@
       .black { background: black; }
       .white { background: white; border: 1px solid #000; }
       pre { background: #f0f0f0; padding: 10px; }
-
-      /* --- modal --- */
-      .modal {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        display: none;
-        background: rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 6px;
-        max-width: 300px;
-        text-align: center;
-      }
-      .modal button {
-        margin-top: 10px;
-        padding: 6px 12px;
-      }
     </style>
   </head>
   <body>
     <h1>Reversi Room</h1>
-    <a href="#" id="to-lobby">ロビーへ</a>
 
     <div id="status"></div>
     <div id="board" class="board"></div>
@@ -44,14 +22,6 @@
     <h2>Debug Messages</h2>
     <pre id="log"></pre>
 
-    <!-- modal -->
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <div id="modal-message"></div>
-        <button id="modal-ok">OK</button>
-      </div>
-    </div>
-
     <script>
       const params = new URLSearchParams(location.search)
       const roomId = params.get("id")
@@ -59,24 +29,8 @@
 
       const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
-      let myToken = sessionStorage.getItem(`room-${roomId}-token`) || null
-      let myRole = null
-
-      // --- modal utility ---
-      function showModal(message, callback) {
-        const modal = document.getElementById("modal")
-        const msgEl = document.getElementById("modal-message")
-        msgEl.textContent = message
-        modal.style.display = "flex"
-
-        const okBtn = document.getElementById("modal-ok")
-        const handler = () => {
-          modal.style.display = "none"
-          okBtn.removeEventListener("click", handler)
-          if (callback) callback()
-        }
-        okBtn.addEventListener("click", handler)
-      }
+      let myToken = null   // ★ join でもらった token
+      let myRole = null    // ★ join でもらった role
 
       // --- UI 更新関数 ---
       function renderBoard(board) {
@@ -121,7 +75,7 @@
 
       // --- WebSocket ---
       ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({ event: "join", seat, token: myToken }))
+        ws.send(JSON.stringify({ event: "join", seat }))
       })
 
       ws.addEventListener("message", (evt) => {
@@ -134,11 +88,10 @@
 
           if (msg.event === "join") {
             if (msg.data.token) {
-              myToken = msg.data.token
-              sessionStorage.setItem(`room-${roomId}-token`, myToken)
+              myToken = msg.data.token   // ★ 保存
             }
             if (msg.data.role) {
-              myRole = msg.data.role
+              myRole = msg.data.role     // ★ 保存
             }
             if (msg.data.board) {
               renderBoard(msg.data.board)
@@ -147,41 +100,19 @@
               renderStatus(msg.data.status, msg.data.black, msg.data.white)
             }
           } else if (msg.event === "move") {
-            if (msg.data.error) {
-              // --- 個別エラーはモーダル表示のみ ---
-              showModal(msg.data.error)
-            } else if (msg.data.board) {
-              // --- 正常時は盤面更新 ---
-              renderBoard(msg.data.board)
-              renderStatus(msg.data.status, msg.data.black, msg.data.white)
-            }
+            const { board, status } = msg.data
+            renderBoard(board)
+            renderStatus(status, msg.data.black, msg.data.white)
           } else if (msg.event === "leave") {
             const { board, status, black, white } = msg.data
-            if (board) renderBoard(board)
-            renderStatus(status, black, white)
-
-            // --- 相手が退出した場合のモーダル ---
-            if ((myRole === "black" && black && !white) ||
-                (myRole === "white" && white && !black)) {
-              showModal("Opponent has left", () => {
-                ws.send(JSON.stringify({ event: "join", token: myToken }))
-              })
+            if (board) {
+              renderBoard(board)   // ← 修正ポイント
             }
-          } else if (msg.event === "error") {
-            showModal(msg.data.reason || "An error occurred")
+            renderStatus(status, black, white)
           }
         } catch (e) {
           console.error("invalid message:", evt.data)
         }
-      })
-
-      // --- ロビーへボタン ---
-      document.getElementById("to-lobby").addEventListener("click", (e) => {
-        e.preventDefault()
-        if (myToken) {
-          ws.send(JSON.stringify({ event: "leave", token: myToken }))
-        }
-        window.location.href = "/"
       })
     </script>
   </body>
