@@ -104,7 +104,10 @@
             renderBoard(board)
             renderStatus(status, msg.data.black, msg.data.white)
           } else if (msg.event === "leave") {
-            const { status, black, white } = msg.data
+            const { board, status, black, white } = msg.data
+            if (board) {
+              renderBoard(board)   // ← 修正ポイント
+            }
             renderStatus(status, black, white)
           }
         } catch (e) {
