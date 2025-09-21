@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <title>Reversi Room</title>
     <style>
       body { font-family: sans-serif; }
@@ -148,10 +149,8 @@
             }
           } else if (msg.event === "move") {
             if (msg.data.error) {
-              // --- 個別エラーはモーダル表示のみ ---
               showModal(msg.data.error)
             } else if (msg.data.board) {
-              // --- 正常時は盤面更新 ---
               renderBoard(msg.data.board)
               renderStatus(msg.data.status, msg.data.black, msg.data.white)
             }
@@ -160,7 +159,6 @@
             if (board) renderBoard(board)
             renderStatus(status, black, white)
 
-            // --- 相手が退出した場合のモーダル ---
             if ((myRole === "black" && black && !white) ||
                 (myRole === "white" && white && !black)) {
               showModal("Opponent has left", () => {
@@ -180,6 +178,7 @@
         e.preventDefault()
         if (myToken) {
           ws.send(JSON.stringify({ event: "leave", token: myToken }))
+          sessionStorage.removeItem(`room-${roomId}-token`)  // ★ トークン削除
         }
         window.location.href = "/"
       })
