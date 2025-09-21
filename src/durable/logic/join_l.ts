@@ -51,27 +51,24 @@ export function join_l(
       newToken = token
       room.board = [...Room.initialBoard]
       room.status = "waiting"
-
-      // ★ 再接続扱い → ステータス更新はここで固定して return
-      if (newToken) {
-        room.touchToken(newToken)
-      }
-      return { role, token: newToken }
     } else {
       role = "observer"
     }
   }
 
-  // --- ステータス更新（observer 以外の場合のみ）
+  // --- ステータス更新（observer 以外の場合） ---
   if (role !== "observer") {
-    if (room.black && room.white) {
+    if (room.status === "leave") {
+      // leave からの復帰は waiting に固定
+      room.status = "waiting"
+    } else if (room.black && room.white) {
       room.status = "black" // ゲーム開始（黒番）
     } else {
       room.status = "waiting"
     }
   }
 
-  // --- token 更新記録 ---
+  // --- token のタッチ更新 ---
   if (newToken) {
     room.touchToken(newToken)
   }
