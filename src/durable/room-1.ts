@@ -26,28 +26,10 @@ export class Room {
     this.startHeartbeat()
   }
 
-/*
   startHeartbeat() {
     this.heartbeatTimer = setInterval(() => {
       for (const ws of this.sessions.keys()) {
         ws.send(JSON.stringify({ event: "ping", data: { time: Date.now() } }))
-      }
-    }, 10000)
-  }
-*/
-  startHeartbeat() {
-    this.heartbeatTimer = setInterval(() => {
-      for (const ws of this.sessions.keys()) {
-        try {
-          ws.send(JSON.stringify({ event: "ping", data: { time: Date.now() } }))
-        } catch {
-          const token = this.sessions.get(ws)
-          if (token) {
-            leave_l(this, token)   // ★ token 削除
-            this.broadcast("leave")
-          }
-          this.sessions.delete(ws)
-        }
       }
     }, 10000)
   }
