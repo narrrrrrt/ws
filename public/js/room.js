@@ -1,170 +1,162 @@
-const params = new URLSearchParams(location.search)
-const roomId = params.get("id")
-const seat = params.get("seat") || "observer"
+// js/room.js
+let ws;
+let myToken = null;
+let myRole = null;
+let currentBoard = null;
+let currentStatus = null;
 
-const boardEl = document.getElementById("board")
-const statusEl = document.getElementById("status")
-const modalEl = document.getElementById("modal")
-const modalMessage = document.getElementById("modalMessage")
-const modalOk = document.getElementById("modalOk")
-const logEl = document.getElementById("log")
+const boardEl = document.getElementById("board");
+const statusEl = document.getElementById("status");
+const logEl = document.getElementById("log");
+const modalEl = document.getElementById("modal");
+const modalMsgEl = document.getElementById("modal-message");
+const modalBtnEl = document.getElementById("modal-button");
 
-let ws
-let currentBoard = []
-let myToken = sessionStorage.getItem("token")
-let lastSaved = parseInt(sessionStorage.getItem("savedAt") || "0")
-if (Date.now() - lastSaved > 1000) {
-  myToken = null
+function log(msg) {
+  const div = document.createElement("div");
+  div.textContent = msg;
+  logEl.appendChild(div);
 }
 
-// --- ユーティリティ ---
-function showModal(msg, onOk) {
-  modalMessage.textContent = msg
-  modalEl.style.display = "flex"
-  modalOk.onclick = () => {
-    modalEl.style.display = "none"
-    if (onOk) onOk()
-  }
+function showModal(message, onOk) {
+  modalMsgEl.textContent = message;
+  modalEl.style.display = "flex";
+  modalBtnEl.onclick = () => {
+    modalEl.style.display = "none";
+    if (onOk) onOk();
+  };
 }
 
-function logMessage(msg) {
-  const entry = document.createElement("div")
-  entry.textContent = msg
-  logEl.appendChild(entry)
-  logEl.scrollTop = logEl.scrollHeight
-}
+function connect() {
+  const url = new URL(window.location.href);
+  const parts = url.pathname.split("/");
+  const roomId = parts[parts.length - 1];
 
-// --- 合法手判定 ---
-function computeLegalMoves(board, player) {
-  const opponent = player === "B" ? "W" : "B"
-  const moves = []
-  const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-  for (let y=0;y<8;y++) {
-    for (let x=0;x<8;x++) {
-      if (board[y][x] !== "-") continue
-      for (const [dx,dy] of dirs) {
-        let cx=x+dx, cy=y+dy, found=false
-        while (cx>=0&&cx<8&&cy>=0&&cy<8&&board[cy][cx]===opponent) {
-          cx+=dx; cy+=dy; found=true
-        }
-        if (found && cx>=0&&cx<8&&cy>=0&&cy<8&&board[cy][cx]===player) {
-          moves.push([x,y])
-          break
-        }
+  ws = new WebSocket(`wss://${window.location.host}/${roomId}/ws`);
+
+  ws.onopen = () => {
+    log("connected");
+    let saved = JSON.parse(sessionStorage.getItem("reversiToken") || "null");
+    if (saved && Date.now() - saved.savedAt < 1000) {
+      myToken = saved.token;
+    }
+    ws.send(JSON.stringify({ event: "join", seat: url.searchParams.get("seat") || "observer", token: myToken }));
+  };
+
+  ws.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    log("raw: " + JSON.stringify(msg));
+
+    if (msg.event === "join") {
+      if (msg.data.role) myRole = msg.data.role;
+      if (msg.data.token) {
+        myToken = msg.data.token;
+        sessionStorage.setItem("reversiToken", JSON.stringify({ token: myToken, savedAt: Date.now() }));
+      }
+      if (msg.data.board) {
+        currentBoard = msg.data.board;
+        currentStatus = msg.data.status;
+        renderBoard(currentBoard, currentStatus);
+        statusEl.textContent = "Status: " + currentStatus;
       }
     }
-  }
-  return moves
+
+    else if (msg.event === "move") {
+      if (msg.data.error) {
+        showModal("Error: " + msg.data.error);
+      }
+      if (msg.data.board) {
+        currentBoard = msg.data.board;
+        currentStatus = msg.data.status;
+        renderBoard(currentBoard, currentStatus);
+        statusEl.textContent = "Status: " + currentStatus;
+      }
+    }
+
+    else if (msg.event === "leave") {
+      showModal("Your opponent has left.", () => {
+        ws.send(JSON.stringify({ event: "join", seat: myRole, token: myToken }));
+      });
+    }
+
+    else if (msg.event === "finish") {
+      let black = 0, white = 0;
+      msg.data.board.forEach(row => {
+        for (let c of row) {
+          if (c === "B") black++;
+          if (c === "W") white++;
+        }
+      });
+      let winner = black > white ? "Black" : white > black ? "White" : "Draw";
+      showModal(`Black: ${black}, White: ${white}, Winner: ${winner}`, () => {
+        ws.send(JSON.stringify({ event: "join", seat: myRole, token: myToken }));
+      });
+    }
+  };
+
+  window.addEventListener("pagehide", () => {
+    if (myToken) {
+      sessionStorage.setItem("reversiToken", JSON.stringify({ token: myToken, savedAt: Date.now() }));
+    }
+  });
 }
 
-// --- ボード描画 ---
 function renderBoard(board, status) {
-  currentBoard = board
-  boardEl.innerHTML = ""
+  boardEl.innerHTML = "";
+  const table = document.createElement("table");
 
-  const legalMoves = (seat !== "observer" && status && status.toLowerCase() === seat)
-    ? computeLegalMoves(board, seat === "black" ? "B" : "W")
-    : []
+  for (let y = 0; y < 8; y++) {
+    const tr = document.createElement("tr");
+    for (let x = 0; x < 8; x++) {
+      const td = document.createElement("td");
+      td.className = "cell";
 
-  for (let y=0;y<8;y++) {
-    for (let x=0;x<8;x++) {
-      const c = board[y][x]
-      const cellEl = document.createElement("div")
-      cellEl.className = "cell"
-
-      if (c === "B" || c === "W") {
-        const disc = document.createElement("div")
-        disc.className = "disc " + (c === "B" ? "black" : "white")
-        cellEl.appendChild(disc)
-      } else if (legalMoves.some(([lx,ly]) => lx===x && ly===y)) {
-        const hint = document.createElement("div")
-        hint.className = "hint"
-        hint.addEventListener("click", ()=> sendMove(x,y))
-        cellEl.appendChild(hint)
+      if (board[y][x] === "B") {
+        td.innerHTML = `<div class="disc black"></div>`;
+      } else if (board[y][x] === "W") {
+        td.innerHTML = `<div class="disc white"></div>`;
       } else {
-        cellEl.addEventListener("click", ()=> {
-          if (seat !== "observer" && status && status.toLowerCase() === seat) {
-            showModal("This is not a legal move.")
+        // 空きマス → 合法手チェック
+        if (myRole && myRole === status) {
+          if (isLegalMove(board, x, y, myRole)) {
+            const dot = document.createElement("div");
+            dot.className = "legal";
+            dot.addEventListener("click", () => {
+              ws.send(JSON.stringify({ event: "move", token: myToken, x, y }));
+            });
+            td.appendChild(dot);
           }
-        })
+        }
       }
-      boardEl.appendChild(cellEl)
+      tr.appendChild(td);
     }
+    table.appendChild(tr);
   }
+
+  boardEl.appendChild(table);
 }
 
-// --- サーバー送信 ---
-function sendJoin() {
-  const msg = { event:"join", seat }
-  if (myToken) msg.token = myToken
-  ws.send(JSON.stringify(msg))
-}
+function isLegalMove(board, x, y, role) {
+  if (board[y][x] !== "-") return false;
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+  const me = role === "black" ? "B" : "W";
+  const opp = role === "black" ? "W" : "B";
 
-function sendMove(x,y) {
-  if (!myToken) {
-    showModal("No token, cannot move.")
-    return
-  }
-  ws.send(JSON.stringify({ event:"move", token:myToken, x, y }))
-}
-
-// --- WebSocket ---
-ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
-
-ws.addEventListener("open", () => { sendJoin() })
-
-ws.addEventListener("message", (ev) => {
-  logMessage("raw: " + ev.data)
-  const msg = JSON.parse(ev.data)
-
-  if (msg.event === "join") {
-    if (msg.data.token) myToken = msg.data.token
-    if (msg.data && msg.data.board) {
-      renderBoard(msg.data.board, msg.data.status)
-      statusEl.textContent = "Status: " + msg.data.status
-    }
-  }
-
-  if (msg.event === "move") {
-    renderBoard(msg.data.board, msg.data.status)
-    statusEl.textContent = "Status: " + msg.data.status
-  }
-
-  if (msg.event === "leave") {
-    showModal("Your opponent has left.", ()=> { sendJoin() })
-  }
-
-  if (msg.event === "finish") {
-    const board = msg.data.board
-    let black=0, white=0
-    for (let row of board) {
-      for (let c of row) {
-        if (c==="B") black++
-        if (c==="W") white++
+  for (let [dx,dy] of dirs) {
+    let nx = x+dx, ny = y+dy, foundOpp = false;
+    while (nx>=0 && nx<8 && ny>=0 && ny<8) {
+      if (board[ny][nx] === opp) {
+        foundOpp = true;
+      } else if (board[ny][nx] === me) {
+        if (foundOpp) return true;
+        break;
+      } else {
+        break;
       }
+      nx += dx; ny += dy;
     }
-    let result="Draw"
-    if (black>white) result="Black wins"
-    else if (white>black) result="White wins"
-    showModal(`Game finished.\nBlack: ${black}, White: ${white}\n${result}`, ()=> {
-      sendJoin()
-    })
   }
+  return false;
+}
 
-  if (msg.event === "error") {
-    showModal("Error: " + msg.reason)
-  }
-})
-
-// --- token管理 ---
-window.addEventListener("pagehide", ()=> {
-  if (myToken) {
-    sessionStorage.setItem("token", myToken)
-    sessionStorage.setItem("savedAt", Date.now().toString())
-  }
-})
-
-// --- ロビーへ ---
-document.getElementById("lobby").addEventListener("click", ()=> {
-  ws.close()
-})
+connect();
