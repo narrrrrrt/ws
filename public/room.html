@@ -2,51 +2,20 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Reversi Room</title>
+    <title>Reversi Room (Minimal)</title>
     <style>
       body { font-family: sans-serif; }
       .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
-      .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; }
       .disc { width: 30px; height: 30px; border-radius: 50%; }
       .black { background: black; }
       .white { background: white; border: 1px solid #000; }
-
-      /* modal */
-      .modal {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        display: none;
-        background: rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 6px;
-        max-width: 300px;
-        text-align: center;
-      }
-      .modal button {
-        margin-top: 10px;
-        padding: 6px 12px;
-      }
     </style>
   </head>
   <body>
-    <h1>Reversi Room</h1>
-    <a href="/" id="to-lobby">Lobby</a>
-
+    <h1>Reversi Room (Minimal)</h1>
     <div id="status"></div>
     <div id="board" class="board"></div>
-
-    <!-- modal -->
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <div id="modal-message"></div>
-        <button id="modal-ok">OK</button>
-      </div>
-    </div>
 
     <script>
       const params = new URLSearchParams(location.search)
@@ -55,102 +24,17 @@
 
       let ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
-      // --- token の保存と復元 ---
-      let myToken = null
-      const saved = sessionStorage.getItem(`room-${roomId}-token`)
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          if (Date.now() - parsed.savedAt < 1000) {
-            myToken = parsed.token
-          }
-        } catch {}
-      }
-
-      function sendJoin() {
-        ws.send(JSON.stringify({ action: "join", seat, token: myToken }))
-      }
-
       ws.onopen = () => {
-        sendJoin()
-      }
-
-      window.addEventListener("pagehide", () => {
-        if (myToken) {
-          sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
-            token: myToken,
-            savedAt: Date.now()
-          }))
-        }
-      })
-
-      document.getElementById("to-lobby").onclick = (e) => {
-        e.preventDefault()
-        ws.close()
-        location.href = "/"
+        console.log("WS connected")
+        ws.send(JSON.stringify({ action: "join", seat }))
       }
 
       const boardEl = document.getElementById("board")
       const statusEl = document.getElementById("status")
 
-      // modal helpers
-      const modal = document.getElementById("modal")
-      const modalMsg = document.getElementById("modal-message")
-      const modalOk = document.getElementById("modal-ok")
-
-      function showModal(msg) {
-        modalMsg.innerHTML = msg
-        modal.style.display = "flex"
-      }
-      function hideModal() {
-        modal.style.display = "none"
-      }
-      modalOk.onclick = () => {
-        hideModal()
-        sendJoin()  // always rejoin after modal OK
-      }
-
-      // --- 合法手計算 ---
-      function calcLegalMoves(board, role) {
-        const me = role === "black" ? "B" : "W"
-        const opp = role === "black" ? "W" : "B"
-        const directions = [
-          [1, 0], [-1, 0], [0, 1], [0, -1],
-          [1, 1], [-1, -1], [1, -1], [-1, 1]
-        ]
-        const moves = []
-        for (let y = 0; y < 8; y++) {
-          for (let x = 0; x < 8; x++) {
-            if (board[y][x] !== "-") continue
-            for (const [dx, dy] of directions) {
-              let cx = x + dx, cy = y + dy
-              let foundOpp = false
-              while (cy >= 0 && cy < 8 && cx >= 0 && cx < 8) {
-                const c = board[cy][cx]
-                if (c === opp) {
-                  foundOpp = true
-                } else if (c === me) {
-                  if (foundOpp) moves.push([x, y])
-                  break
-                } else {
-                  break
-                }
-                cx += dx
-                cy += dy
-              }
-            }
-          }
-        }
-        return moves
-      }
-
-      function renderBoard(board, status, myRole) {
+      function renderBoard(board) {
+        console.log("renderBoard called", board)
         boardEl.innerHTML = ""
-        let legalMoves = []
-        if (myRole && status === myRole) {
-          legalMoves = calcLegalMoves(board, myRole)
-        }
-
         for (let y = 0; y < 8; y++) {
           for (let x = 0; x < 8; x++) {
             const cellEl = document.createElement("div")
@@ -160,17 +44,6 @@
               const disc = document.createElement("div")
               disc.className = "disc " + (c === "B" ? "black" : "white")
               cellEl.appendChild(disc)
-            } else if (legalMoves.some(([lx, ly]) => lx === x && ly === y)) {
-              cellEl.textContent = "*"
-              cellEl.onclick = () => {
-                ws.send(JSON.stringify({ action: "move", token: myToken, x, y }))
-              }
-            } else {
-              cellEl.onclick = () => {
-                if (myRole && status === myRole) {
-                  showModal("This is not a legal move.")
-                }
-              }
             }
             boardEl.appendChild(cellEl)
           }
@@ -179,32 +52,14 @@
 
       ws.onmessage = (ev) => {
         const msg = JSON.parse(ev.data)
-        if (msg.event === "join") {
-          const { board, status } = msg.data
-          if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
-          if (status) statusEl.textContent = "Status: " + status
-        } else if (msg.event === "move") {
-          const { board, status } = msg.data
-          if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
-          if (status) statusEl.textContent = "Status: " + status
-        } else if (msg.event === "leave") {
-          showModal("Your opponent has left.")
-        } else if (msg.event === "finish") {
-          const { board } = msg.data
-          let black = 0, white = 0
-          for (let row of board) {
-            for (let c of row) {
-              if (c === "B") black++
-              else if (c === "W") white++
-            }
-          }
-          let result = `Black: ${black}, White: ${white}<br>`
-          if (black > white) result += "Winner: Black"
-          else if (white > black) result += "Winner: White"
-          else result += "Draw"
-          showModal(result)
-        } else if (msg.event === "error") {
-          showModal(msg.data.error || "Error occurred.")
+        console.log("event:", msg.event, msg.data)
+        if (msg.event === "join" && msg.data && msg.data.board) {
+          renderBoard(msg.data.board)
+          if (msg.data.status) statusEl.textContent = "Status: " + msg.data.status
+        }
+        if (msg.event === "move" && msg.data && msg.data.board) {
+          renderBoard(msg.data.board)
+          if (msg.data.status) statusEl.textContent = "Status: " + msg.data.status
         }
       }
     </script>
