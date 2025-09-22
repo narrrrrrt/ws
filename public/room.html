@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Reversi Room (Minimal)</title>
+    <title>Reversi Room (Minimal Join Only)</title>
     <style>
       body { font-family: sans-serif; }
       .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1>Reversi Room (Minimal)</h1>
+    <h1>Reversi Room (Minimal Join Only)</h1>
     <div id="status"></div>
     <div id="board" class="board"></div>
 
@@ -22,16 +22,18 @@
       const roomId = params.get("id")
       const seat = params.get("seat") || "observer"
 
+      // --- WebSocket 接続 ---
       let ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
       ws.onopen = () => {
-        console.log("WS connected")
+        console.log("connected")
         ws.send(JSON.stringify({ action: "join", seat }))
       }
 
       const boardEl = document.getElementById("board")
       const statusEl = document.getElementById("status")
 
+      // --- 盤面描画 ---
       function renderBoard(board) {
         console.log("renderBoard called", board)
         boardEl.innerHTML = ""
@@ -50,16 +52,15 @@
         }
       }
 
+      // --- メッセージ受信 ---
       ws.onmessage = (ev) => {
         const msg = JSON.parse(ev.data)
         console.log("event:", msg.event, msg.data)
         if (msg.event === "join" && msg.data && msg.data.board) {
           renderBoard(msg.data.board)
-          if (msg.data.status) statusEl.textContent = "Status: " + msg.data.status
-        }
-        if (msg.event === "move" && msg.data && msg.data.board) {
-          renderBoard(msg.data.board)
-          if (msg.data.status) statusEl.textContent = "Status: " + msg.data.status
+          if (msg.data.status) {
+            statusEl.textContent = "Status: " + msg.data.status
+          }
         }
       }
     </script>
