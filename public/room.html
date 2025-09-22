@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Reversi Room (Minimal Join Only)</title>
+    <title>Reversi Room (Minimal Join Debug)</title>
     <style>
       body { font-family: sans-serif; }
       .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
@@ -10,32 +10,31 @@
       .disc { width: 30px; height: 30px; border-radius: 50%; }
       .black { background: black; }
       .white { background: white; border: 1px solid #000; }
+      #debug { margin-top: 20px; font-size: 12px; white-space: pre-wrap; background: #f0f0f0; padding: 10px; }
     </style>
   </head>
   <body>
-    <h1>Reversi Room (Minimal Join Only)</h1>
+    <h1>Reversi Room (Minimal Join Debug)</h1>
     <div id="status"></div>
     <div id="board" class="board"></div>
+    <div id="debug"></div>
 
     <script>
       const params = new URLSearchParams(location.search)
       const roomId = params.get("id")
       const seat = params.get("seat") || "observer"
 
-      // --- WebSocket 接続 ---
-      let ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
-
-      ws.onopen = () => {
-        console.log("connected")
-        ws.send(JSON.stringify({ action: "join", seat }))
+      const debugEl = document.getElementById("debug")
+      function log(msg) {
+        console.log(msg)
+        debugEl.textContent += msg + "\n"
       }
 
       const boardEl = document.getElementById("board")
       const statusEl = document.getElementById("status")
 
-      // --- 盤面描画 ---
       function renderBoard(board) {
-        console.log("renderBoard called", board)
+        log("renderBoard called, board=" + JSON.stringify(board))
         boardEl.innerHTML = ""
         for (let y = 0; y < 8; y++) {
           for (let x = 0; x < 8; x++) {
@@ -52,17 +51,38 @@
         }
       }
 
-      // --- メッセージ受信 ---
-      ws.onmessage = (ev) => {
-        const msg = JSON.parse(ev.data)
-        console.log("event:", msg.event, msg.data)
+      // --- WebSocket ---
+      let ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
+
+      ws.addEventListener("open", () => {
+        log("connected")
+        ws.send(JSON.stringify({ action: "join", seat }))
+        log("sent join: seat=" + seat)
+      })
+
+      ws.addEventListener("message", (ev) => {
+        log("raw: " + ev.data)
+        let msg
+        try {
+          msg = JSON.parse(ev.data)
+        } catch (e) {
+          log("JSON parse error: " + e)
+          return
+        }
+        log("event: " + msg.event)
         if (msg.event === "join" && msg.data && msg.data.board) {
           renderBoard(msg.data.board)
           if (msg.data.status) {
             statusEl.textContent = "Status: " + msg.data.status
           }
         }
-      }
+        if (msg.event === "move" && msg.data && msg.data.board) {
+          renderBoard(msg.data.board)
+          if (msg.data.status) {
+            statusEl.textContent = "Status: " + msg.data.status
+          }
+        }
+      })
     </script>
   </body>
 </html>
