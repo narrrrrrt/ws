@@ -6,11 +6,11 @@
   <style>
     body { font-family: sans-serif; }
     .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
-    .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; }
     .disc { width: 30px; height: 30px; border-radius: 50%; }
     .black { background: black; }
     .white { background: white; border: 1px solid #000; }
-    .legal { background: lightgreen; }
+    .hint { width: 12px; height: 12px; border-radius: 50%; background: orange; }
     #modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); align-items:center; justify-content:center; }
     #modalContent { background: #fff; padding: 20px; border-radius: 6px; }
   </style>
@@ -99,8 +99,10 @@
             disc.className = "disc " + (c === "B" ? "black" : "white")
             cellEl.appendChild(disc)
           } else if (legalMoves.some(([lx,ly])=>lx===x&&ly===y)) {
-            cellEl.classList.add("legal")
-            cellEl.addEventListener("click", ()=> sendMove(x,y))
+            const hint = document.createElement("div")
+            hint.className = "hint"
+            hint.addEventListener("click", ()=> sendMove(x,y))
+            cellEl.appendChild(hint)
           } else {
             cellEl.addEventListener("click", ()=> {
               if (seat !== "observer" && status && status.toLowerCase() === seat) {
