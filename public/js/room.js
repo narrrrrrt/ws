@@ -80,6 +80,13 @@ function renderBoard(board, status) {
       boardEl.appendChild(cell);
     }
   }
+
+  // 👇 パス処理を追加
+  if (status === myRole && legalMoves.length === 0) {
+    showModal("No legal moves. Pass your turn.", () => {
+      sendMove(null, null);
+    }, "pass");
+  }
 }
 
 // ---------- move calc ----------
@@ -117,8 +124,17 @@ function getLegalMoves(board, status) {
   return moves;
 }
 
-// ---------- ws ----------
-function connect() {
+// ---------- ws send ----------
+function sendJoin(seat, token) {
+  ws.send(JSON.stringify({event: "join", seat, token}));
+}
+
+function sendMove(x, y) {
+  ws.send(JSON.stringify({event: "move", token: myToken, x, y}));
+}
+
+// ---------- main (IIFE) ----------
+(async () => {
   const params = new URLSearchParams(location.search);
   const roomId = params.get("id");
   const seat = params.get("seat");
@@ -193,23 +209,8 @@ function connect() {
   });
 
   window.addEventListener("pagehide", () => {
-    const params = new URLSearchParams(location.search);
-    const roomId = params.get("id");
     if (myToken) {
       sessionStorage.setItem("token-" + roomId, JSON.stringify({token: myToken, savedAt: Date.now()}));
     }
   });
-}
-
-function sendJoin(seat, token) {
-  ws.send(JSON.stringify({event: "join", seat, token}));
-}
-
-function sendMove(x, y) {
-  ws.send(JSON.stringify({event: "move", token: myToken, x, y}));
-}
-
-// ---------- start ----------
-(async () => {
-  connect();
 })();
