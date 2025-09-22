@@ -10,9 +10,8 @@
       .disc { width: 30px; height: 30px; border-radius: 50%; }
       .black { background: black; }
       .white { background: white; border: 1px solid #000; }
-      pre { background: #f0f0f0; padding: 10px; }
 
-      /* --- modal --- */
+      /* modal */
       .modal {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -36,14 +35,10 @@
   </head>
   <body>
     <h1>Reversi Room</h1>
-    <a href="#" id="to-lobby">ロビーへ</a>
+    <a href="/" id="to-lobby">Lobby</a>
 
     <div id="status"></div>
     <div id="board" class="board"></div>
-
-    <hr>
-    <h2>Debug Messages</h2>
-    <pre id="log"></pre>
 
     <!-- modal -->
     <div id="modal" class="modal">
@@ -58,9 +53,9 @@
       const roomId = params.get("id")
       const seat = params.get("seat") || "observer"
 
-      const ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
+      let ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
-      // --- token を 1秒有効にする ---
+      // --- token の保存と復元 ---
       let myToken = null
       const saved = sessionStorage.getItem(`room-${roomId}-token`)
       if (saved) {
@@ -68,140 +63,18 @@
           const parsed = JSON.parse(saved)
           if (Date.now() - parsed.savedAt < 1000) {
             myToken = parsed.token
-          } else {
-            sessionStorage.removeItem(`room-${roomId}-token`)
           }
-        } catch {
-          sessionStorage.removeItem(`room-${roomId}-token`)
-        }
+        } catch {}
       }
 
-      let myRole = null
-
-      // --- modal utility ---
-      function showModal(message, callback) {
-        const modal = document.getElementById("modal")
-        const msgEl = document.getElementById("modal-message")
-        msgEl.textContent = message
-        modal.style.display = "flex"
-
-        const okBtn = document.getElementById("modal-ok")
-        const handler = () => {
-          modal.style.display = "none"
-          okBtn.removeEventListener("click", handler)
-          if (callback) callback()
-        }
-        okBtn.addEventListener("click", handler)
+      function sendJoin() {
+        ws.send(JSON.stringify({ action: "join", seat, token: myToken }))
       }
 
-      // --- UI 更新関数 ---
-      function renderBoard(board) {
-        const boardEl = document.getElementById("board")
-        boardEl.innerHTML = ""
-        board.forEach((row, y) => {
-          row.split("").forEach((cell, x) => {
-            const cellEl = document.createElement("div")
-            cellEl.className = "cell"
-            if (cell === "B") {
-              const d = document.createElement("div")
-              d.className = "disc black"
-              cellEl.appendChild(d)
-            } else if (cell === "W") {
-              const d = document.createElement("div")
-              d.className = "disc white"
-              cellEl.appendChild(d)
-            }
-
-            // --- クリックで move 送信 ---
-            cellEl.addEventListener("click", () => {
-              if (!myToken || myRole === "observer") {
-                console.warn("Observer or no token, cannot move")
-                return
-              }
-              ws.send(JSON.stringify({
-                event: "move",
-                token: myToken,
-                x, y
-              }))
-            })
-
-            boardEl.appendChild(cellEl)
-          })
-        })
+      ws.onopen = () => {
+        sendJoin()
       }
 
-      function renderStatus(status, black, white) {
-        const s = document.getElementById("status")
-        s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`
-      }
-
-      // --- WebSocket ---
-      ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({ event: "join", seat, token: myToken }))
-      })
-
-      ws.addEventListener("message", (evt) => {
-        try {
-          const msg = JSON.parse(evt.data)
-          console.log("recv:", msg)
-
-          const debug = document.getElementById("log")
-          debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
-
-          if (msg.event === "join") {
-            if (msg.data.token) {
-              myToken = msg.data.token
-              sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
-                token: myToken,
-                savedAt: Date.now()
-              }))
-            }
-            if (msg.data.role) {
-              myRole = msg.data.role
-            }
-            if (msg.data.board) {
-              renderBoard(msg.data.board)
-            }
-            if (msg.data.status) {
-              renderStatus(msg.data.status, msg.data.black, msg.data.white)
-            }
-          } else if (msg.event === "move") {
-            if (msg.data.error) {
-              showModal(msg.data.error)
-            } else if (msg.data.board) {
-              renderBoard(msg.data.board)
-              renderStatus(msg.data.status, msg.data.black, msg.data.white)
-            }
-          } else if (msg.event === "leave") {
-            const { board, status, black, white } = msg.data
-            if (board) renderBoard(board)
-            renderStatus(status, black, white)
-
-            if ((myRole === "black" && black && !white) ||
-                (myRole === "white" && white && !black)) {
-              showModal("Opponent has left", () => {
-                ws.send(JSON.stringify({ event: "join", token: myToken }))
-              })
-            }
-          } else if (msg.event === "error") {
-            showModal(msg.data.reason || "An error occurred")
-          }
-        } catch (e) {
-          console.error("invalid message:", evt.data)
-        }
-      })
-
-      // --- ロビーへボタン ---
-      document.getElementById("to-lobby").addEventListener("click", (e) => {
-        e.preventDefault()
-        if (myToken) {
-          ws.send(JSON.stringify({ event: "leave", token: myToken }))
-          sessionStorage.removeItem(`room-${roomId}-token`)
-        }
-        window.location.href = "/"
-      })
-
-      // --- ページが閉じる直前に savedAt を更新 ---
       window.addEventListener("pagehide", () => {
         if (myToken) {
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
@@ -210,6 +83,138 @@
           }))
         }
       })
+
+      document.getElementById("to-lobby").onclick = (e) => {
+        e.preventDefault()
+        ws.close()
+        location.href = "/"
+      }
+
+      const boardEl = document.getElementById("board")
+      const statusEl = document.getElementById("status")
+
+      // modal helpers
+      const modal = document.getElementById("modal")
+      const modalMsg = document.getElementById("modal-message")
+      const modalOk = document.getElementById("modal-ok")
+
+      function showModal(msg) {
+        modalMsg.innerHTML = msg
+        modal.style.display = "flex"
+      }
+      function hideModal() {
+        modal.style.display = "none"
+      }
+      modalOk.onclick = () => {
+        hideModal()
+        sendJoin()  // always rejoin after modal OK
+      }
+
+      // --- 合法手計算 ---
+      function calcLegalMoves(board, role) {
+        const me = role === "black" ? "B" : "W"
+        const opp = role === "black" ? "W" : "B"
+        const directions = [
+          [1, 0], [-1, 0], [0, 1], [0, -1],
+          [1, 1], [-1, -1], [1, -1], [-1, 1]
+        ]
+        const moves = []
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 8; x++) {
+            if (board[y][x] !== "-") continue
+            for (const [dx, dy] of directions) {
+              let cx = x + dx, cy = y + dy
+              let foundOpp = false
+              while (cy >= 0 && cy < 8 && cx >= 0 && cx < 8) {
+                const c = board[cy][cx]
+                if (c === opp) {
+                  foundOpp = true
+                } else if (c === me) {
+                  if (foundOpp) moves.push([x, y])
+                  break
+                } else {
+                  break
+                }
+                cx += dx
+                cy += dy
+              }
+            }
+          }
+        }
+        return moves
+      }
+
+      function renderBoard(board, status, myRole) {
+        boardEl.innerHTML = ""
+        let newBoard = board.map(r => r.split(""))
+
+        let legalMoves = []
+        if (myRole && status === myRole) {
+          legalMoves = calcLegalMoves(board, myRole)
+          for (const [x, y] of legalMoves) {
+            newBoard[y][x] = "*"
+          }
+        }
+
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 8; x++) {
+            const cellEl = document.createElement("div")
+            cellEl.className = "cell"
+            const c = newBoard[y][x]
+            if (c === "B" || c === "W") {
+              const disc = document.createElement("div")
+              disc.className = "disc " + (c === "B" ? "black" : "white")
+              cellEl.appendChild(disc)
+            } else if (c === "*") {
+              cellEl.textContent = "*"
+              cellEl.onclick = () => {
+                // send move only if it's legal
+                ws.send(JSON.stringify({ action: "move", token: myToken, x, y }))
+              }
+            } else {
+              // non-legal empty cell
+              cellEl.onclick = () => {
+                showModal("This is not a legal move.")
+              }
+            }
+            boardEl.appendChild(cellEl)
+          }
+        }
+      }
+
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data)
+        if (msg.event === "move") {
+          const { board, status } = msg.data
+          if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
+          if (status) statusEl.textContent = "Status: " + status
+        } else if (msg.event === "join") {
+          if (seat === "observer" && modal.style.display === "flex") {
+            hideModal()
+          }
+          const { board, status } = msg.data
+          if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
+          if (status) statusEl.textContent = "Status: " + status
+        } else if (msg.event === "leave") {
+          showModal("Your opponent has left.")
+        } else if (msg.event === "finish") {
+          const { board } = msg.data
+          let black = 0, white = 0
+          for (let row of board) {
+            for (let c of row) {
+              if (c === "B") black++
+              else if (c === "W") white++
+            }
+          }
+          let result = `Black: ${black}, White: ${white}<br>`
+          if (black > white) result += "Winner: Black"
+          else if (white > black) result += "Winner: White"
+          else result += "Draw"
+          showModal(result)
+        } else if (msg.event === "error") {
+          showModal(msg.data.error || "Error occurred.")
+        }
+      }
     </script>
   </body>
 </html>
