@@ -41,10 +41,9 @@ function showModal(message, onOk, type = null) {
       pendingLeave = false;
     }
 
-    // leave 中に join が来ていた場合 → OK 時に再 join
-    if (type === "leave" && pendingLeave) {
+    // leave モーダルは pendingLeave 無関係に OK 時に必ず再 join
+    if (type === "leave") {
       ws.send(JSON.stringify({ event: "join", token: myToken }));
-      pendingLeave = false;
     }
   };
 }
@@ -73,7 +72,16 @@ function connect() {
     log("raw: " + JSON.stringify(msg));
 
     if (msg.event === "join") {
-      // finish/leave モーダル中なら → OK 時に再 join するのでここでは閉じない
+      if (msg.data.role) myRole = msg.data.role;
+
+      if (msg.data.token) {
+        myToken = msg.data.token;
+        sessionStorage.setItem(
+          `reversiToken_${roomId}`,
+          JSON.stringify({ token: myToken, savedAt: Date.now() })
+        );
+      }
+
       if (msg.data.board) {
         currentBoard = msg.data.board;
         currentStatus = msg.data.status;
@@ -85,8 +93,7 @@ function connect() {
     else if (msg.event === "move") {
       if (msg.data.error) {
         showModal("Error: " + msg.data.error, null, "error");
-      }
-      if (msg.data.board) {
+      } else if (msg.data.board) {   // ✅ else if に整理済み
         currentBoard = msg.data.board;
         currentStatus = msg.data.status;
         renderBoard(currentBoard, currentStatus);
@@ -96,24 +103,17 @@ function connect() {
 
     else if (msg.event === "leave") {
       if (currentModalType === "finish") {
-        // finish 中に leave → pending フラグを立てる
+        // finish モーダル中に leave が来たら pending フラグを立てる
         pendingLeave = true;
         return;
       }
 
       if (msg.data[myRole] === true) {
-        showModal("Your opponent has left.", () => {
-          ws.send(JSON.stringify({ event: "join", token: myToken }));
-        }, "leave");
+        showModal("Your opponent has left.", null, "leave");
       }
     }
 
     else if (msg.event === "finish") {
-      if (currentModalType === "leave") {
-        // leave モーダル → finish 優先
-        hideModal();
-      }
-
       let black = 0, white = 0;
       msg.data.board.forEach(row => {
         for (let c of row) {
@@ -123,16 +123,21 @@ function connect() {
       });
       let winner = black > white ? "Black" : white > black ? "White" : "Draw";
 
-      showModal(`Black: ${black}, White: ${white}, Winner: ${winner}`, () => {
-        ws.send(JSON.stringify({ event: "join", token: myToken }));
-      }, "finish");
+      showModal(
+        `Black: ${black}, White: ${white}, Winner: ${winner}`,
+        null,
+        "finish"
+      );
     }
   });
 
   // ページ遷移でトークン保存
   window.addEventListener("pagehide", () => {
     if (myToken) {
-      sessionStorage.setItem(`reversiToken_${roomId}`, JSON.stringify({ token: myToken, savedAt: Date.now() }));
+      sessionStorage.setItem(
+        `reversiToken_${roomId}`,
+        JSON.stringify({ token: myToken, savedAt: Date.now() })
+      );
     }
   });
 }
@@ -207,4 +212,7 @@ function isLegalMove(board, x, y, role) {
   return false;
 }
 
-connect();
+// ✅ 即時実行関数で connect 呼び出し
+(async () => {
+  connect();
+})();
