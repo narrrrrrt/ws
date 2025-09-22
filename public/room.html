@@ -3,183 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Reversi Room</title>
+  <link rel="stylesheet" href="css/room.css">
 </head>
 <body>
   <h1>Reversi Room</h1>
   <a href="/" id="lobby">Lobby</a>
   <div id="status"></div>
-  <div id="board"></div>
+  <div id="board" class="board"></div>
 
   <!-- モーダル -->
-  <div id="modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#ccc;">
-    <div style="background:#fff; padding:20px; margin:50px auto; width:300px;">
+  <div id="modal">
+    <div id="modalContent">
       <p id="modalMessage"></p>
       <button id="modalOk">OK</button>
     </div>
   </div>
 
-  <script>
-    const params = new URLSearchParams(location.search)
-    const roomId = params.get("id")
-    const seat = params.get("seat") || "observer"
+  <!-- ログ -->
+  <div id="log"></div>
 
-    const boardEl = document.getElementById("board")
-    const statusEl = document.getElementById("status")
-    const modalEl = document.getElementById("modal")
-    const modalMessage = document.getElementById("modalMessage")
-    const modalOk = document.getElementById("modalOk")
-
-    let ws
-    let currentBoard = []
-    let myToken = sessionStorage.getItem("token")
-    let lastSaved = parseInt(sessionStorage.getItem("savedAt") || "0")
-    if (Date.now() - lastSaved > 1000) {
-      myToken = null
-    }
-
-    function showModal(msg, onOk) {
-      modalMessage.textContent = msg
-      modalEl.style.display = "block"
-      modalOk.onclick = () => {
-        modalEl.style.display = "none"
-        if (onOk) onOk()
-      }
-    }
-
-    // 合法手判定
-    function computeLegalMoves(board, player) {
-      const opponent = player === "B" ? "W" : "B"
-      const moves = []
-      const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-      for (let y=0;y<8;y++) {
-        for (let x=0;x<8;x++) {
-          if (board[y][x] !== "-") continue
-          for (const [dx,dy] of dirs) {
-            let cx=x+dx, cy=y+dy, found=false
-            while (cx>=0&&cx<8&&cy>=0&&cy<8&&board[cy][cx]===opponent) {
-              cx+=dx; cy+=dy; found=true
-            }
-            if (found && cx>=0&&cx<8&&cy>=0&&cy<8&&board[cy][cx]===player) {
-              moves.push([x,y])
-              break
-            }
-          }
-        }
-      }
-      return moves
-    }
-
-    // ボード描画（DOMで組み立て）
-    function renderBoard(board, status) {
-      currentBoard = board
-      boardEl.innerHTML = ""
-
-      const legalMoves = (seat !== "observer" && status && status.toLowerCase() === seat)
-        ? computeLegalMoves(board, seat === "black" ? "B" : "W")
-        : []
-
-      for (let y=0;y<8;y++) {
-        const rowDiv = document.createElement("div")
-        for (let x=0;x<8;x++) {
-          const c = board[y][x]
-          const cellSpan = document.createElement("span")
-
-          if (c === "B" || c === "W") {
-            cellSpan.textContent = c
-          } else if (legalMoves.some(([lx,ly])=>lx===x&&ly===y)) {
-            const link = document.createElement("a")
-            link.href = "#"
-            link.textContent = "*"
-            link.addEventListener("click", (e)=> {
-              e.preventDefault()
-              sendMove(x,y)
-            })
-            cellSpan.appendChild(link)
-          } else {
-            cellSpan.textContent = "-"
-          }
-
-          rowDiv.appendChild(cellSpan)
-          rowDiv.append(" ")
-        }
-        boardEl.appendChild(rowDiv)
-      }
-    }
-
-    // サーバー送信
-    function sendJoin() {
-      const msg = { event:"join", seat }
-      if (myToken) msg.token = myToken
-      ws.send(JSON.stringify(msg))
-    }
-
-    function sendMove(x,y) {
-      if (!myToken) {
-        showModal("No token, cannot move.")
-        return
-      }
-      ws.send(JSON.stringify({ event:"move", token:myToken, x, y }))
-    }
-
-    // WebSocket
-    ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
-
-    ws.addEventListener("open", () => { sendJoin() })
-
-    ws.addEventListener("message", (ev) => {
-      const msg = JSON.parse(ev.data)
-
-      if (msg.event === "join") {
-        if (msg.data.token) myToken = msg.data.token
-        if (msg.data && msg.data.board) {
-          renderBoard(msg.data.board, msg.data.status)
-          statusEl.textContent = "Status: " + msg.data.status
-        }
-      }
-
-      if (msg.event === "move") {
-        renderBoard(msg.data.board, msg.data.status)
-        statusEl.textContent = "Status: " + msg.data.status
-      }
-
-      if (msg.event === "leave") {
-        showModal("Your opponent has left.", ()=> { sendJoin() })
-      }
-
-      if (msg.event === "finish") {
-        const board = msg.data.board
-        let black=0, white=0
-        for (let row of board) {
-          for (let c of row) {
-            if (c==="B") black++
-            if (c==="W") white++
-          }
-        }
-        let result="Draw"
-        if (black>white) result="Black wins"
-        else if (white>black) result="White wins"
-        showModal(`Game finished.\nBlack: ${black}, White: ${white}\n${result}`, ()=> {
-          sendJoin()
-        })
-      }
-
-      if (msg.event === "error") {
-        showModal("Error: " + msg.reason)
-      }
-    })
-
-    // token管理
-    window.addEventListener("pagehide", ()=> {
-      if (myToken) {
-        sessionStorage.setItem("token", myToken)
-        sessionStorage.setItem("savedAt", Date.now().toString())
-      }
-    })
-
-    // ロビーへ
-    document.getElementById("lobby").addEventListener("click", ()=> {
-      ws.close()
-    })
-  </script>
+  <script src="js/room.js"></script>
 </body>
 </html>
