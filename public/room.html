@@ -3,27 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Reversi Room</title>
-  <style>
-    body { font-family: sans-serif; }
-    .board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
-    .cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; }
-    .disc { width: 30px; height: 30px; border-radius: 50%; }
-    .black { background: black; }
-    .white { background: white; border: 1px solid #000; }
-    .hint { width: 12px; height: 12px; border-radius: 50%; background: orange; }
-    #modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); align-items:center; justify-content:center; }
-    #modalContent { background: #fff; padding: 20px; border-radius: 6px; }
-  </style>
 </head>
 <body>
   <h1>Reversi Room</h1>
   <a href="/" id="lobby">Lobby</a>
   <div id="status"></div>
-  <div id="board" class="board"></div>
+  <pre id="board"></pre>
 
   <!-- モーダル -->
-  <div id="modal">
-    <div id="modalContent">
+  <div id="modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#ccc;">
+    <div style="background:#fff; padding:20px; margin:50px auto; width:300px;">
       <p id="modalMessage"></p>
       <button id="modalOk">OK</button>
     </div>
@@ -48,17 +37,16 @@
       myToken = null
     }
 
-    // --- モーダル共通処理 ---
     function showModal(msg, onOk) {
       modalMessage.textContent = msg
-      modalEl.style.display = "flex"
+      modalEl.style.display = "block"
       modalOk.onclick = () => {
         modalEl.style.display = "none"
         if (onOk) onOk()
       }
     }
 
-    // --- 合法手判定 ---
+    // 合法手判定
     function computeLegalMoves(board, player) {
       const opponent = player === "B" ? "W" : "B"
       const moves = []
@@ -81,41 +69,31 @@
       return moves
     }
 
-    // --- ボード描画 ---
+    // ボード描画（テキスト＋リンク）
     function renderBoard(board, status) {
       currentBoard = board
-      boardEl.innerHTML = ""
       const legalMoves = (seat !== "observer" && status && status.toLowerCase() === seat)
         ? computeLegalMoves(board, seat === "black" ? "B" : "W")
         : []
 
+      let html = ""
       for (let y=0;y<8;y++) {
         for (let x=0;x<8;x++) {
-          const cellEl = document.createElement("div")
-          cellEl.className = "cell"
           const c = board[y][x]
           if (c === "B" || c === "W") {
-            const disc = document.createElement("div")
-            disc.className = "disc " + (c === "B" ? "black" : "white")
-            cellEl.appendChild(disc)
+            html += c + " "
           } else if (legalMoves.some(([lx,ly])=>lx===x&&ly===y)) {
-            const hint = document.createElement("div")
-            hint.className = "hint"
-            hint.addEventListener("click", ()=> sendMove(x,y))
-            cellEl.appendChild(hint)
+            html += `<a href="#" onclick="sendMove(${x},${y})">*</a> `
           } else {
-            cellEl.addEventListener("click", ()=> {
-              if (seat !== "observer" && status && status.toLowerCase() === seat) {
-                showModal("This is not a legal move.")
-              }
-            })
+            html += "- "
           }
-          boardEl.appendChild(cellEl)
         }
+        html += "\n"
       }
+      boardEl.innerHTML = html
     }
 
-    // --- サーバー送信 ---
+    // サーバー送信
     function sendJoin() {
       const msg = { event:"join", seat }
       if (myToken) msg.token = myToken
@@ -127,30 +105,25 @@
       ws.send(JSON.stringify({ event:"move", token:myToken, x, y }))
     }
 
-    // --- WebSocket ---
+    // WebSocket
     ws = new WebSocket(`wss://${location.host}/${roomId}/ws`)
 
-    ws.addEventListener("open", () => {
-      sendJoin()
-    })
+    ws.addEventListener("open", () => { sendJoin() })
 
     ws.addEventListener("message", (ev) => {
       const msg = JSON.parse(ev.data)
-      if (msg.event === "join") {
+
+      if (msg.event === "join" || msg.event === "move") {
         if (msg.data && msg.data.board) {
           renderBoard(msg.data.board, msg.data.status)
           statusEl.textContent = "Status: " + msg.data.status
         }
       }
-      if (msg.event === "move") {
-        renderBoard(msg.data.board, msg.data.status)
-        statusEl.textContent = "Status: " + msg.data.status
-      }
+
       if (msg.event === "leave") {
-        showModal("Your opponent has left.", ()=> {
-          sendJoin()
-        })
+        showModal("Your opponent has left.", ()=> { sendJoin() })
       }
+
       if (msg.event === "finish") {
         const board = msg.data.board
         let black=0, white=0
@@ -167,12 +140,13 @@
           sendJoin()
         })
       }
+
       if (msg.event === "error") {
         showModal("Error: " + msg.reason)
       }
     })
 
-    // --- token管理 ---
+    // token管理
     window.addEventListener("pagehide", ()=> {
       if (myToken) {
         sessionStorage.setItem("token", myToken)
@@ -180,7 +154,7 @@
       }
     })
 
-    // --- ロビーへ ---
+    // ロビーへ
     document.getElementById("lobby").addEventListener("click", ()=> {
       ws.close()
     })
