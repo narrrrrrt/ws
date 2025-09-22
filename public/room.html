@@ -8,7 +8,7 @@
   <h1>Reversi Room</h1>
   <a href="/" id="lobby">Lobby</a>
   <div id="status"></div>
-  <pre id="board"></pre>
+  <div id="board"></div>
 
   <!-- モーダル -->
   <div id="modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#ccc;">
@@ -69,28 +69,41 @@
       return moves
     }
 
-    // ボード描画（テキスト＋リンク）
+    // ボード描画（DOMで組み立て）
     function renderBoard(board, status) {
       currentBoard = board
+      boardEl.innerHTML = ""
+
       const legalMoves = (seat !== "observer" && status && status.toLowerCase() === seat)
         ? computeLegalMoves(board, seat === "black" ? "B" : "W")
         : []
 
-      let html = ""
       for (let y=0;y<8;y++) {
+        const rowDiv = document.createElement("div")
         for (let x=0;x<8;x++) {
           const c = board[y][x]
+          const cellSpan = document.createElement("span")
+
           if (c === "B" || c === "W") {
-            html += c + " "
+            cellSpan.textContent = c
           } else if (legalMoves.some(([lx,ly])=>lx===x&&ly===y)) {
-            html += `<a href="#" onclick="sendMove(${x},${y})">*</a> `
+            const link = document.createElement("a")
+            link.href = "#"
+            link.textContent = "*"
+            link.addEventListener("click", (e)=> {
+              e.preventDefault()
+              sendMove(x,y)
+            })
+            cellSpan.appendChild(link)
           } else {
-            html += "- "
+            cellSpan.textContent = "-"
           }
+
+          rowDiv.appendChild(cellSpan)
+          rowDiv.append(" ")
         }
-        html += "\n"
+        boardEl.appendChild(rowDiv)
       }
-      boardEl.innerHTML = html
     }
 
     // サーバー送信
@@ -101,7 +114,10 @@
     }
 
     function sendMove(x,y) {
-      if (!myToken) return
+      if (!myToken) {
+        showModal("No token, cannot move.")
+        return
+      }
       ws.send(JSON.stringify({ event:"move", token:myToken, x, y }))
     }
 
@@ -113,11 +129,17 @@
     ws.addEventListener("message", (ev) => {
       const msg = JSON.parse(ev.data)
 
-      if (msg.event === "join" || msg.event === "move") {
+      if (msg.event === "join") {
+        if (msg.data.token) myToken = msg.data.token
         if (msg.data && msg.data.board) {
           renderBoard(msg.data.board, msg.data.status)
           statusEl.textContent = "Status: " + msg.data.status
         }
+      }
+
+      if (msg.event === "move") {
+        renderBoard(msg.data.board, msg.data.status)
+        statusEl.textContent = "Status: " + msg.data.status
       }
 
       if (msg.event === "leave") {
