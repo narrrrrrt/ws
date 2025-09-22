@@ -34,16 +34,20 @@ function connect() {
 
   ws = new WebSocket(`wss://${window.location.host}/${roomId}/ws`);
 
-  ws.onopen = () => {
+  ws.addEventListener("open", () => {
     log("connected");
     let saved = JSON.parse(sessionStorage.getItem("reversiToken") || "null");
     if (saved && Date.now() - saved.savedAt < 1000) {
       myToken = saved.token;
     }
-    ws.send(JSON.stringify({ event: "join", seat: url.searchParams.get("seat") || "observer", token: myToken }));
-  };
+    ws.send(JSON.stringify({
+      event: "join",
+      seat: url.searchParams.get("seat") || "observer",
+      token: myToken
+    }));
+  });
 
-  ws.onmessage = (ev) => {
+  ws.addEventListener("message", (ev) => {
     const msg = JSON.parse(ev.data);
     log("raw: " + JSON.stringify(msg));
 
@@ -92,7 +96,7 @@ function connect() {
         ws.send(JSON.stringify({ event: "join", seat: myRole, token: myToken }));
       });
     }
-  };
+  });
 
   window.addEventListener("pagehide", () => {
     if (myToken) {
