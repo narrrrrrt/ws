@@ -8,11 +8,11 @@ export function moveHandle(room: Room, data: any, ws: WebSocket): void {
   // ロジックで判定 & EventResponse を返す
   const response: EventResponse = move_l(room, token, x, y)
 
-  // 個別レスポンスは必ず返す
+  // 個別レスポンス（常に返す）
   ws.send(JSON.stringify(response))
 
-  // エラーでなければ全員にブロードキャスト
+  // エラーがなければ全員に最新状態をブロードキャスト
   if (!response.data?.error) {
-    room.broadcast(response.event)
+    room.broadcast("move")
   }
 }

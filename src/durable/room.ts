@@ -6,6 +6,8 @@ export class Room {
   white: string | null = null
   board: string[] = [...Room.initialBoard]
   status: RoomStatus = "waiting"
+  
+  lastAction: "move" | "pass" | null = null
 
   // WebSocket → token
   sessions: Map<WebSocket, string | null> = new Map()
