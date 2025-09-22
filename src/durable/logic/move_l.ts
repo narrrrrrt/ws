@@ -37,6 +37,9 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
   room.lastAction = "move"
   room.status = role === "black" ? "white" : "black"
 
+  // --- token のタッチ更新 ---
+  room.touchToken(token)
+
   return { event: "move", data: {} }
 }
 
