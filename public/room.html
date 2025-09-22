@@ -145,9 +145,7 @@
       }
 
       function renderBoard(board, status, myRole) {
-        if (!board) return
         boardEl.innerHTML = ""
-
         let legalMoves = []
         if (myRole && status === myRole) {
           legalMoves = calcLegalMoves(board, myRole)
@@ -181,14 +179,11 @@
 
       ws.onmessage = (ev) => {
         const msg = JSON.parse(ev.data)
-        if (msg.event === "move") {
+        if (msg.event === "join") {
           const { board, status } = msg.data
           if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
           if (status) statusEl.textContent = "Status: " + status
-        } else if (msg.event === "join") {
-          if (seat === "observer" && modal.style.display === "flex") {
-            hideModal()
-          }
+        } else if (msg.event === "move") {
           const { board, status } = msg.data
           if (board) renderBoard(board, status, seat !== "observer" ? seat : null)
           if (status) statusEl.textContent = "Status: " + status
