@@ -117,9 +117,7 @@ function renderBoard(board, status) {
       );
     } else {
       // 自分だけ合法手なし → パス
-      showModal("No legal moves. Pass your turn.", () => {
-        sendMove(null, null); // パス送信
-      }, "pass");
+      showModal("No legal moves. Pass your turn.", null, "pass");
     }
   }
 }
