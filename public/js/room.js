@@ -57,9 +57,11 @@ function hideModal() {
 // ---------- board rendering ----------
 function renderBoard(board, status) {
   boardEl.innerHTML = "";
-  const legalMoves = getLegalMoves(board, status);
 
-  // 👇 相手の合法手もチェック（終了判定に使う）
+  // 自分の合法手（描画用）
+  const legalMoves = (status === myRole) ? getLegalMoves(board, status) : [];
+
+  // 相手の合法手（終了判定用）
   const oppStatus = status === "black" ? "white" : "black";
   const oppMoves = getLegalMoves(board, oppStatus);
 
@@ -92,60 +94,50 @@ function renderBoard(board, status) {
     }
   }
 
-  // ---------- 終了判定 ----------
-  if (legalMoves.length === 0 && oppMoves.length === 0) {
-    // 双方合法手なし → ゲーム終了
-    let blackCount = 0, whiteCount = 0;
-    for (let row of board) {
-      for (let c of row) {
-        if (c === "B") blackCount++;
-        if (c === "W") whiteCount++;
-      }
-    }
-    let winner = blackCount > whiteCount ? "Black" :
-                 whiteCount > blackCount ? "White" : "Draw";
-    showModal(`Game Over\nBlack: ${blackCount}, White: ${whiteCount}\nWinner: ${winner}`, null, "finish");
-    return; // 👈 ここで終了、以降のパス判定はしない
-  }
-
-  // ---------- パス判定 ----------
+  // パス or 終了判定
   if (status === myRole && legalMoves.length === 0) {
-    showModal("No legal moves. Pass your turn.", () => {
-      sendMove(null, null);
-    }, "pass");
+    if (oppMoves.length === 0) {
+      // 双方打てない → 終了
+      let blackCount = 0, whiteCount = 0;
+      for (let row of board) {
+        for (let c of row) {
+          if (c === "B") blackCount++;
+          if (c === "W") whiteCount++;
+        }
+      }
+      let winner = blackCount > whiteCount ? "Black" :
+                   whiteCount > blackCount ? "White" : "Draw";
+      showModal(`Game Over\nBlack: ${blackCount}, White: ${whiteCount}\nWinner: ${winner}`, null, "finish");
+    } else {
+      // 自分だけパス
+      showModal("No legal moves. Pass your turn.", () => {
+        sendMove(null, null);
+      }, "pass");
+    }
   }
 }
 
 // ---------- move calc ----------
 function getLegalMoves(board, role) {
-  // 👇 まず安全策。黒か白以外なら合法手なしを返す
-  if (role !== "black" && role !== "white") {
-    return [];
-  }
-
   const moves = [];
   const dirs = [
-    [1,0], [-1,0], [0,1], [0,-1],
-    [1,1], [1,-1], [-1,1], [-1,-1]
+    [1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]
   ];
-  const myDisc  = role === "black" ? "B" : "W";
+  const myDisc = role === "black" ? "B" : "W";
   const oppDisc = role === "black" ? "W" : "B";
 
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
       if (board[y][x] !== "-") continue;
-
-      for (const [dx, dy] of dirs) {
+      for (const [dx,dy] of dirs) {
         let nx = x + dx, ny = y + dy;
         let foundOpp = false;
-
         while (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
           if (board[ny][nx] === oppDisc) {
             foundOpp = true;
           } else if (board[ny][nx] === myDisc && foundOpp) {
-            // 👇 一度でも相手の石を挟んで自分の石があれば合法手
-            moves.push({ x, y });
-            nx = -1; // 強制脱出
+            moves.push({x,y});
+            nx = -1; // break outer
             ny = -1;
           } else {
             break;
@@ -156,7 +148,6 @@ function getLegalMoves(board, role) {
       }
     }
   }
-
   return moves;
 }
 
