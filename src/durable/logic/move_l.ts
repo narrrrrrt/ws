@@ -35,7 +35,7 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
   // --- token のタッチ更新 ---
   room.touchToken(token)
 
-  return { event: "move", data: {} }
+  return { event: "move", data: { status: room.status } }
 }
 
 // 8方向に対して裏返し処理を実行
