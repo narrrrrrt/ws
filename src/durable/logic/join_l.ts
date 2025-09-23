@@ -34,10 +34,12 @@ export function join_l(
   // case 2: リロード (seat + token)
   else if (seat && token) {
     if (seat === "black" && room.black === token) {
-      role = "black"
+      //role = "black"
+      role = seat
       newToken = token
     } else if (seat === "white" && room.white === token) {
-      role = "white"
+      //role = "white"
+      role = seat 
       newToken = token
     } else {
       role = "observer"
