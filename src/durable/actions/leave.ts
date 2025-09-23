@@ -16,5 +16,5 @@ export function leaveHandle(room: Room, data: any, ws: WebSocket): void {
   //room.respond(ws, response)
 
   // 全員にブロードキャスト
-  room.broadcast("leave")
+  //room.broadcast("leave")
 }
