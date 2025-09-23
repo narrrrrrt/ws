@@ -29,3 +29,12 @@ pre { background: #f0f0f0; padding: 10px; }
 .cell.hint {
   outline: 2px dashed yellow;
 }
+
+/* 合法手ガイド用のオレンジドット */
+.cell .hint-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: orange;
+  opacity: 0.8;
+}

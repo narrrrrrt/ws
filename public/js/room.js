@@ -121,7 +121,7 @@ function renderStatus(status, black, white) {
           document.getElementById("role").textContent = "You are " + myRole;
         }
         if (msg.data.board) {
-          renderBoard(msg.data.board);
+          renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
           renderStatus(msg.data.status, msg.data.black, msg.data.white);
@@ -130,7 +130,7 @@ function renderStatus(status, black, white) {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          renderBoard(msg.data.board);
+          renderBoard(msg.data.board, msg.data.status);
           renderStatus(msg.data.status, msg.data.black, msg.data.white);
         }
       } else if (msg.event === "leave") {
