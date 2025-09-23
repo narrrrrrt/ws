@@ -11,6 +11,7 @@ let pendingLeave = false;
 const boardEl = document.querySelector(".board");
 const statusEl = document.getElementById("status");
 const modalEl = document.getElementById("modal");
+const roleEl = document.getElementById("role");
 const modalContentEl = document.getElementById("modalContent");
 const logEl = document.getElementById("log");
 
@@ -176,14 +177,16 @@ function sendMove(x, y) {
   });
 
   ws.addEventListener("message", (ev) => {
-    log("raw: " + ev.data);
     const msg = JSON.parse(ev.data);
+    if (msg.event === "ping") return;
+    log("raw: " + ev.data);
 
     if (msg.event === "join") {
       if (msg.data.role) {
         myRole = msg.data.role;
         myToken = msg.data.token;
         sessionStorage.setItem("token-" + roomId, JSON.stringify({token: myToken, savedAt: Date.now()}));
+        roleEl.textContent = "You are " + myRole;
       }
       if (msg.data.board) {
         currentBoard = msg.data.board;
