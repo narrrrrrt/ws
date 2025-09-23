@@ -24,10 +24,18 @@ function showModal(message, callback) {
 function renderBoard(board) {
   const boardEl = document.getElementById("board");
   boardEl.innerHTML = "";
+
+  // --- 合法手を取得 ---
+  const validMoves = (myRole && myRole !== "observer")
+    ? getValidMoves(board, myRole)
+    : [];
+  const validMap = new Set(validMoves.map(m => `${m.x},${m.y}`));
+
   board.forEach((row, y) => {
     row.split("").forEach((cell, x) => {
       const cellEl = document.createElement("div");
       cellEl.className = "cell";
+
       if (cell === "B") {
         const d = document.createElement("div");
         d.className = "disc black";
@@ -36,20 +44,22 @@ function renderBoard(board) {
         const d = document.createElement("div");
         d.className = "disc white";
         cellEl.appendChild(d);
+      } else if (validMap.has(`${x},${y}`)) {
+        // --- ガイド表示用 (合法手のマス)
+        cellEl.classList.add("hint");
       }
 
-      // --- クリックで move 送信 ---
-      cellEl.addEventListener("click", () => {
-        if (!myToken || myRole === "observer") {
-          console.warn("Observer or no token, cannot move");
-          return;
-        }
-        ws.send(JSON.stringify({
-          event: "move",
-          token: myToken,
-          x, y
-        }));
-      });
+      // --- 合法手だけクリック可能 ---
+      if (validMap.has(`${x},${y}`)) {
+        cellEl.addEventListener("click", () => {
+          if (!myToken || myRole === "observer") return;
+          ws.send(JSON.stringify({
+            event: "move",
+            token: myToken,
+            x, y
+          }));
+        });
+      }
 
       boardEl.appendChild(cellEl);
     });
