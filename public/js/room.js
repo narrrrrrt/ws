@@ -51,6 +51,8 @@ function hideModal() {
 // ---------- board rendering ----------
 function renderBoard(board, status) {
   boardEl.innerHTML = "";
+
+  // 現在のターンの合法手を計算（表示するかはこの後の条件で決める）
   const legalMoves = getLegalMoves(board, status);
 
   for (let y = 0; y < 8; y++) {
@@ -67,8 +69,9 @@ function renderBoard(board, status) {
         disc.className = "disc white";
         cell.appendChild(disc);
       } else {
+        // 👇 自分の番のときだけ合法手を表示する
         const move = legalMoves.find(m => m.x === x && m.y === y);
-        if (move) {
+        if (move && status === myRole) {
           const hint = document.createElement("div");
           hint.className = "hint";
           hint.addEventListener("click", () => {
@@ -82,7 +85,7 @@ function renderBoard(board, status) {
     }
   }
 
-  // 👇 パス or 終了判定を追加
+  // 👇 パス or 終了判定
   if (status === myRole && legalMoves.length === 0) {
     const opp = status === "black" ? "white" : "black";
     const oppMoves = getLegalMoves(board, opp);
@@ -116,27 +119,35 @@ function renderBoard(board, status) {
 }
 
 // ---------- move calc ----------
-function getLegalMoves(board, status) {
-  //if (status !== myRole) return [];
+function getLegalMoves(board, role) {
+  // 👇 まず安全策。黒か白以外なら合法手なしを返す
+  if (role !== "black" && role !== "white") {
+    return [];
+  }
+
   const moves = [];
   const dirs = [
-    [1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]
+    [1,0], [-1,0], [0,1], [0,-1],
+    [1,1], [1,-1], [-1,1], [-1,-1]
   ];
-  const myDisc = status === "black" ? "B" : "W";
-  const oppDisc = status === "black" ? "W" : "B";
+  const myDisc  = role === "black" ? "B" : "W";
+  const oppDisc = role === "black" ? "W" : "B";
 
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
       if (board[y][x] !== "-") continue;
-      for (const [dx,dy] of dirs) {
+
+      for (const [dx, dy] of dirs) {
         let nx = x + dx, ny = y + dy;
         let foundOpp = false;
+
         while (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
           if (board[ny][nx] === oppDisc) {
             foundOpp = true;
           } else if (board[ny][nx] === myDisc && foundOpp) {
-            moves.push({x,y});
-            nx = -1; // break outer
+            // 👇 一度でも相手の石を挟んで自分の石があれば合法手
+            moves.push({ x, y });
+            nx = -1; // 強制脱出
             ny = -1;
           } else {
             break;
@@ -147,6 +158,7 @@ function getLegalMoves(board, status) {
       }
     }
   }
+
   return moves;
 }
 
