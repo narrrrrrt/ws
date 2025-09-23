@@ -143,8 +143,15 @@ function renderStatus(status, black, white) {
 
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
+            
+            
+            
+      const debug = document.getElementById("log");
+      debug.textContent += "leave " + myRole;
+            
+            
           showModal("Opponent has left", () => {
-            ws.send(JSON.stringify({ event: "join", token: myToken, seat: myRole}));
+            ws.send(JSON.stringify({ event: "join", token: myToken, seat: myRole }));
           });
         }
       } else if (msg.event === "error") {
