@@ -145,7 +145,7 @@ function renderStatus(status, black, white) {
             (myRole === "white" && white && !black)) {
             
             
-            
+            alert();
       const debug = document.getElementById("log");
       debug.textContent += "leave " + myRole;
             
