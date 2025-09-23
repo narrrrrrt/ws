@@ -81,11 +81,36 @@ function renderBoard(board, status) {
     }
   }
 
-  // 👇 パス処理を追加
+  // 👇 パス or 終了判定を追加
   if (status === myRole && legalMoves.length === 0) {
-    showModal("No legal moves. Pass your turn.", () => {
-      sendMove(null, null);
-    }, "pass");
+    const opp = status === "black" ? "white" : "black";
+    const oppMoves = getLegalMoves(board, opp);
+
+    if (oppMoves.length === 0) {
+      // 双方合法手なし → 終了
+      let blackCount = 0, whiteCount = 0;
+      for (let row of board) {
+        for (let c of row) {
+          if (c === "B") blackCount++;
+          if (c === "W") whiteCount++;
+        }
+      }
+      let winner = blackCount > whiteCount ? "Black" :
+                   whiteCount > blackCount ? "White" : "Draw";
+
+      showModal(
+        `Game Over\nBlack: ${blackCount}, White: ${whiteCount}\nWinner: ${winner}`,
+        () => {
+          sendJoin(myRole, myToken); // 再ジョイン
+        },
+        "finish"
+      );
+    } else {
+      // 自分だけ合法手なし → パス
+      showModal("No legal moves. Pass your turn.", () => {
+        sendMove(null, null); // パス送信
+      }, "pass");
+    }
   }
 }
 
@@ -190,7 +215,7 @@ function sendMove(x, y) {
         }
       }
     }
-
+/*
     else if (msg.event === "finish") {
       if (currentModalType === "leave") return;
       let blackCount = 0, whiteCount = 0;
@@ -204,6 +229,7 @@ function sendMove(x, y) {
                    whiteCount > blackCount ? "White" : "Draw";
       showModal(`Game Over\nBlack: ${blackCount}, White: ${whiteCount}\nWinner: ${winner}`, null, "finish");
     }
+*/
 
     else if (msg.event === "error") {
       showModal("Error: " + msg.data.reason, null, "error");

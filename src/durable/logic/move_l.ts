@@ -16,11 +16,6 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
 
   // --- パス処理 ---
   if (x === null || y === null) {
-    if (room.lastAction === "pass") {
-      // 2回連続でパス → ゲーム終了
-      return { event: "finish", data: {} }
-    }
-    room.lastAction = "pass"
     room.status = role === "black" ? "white" : "black"
     return { event: "move", data: {} }
   }
