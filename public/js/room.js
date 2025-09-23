@@ -28,7 +28,6 @@ function showModal(message, onOk, type) {
   `;
   modalEl.style.display = "flex";
   document.getElementById("modalOk").onclick = () => {
-    e.stopPropagation();
     modalEl.style.display = "none";
     currentModalType = null;
     if (type === "leave" || pendingLeave) {
@@ -72,7 +71,7 @@ function renderBoard(board, status) {
           const hint = document.createElement("div");
           hint.className = "hint";
           hint.addEventListener("click", () => {
-            sendMove(x, y);
+            if (!currentModalType) sendMove(x, y);
           });
           cell.appendChild(hint);
         }
@@ -171,8 +170,10 @@ function sendMove(x, y) {
 
     else if (msg.event === "move") {
       if (msg.data.error) {
+        //currentStatus = msg.data.status;
         showModal("Error: " + msg.data.error, null, "error");
-      } else if (msg.data.board) {
+      } 
+      if (msg.data.board) {
         currentBoard = msg.data.board;
         currentStatus = msg.data.status;
         renderBoard(currentBoard, currentStatus);
