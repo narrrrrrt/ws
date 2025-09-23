@@ -77,7 +77,7 @@ function renderBoard(board, status) {
           hint.className = "hint";
           hint.addEventListener("click", () => {
             //if (!currentModalType) sendMove(x, y);
-            sendMove(x, y);
+            if (currentStatus === myRole) sendMove(x, y);
           });
           cell.appendChild(hint);
         }
