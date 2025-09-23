@@ -21,14 +21,15 @@ function showModal(message, callback) {
 }
 
 // --- UI 更新関数 ---
-function renderBoard(board) {
+function renderBoard(board, status) {
   const boardEl = document.getElementById("board");
   boardEl.innerHTML = "";
 
-  // --- 合法手を取得 ---
-  const validMoves = (myRole && myRole !== "observer")
-    ? getValidMoves(board, myRole)
-    : [];
+  // --- 合法手を出す条件 ---
+  let validMoves = [];
+  if (myRole && myRole !== "observer" && myRole === status.toLowerCase()) {
+    validMoves = getValidMoves(board, myRole);
+  }
   const validMap = new Set(validMoves.map(m => `${m.x},${m.y}`));
 
   board.forEach((row, y) => {
@@ -45,8 +46,10 @@ function renderBoard(board) {
         d.className = "disc white";
         cellEl.appendChild(d);
       } else if (validMap.has(`${x},${y}`)) {
-        // --- ガイド表示用 (合法手のマス)
-        cellEl.classList.add("hint");
+        // --- 合法手のガイドをオレンジの点で表示 ---
+        const dot = document.createElement("div");
+        dot.className = "hint-dot";
+        cellEl.appendChild(dot);
       }
 
       // --- 合法手だけクリック可能 ---
