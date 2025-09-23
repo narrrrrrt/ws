@@ -17,7 +17,7 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
   // --- パス処理 ---
   if (x === null || y === null) {
     room.status = role === "black" ? "white" : "black"
-    return { event: "move", data: { status: room.status } }
+    return { event: "pass", data: {} }
   }
 
   // --- 石を置く ---
@@ -35,7 +35,7 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
   // --- token のタッチ更新 ---
   room.touchToken(token)
 
-  return { event: "move", data: { status: room.status } }
+  return { event: "move", data: {} }
 }
 
 // 8方向に対して裏返し処理を実行

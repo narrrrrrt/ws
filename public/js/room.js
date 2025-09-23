@@ -29,8 +29,13 @@ function showModal(message, onOk, type) {
   `;
   modalEl.style.display = "flex";
   document.getElementById("modalOk").onclick = () => {
-    modalEl.style.display = "none";
+    //modalEl.style.display = "none";
     
+    if (type !== "pass") {
+      modalEl.style.display = "none";
+      currentModalType = null;
+    }
+
     if (type === "leave" || pendingLeave) {
       pendingLeave = false;
       sendJoin(myRole, myToken);
@@ -76,8 +81,7 @@ function renderBoard(board, status) {
           const hint = document.createElement("div");
           hint.className = "hint";
           hint.addEventListener("click", () => {
-            //if (!currentModalType) sendMove(x, y);
-            if (currentStatus === myRole) sendMove(x, y);
+            if (!currentModalType) sendMove(x, y);
           });
           cell.appendChild(hint);
         }
@@ -218,12 +222,15 @@ function sendMove(x, y) {
         currentBoard = msg.data.board;
         renderBoard(currentBoard, currentStatus);
         statusEl.textContent = "Status: " + currentStatus;
-        
-        //if (currentModalType === "pass") {
-        //  currentModalType = null;
-        //}
       }
-      currentStatus = msg.data.status;
+    }
+    
+    else if (msg.event === "pass") {
+      // パスが受理されたことを確認しただけ
+      // ここでは描画しない
+      log("You passed.");
+      // モーダルを閉じる
+      hideModal();
     }
 
     else if (msg.event === "leave") {
