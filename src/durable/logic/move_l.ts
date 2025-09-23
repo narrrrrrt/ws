@@ -40,36 +40,41 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
 
 // 8方向に対して裏返し処理を実行
 function flipStones(board: string[], x: number, y: number, role: "black" | "white") {
-  const me = role === "black" ? "B" : "W"
-  const opp = role === "black" ? "W" : "B"
+  const me = role === "black" ? "B" : "W";
+  const opp = role === "black" ? "W" : "B";
   const directions = [
-    [1, 0], [-1, 0], [0, 1], [0, -1],
-    [1, 1], [-1, -1], [1, -1], [-1, 1]
-  ]
+    [1, 0],  [-1, 0], [0, 1],  [0, -1],
+    [1, 1],  [-1, -1], [1, -1], [-1, 1]
+  ];
 
   for (const [dx, dy] of directions) {
-    const toFlip: [number, number][] = []
-    let cx = x + dx
-    let cy = y + dy
+    const toFlip: [number, number][] = [];
+    let cx = x + dx;
+    let cy = y + dy;
 
     while (cy >= 0 && cy < 8 && cx >= 0 && cx < 8) {
-      const cell = board[cy][cx]
+      const cell = board[cy][cx];
       if (cell === opp) {
-        toFlip.push([cx, cy])
+        // 相手の石 → 裏返し候補に追加
+        toFlip.push([cx, cy]);
       } else if (cell === me) {
+        // 自分の石で挟めた場合のみ裏返す
         if (toFlip.length > 0) {
           for (const [fx, fy] of toFlip) {
-            const row = board[fy].split("")
-            row[fx] = me
-            board[fy] = row.join("")
+            if (fy < 0 || fy >= 8 || fx < 0 || fx >= 8) continue; // 念のため境界チェック
+            const row = board[fy].split("");
+            row[fx] = me;
+            board[fy] = row.join("");
           }
         }
-        break
+        break;
       } else {
-        break
+        // 空マスなど → flip候補は破棄して終了
+        toFlip.length = 0;
+        break;
       }
-      cx += dx
-      cy += dy
+      cx += dx;
+      cy += dy;
     }
   }
 }
