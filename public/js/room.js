@@ -30,7 +30,7 @@ function showModal(message, onOk, type) {
   modalEl.style.display = "flex";
   document.getElementById("modalOk").onclick = () => {
     modalEl.style.display = "none";
-    currentModalType = null;
+    
     if (type === "leave" || pendingLeave) {
       pendingLeave = false;
       sendJoin(myRole, myToken);
@@ -40,6 +40,7 @@ function showModal(message, onOk, type) {
       sendMove(null, null); // パス送信
     }
     if (onOk) onOk();
+    currentModalType = null;
   };
 }
 
