@@ -40,7 +40,7 @@ function showModal(message, onOk, type) {
       sendMove(null, null); // パス送信
     }
     if (onOk) onOk();
-    currentModalType = null;
+    //currentModalType = null;
   };
 }
 
@@ -219,6 +219,10 @@ function sendMove(x, y) {
         currentStatus = msg.data.status;
         renderBoard(currentBoard, currentStatus);
         statusEl.textContent = "Status: " + currentStatus;
+        
+        if (currentModalType === "pass") {
+          currentModalType = null;
+        }
       }
     }
 
