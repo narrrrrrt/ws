@@ -144,7 +144,7 @@ function renderStatus(status, black, white) {
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
           showModal("Opponent has left", () => {
-            ws.send(JSON.stringify({ event: "join", token: myToken }));
+            ws.send(JSON.stringify({ event: "join", token: myToken, seat: myRole}));
           });
         }
       } else if (msg.event === "error") {
