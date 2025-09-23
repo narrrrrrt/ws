@@ -145,6 +145,7 @@
       ws.addEventListener("message", (evt) => {
         try {
           const msg = JSON.parse(evt.data)
+          if (msg.event === "ping") return;
           console.log("recv:", msg)
 
           const debug = document.getElementById("log")
