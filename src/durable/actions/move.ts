@@ -13,6 +13,6 @@ export function moveHandle(room: Room, data: any, ws: WebSocket): void {
 
   // エラーでなければ全員にブロードキャスト
   if (!response.data?.error) {
-    room.broadcast(response.event)
+    room.broadcast("move")
   }
 }
