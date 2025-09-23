@@ -39,6 +39,7 @@
     <a href="#" id="to-lobby">ロビーへ</a>
 
     <div id="status"></div>
+    <div id="role"></div>
     <div id="board" class="board"></div>
 
     <hr>
@@ -82,6 +83,7 @@
       function showModal(message, callback) {
         const modal = document.getElementById("modal")
         const msgEl = document.getElementById("modal-message")
+        const roleEl = document.getElementById("role");
         msgEl.textContent = message
         modal.style.display = "flex"
 
@@ -158,6 +160,7 @@
             }
             if (msg.data.role) {
               myRole = msg.data.role
+              roleEl.textContent = "You are " + myRole;
             }
             if (msg.data.board) {
               renderBoard(msg.data.board)
