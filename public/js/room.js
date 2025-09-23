@@ -220,6 +220,7 @@ function sendMove(x, y) {
       } 
       if (msg.data.board) {
         currentBoard = msg.data.board;
+        currentStatus = msg.data.status; 
         renderBoard(currentBoard, currentStatus);
         statusEl.textContent = "Status: " + currentStatus;
       }
