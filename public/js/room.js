@@ -94,10 +94,11 @@ function renderBoard(board, status) {
     }
   }
 
-  // パス or 終了判定
+  // 👇 終了判定 & パス処理
   if (status === myRole && legalMoves.length === 0) {
+    const oppMoves = getLegalMoves(board, status === "black" ? "white" : "black");
     if (oppMoves.length === 0) {
-      // 双方打てない → 終了
+      // 両者打てない → 終了
       let blackCount = 0, whiteCount = 0;
       for (let row of board) {
         for (let c of row) {
@@ -108,11 +109,11 @@ function renderBoard(board, status) {
       let winner = blackCount > whiteCount ? "Black" :
                    whiteCount > blackCount ? "White" : "Draw";
       showModal(`Game Over\nBlack: ${blackCount}, White: ${whiteCount}\nWinner: ${winner}`, null, "finish");
+
     } else {
-      // 自分だけパス
-      showModal("No legal moves. Pass your turn.", () => {
-        sendMove(null, null);
-      }, "pass");
+      // 自分だけ合法手なし → パス
+      showModal("No legal moves. Pass your turn.", null, "pass");
+      sendMove(null, null); // パス送信は即実行してから通知
     }
   }
 }
