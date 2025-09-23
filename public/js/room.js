@@ -212,12 +212,10 @@ function sendMove(x, y) {
 
     else if (msg.event === "move") {
       if (msg.data.error) {
-        currentStatus = msg.data.status;
         showModal("Error: " + msg.data.error, null, "error");
       } 
       if (msg.data.board) {
         currentBoard = msg.data.board;
-        currentStatus = msg.data.status;
         renderBoard(currentBoard, currentStatus);
         statusEl.textContent = "Status: " + currentStatus;
         
@@ -225,6 +223,7 @@ function sendMove(x, y) {
         //  currentModalType = null;
         //}
       }
+      currentStatus = msg.data.status;
     }
 
     else if (msg.event === "leave") {
