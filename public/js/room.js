@@ -138,14 +138,14 @@ function renderStatus(status, black, white) {
         }
       } else if (msg.event === "leave") {
         const { board, status, black, white } = msg.data;
-        if (board) renderBoard(board);
+        if (board) renderBoard(board ,status);
         renderStatus(status, black, white);
 
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
             
             
-            alert();
+            //alert();
       const debug = document.getElementById("log");
       debug.textContent += "leave " + myRole;
             
