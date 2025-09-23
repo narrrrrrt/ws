@@ -17,7 +17,7 @@ export function move_l(room: Room, token: string, x: number | null, y: number | 
   // --- パス処理 ---
   if (x === null || y === null) {
     room.status = role === "black" ? "white" : "black"
-    return { event: "move", data: {} }
+    return { event: "move", data: { status: room.status } }
   }
 
   // --- 石を置く ---
