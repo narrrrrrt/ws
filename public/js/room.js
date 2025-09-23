@@ -117,7 +117,7 @@ function renderBoard(board, status) {
 
 // ---------- move calc ----------
 function getLegalMoves(board, status) {
-  if (status !== myRole) return [];
+  //if (status !== myRole) return [];
   const moves = [];
   const dirs = [
     [1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]
