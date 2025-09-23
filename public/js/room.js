@@ -28,6 +28,7 @@ function showModal(message, onOk, type) {
   `;
   modalEl.style.display = "flex";
   document.getElementById("modalOk").onclick = () => {
+    e.stopPropagation();
     modalEl.style.display = "none";
     currentModalType = null;
     if (type === "leave" || pendingLeave) {
