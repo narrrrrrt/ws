@@ -71,6 +71,15 @@ export class Room {
       this.broadcast("leave")
     }, 3000)
   }
+  
+  removeByToken(token: string) {
+    for (const [ws, t] of this.sessions.entries()) {
+      if (t === token) {
+        this.sessions.delete(ws)
+        break // 見つかったら抜ける
+      }
+    }
+  }
 
   broadcast(event: string) {
     const payload: BroadcastPayload = {

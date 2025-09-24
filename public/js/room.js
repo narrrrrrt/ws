@@ -159,7 +159,7 @@ function renderStatus(status, black, white) {
   document.getElementById("to-lobby").addEventListener("click", (e) => {
     e.preventDefault();
     if (myToken) {
-      //ws.send(JSON.stringify({ event: "leave", token: myToken }));
+      ws.send(JSON.stringify({ event: "leave", token: myToken }));
       sessionStorage.removeItem(`room-${roomId}-token`);
     }
     window.location.href = "/";
