@@ -111,7 +111,7 @@ export class Room {
     if (!payload) {
       // 現在の状態を丸ごと返す
       const current: BroadcastPayload = {
-        event: "state",
+        event: "join",
         data: {
           black: this.black !== null,
           white: this.white !== null,
