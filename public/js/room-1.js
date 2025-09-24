@@ -68,31 +68,32 @@ function renderBoard(board, status) {
     });
   });
   
-  // --- 終了判定 (全員で実行する) ---
-  const blackMoves = getValidMoves(board, "black");
-  const whiteMoves = getValidMoves(board, "white");
-
-  if (blackMoves.length === 0 && whiteMoves.length === 0) {
-    const blackCount = board.flat().join("").split("B").length - 1;
-    const whiteCount = board.flat().join("").split("W").length - 1;
-    let winner;
-    if (blackCount > whiteCount) winner = "Black wins!";
-    else if (whiteCount > blackCount) winner = "White wins!";
-    else winner = "Draw!";
-
-    showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
-      ws.send(JSON.stringify({ event: "join", token: myToken }));
-    });
-    return; // 終了時はここで抜けてもOK
-  }
-
-  // --- パス判定 (手番の人だけチェック) ---
+  // --- パス判定 ---
   if (myRole && myRole === status.toLowerCase() && validMoves.length === 0) {
-    ws.send(JSON.stringify({
-      event: "move",
-      token: myToken,
-      x: null, y: null
-    }));
+    // 相手の合法手をチェック
+    const opponent = (myRole === "black") ? "white" : "black";
+    const oppMoves = getValidMoves(board, opponent);
+
+    if (oppMoves.length > 0) {
+      // 自分だけ打てない → パス送信
+      ws.send(JSON.stringify({
+        event: "move",
+        token: myToken,
+        x: null, y: null
+      }));
+    } else {
+      // 両方打てない → 終了処理
+      const blackCount = board.flat().join("").split("B").length - 1;
+      const whiteCount = board.flat().join("").split("W").length - 1;
+      let winner;
+      if (blackCount > whiteCount) winner = "Black wins!";
+      else if (whiteCount > blackCount) winner = "White wins!";
+      else winner = "Draw!";
+
+      showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
+        ws.send(JSON.stringify({ event: "join", token: myToken }));
+      });
+    }
   }
 }
 
