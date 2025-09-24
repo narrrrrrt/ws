@@ -26,7 +26,7 @@
               btn.classList.add("active");
               btn.disabled = false;
               btn.onclick = () => {
-                window.location.href = `room.html?id=${id}&seat=${seat}`;
+                window.location.href = `http://ive.narrat.workers.dev/room.html?id=${id}&seat=${seat}`;
               };
             }
           });
@@ -36,7 +36,7 @@
           obsBtn.classList.add("active");
           obsBtn.disabled = false;
           obsBtn.onclick = () => {
-            window.location.href = `room.html?id=${id}&seat=observer`;
+            window.location.href = `http://ive.narrat.workers.dev/room.html?id=${id}&seat=observer`;
           };
         }
       } catch (e) {
