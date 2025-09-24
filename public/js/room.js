@@ -4,6 +4,15 @@ let myRole = null;
 let ws = null;
 let roomId = null;
 
+// --- debug utility ---
+function debugLog(message) {
+  const debug = document.getElementById("log");
+  if (debug) {
+    debug.textContent += message + "\n";
+    debug.scrollTop = debug.scrollHeight; // 下までスクロール
+  }
+}
+
 // --- modal utility ---
 function showModal(message, callback) {
   const modal = document.getElementById("modal");
@@ -69,9 +78,9 @@ function renderBoard(board, status) {
   });
 }
 
-function renderStatus(status, black, white) {
+function renderStatus(status) {
   const s = document.getElementById("status");
-  s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
+  s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
 // --- 実行部分 ---
@@ -79,6 +88,7 @@ function renderStatus(status, black, white) {
   const params = new URLSearchParams(location.search);
   roomId = params.get("id");
   const seat = params.get("seat") || "observer";
+  document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
 
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
@@ -106,10 +116,6 @@ function renderStatus(status, black, white) {
     try {
       const msg = JSON.parse(evt.data);
       if (msg.event === "ping") return;
-      console.log("recv:", msg);
-
-      //const debug = document.getElementById("log");
-      //debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
 
       if (msg.event === "join") {
         if (msg.data.token) {
@@ -121,27 +127,31 @@ function renderStatus(status, black, white) {
         }
         if (msg.data.role) {
           myRole = msg.data.role;
-          document.getElementById("role").textContent = "You are " + myRole;
         }
         if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
-          renderStatus(msg.data.status, msg.data.black, msg.data.white);
+          renderStatus(msg.data.status);
         }
       } else if (msg.event === "move") {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
-          renderStatus(msg.data.status, msg.data.black, msg.data.white);
+
           
+          // --- 石数をクライアントで数える ---
+          const flat = msg.data.board.join("");
+          const blackCount = flat.split("B").length - 1;
+          const whiteCount = flat.split("W").length - 1;
+
+          renderStatus(msg.data.status);
+
           // --- 終了判定をここで必ず全員実行 ---
           const blackMoves = getValidMoves(msg.data.board, "black");
           const whiteMoves = getValidMoves(msg.data.board, "white");
           if (blackMoves.length === 0 && whiteMoves.length === 0) {
-            const blackCount = msg.data.black;
-            const whiteCount = msg.data.white;
             let winner;
             if (blackCount > whiteCount) winner = "Black wins!";
             else if (whiteCount > blackCount) winner = "White wins!";
@@ -159,7 +169,7 @@ function renderStatus(status, black, white) {
       } else if (msg.event === "leave") {
         const { board, status, black, white } = msg.data;
         if (board) renderBoard(board ,status);
-        renderStatus(status, black, white);
+        renderStatus(status);
 
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
@@ -171,7 +181,7 @@ function renderStatus(status, black, white) {
         showModal(msg.data.reason || "An error occurred");
       }
     } catch (e) {
-      console.error("invalid message:", evt.data);
+      //console.error("invalid message:", evt.data);
     }
   });
 

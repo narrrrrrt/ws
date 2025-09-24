@@ -1,0 +1,46 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+#rooms {
+  display: flex;
+  flex-wrap: wrap; /* 幅が狭いときは折り返す */
+  gap: 20px;
+}
+
+.room {
+  border: 1px solid #ddd;
+  padding: 10px;
+  min-width: 150px;
+  flex: 1 1 150px;
+}
+
+.room h2 {
+  margin-top: 0;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+button {
+  display: block;       /* 縦に並べる */
+  width: 100%;
+  margin: 5px 0;
+  padding: 6px 12px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* アクティブ（空きあり） */
+button.active {
+  background: #cce5ff; /* 薄い青 */
+  color: #000;
+}
+
+/* 非アクティブ（埋まってる） */
+button.inactive {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
