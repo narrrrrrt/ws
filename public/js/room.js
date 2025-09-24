@@ -146,12 +146,6 @@ function renderStatus(status) {
         } else if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
 
-          
-          const movesByColor = {
-            black: getValidMoves(msg.data.board, "black"),
-            white: getValidMoves(msg.data.board, "white"),
-          };
-
           // --- ゲーム終了チェック ---
           const movesByColor = {
             black: getValidMoves(msg.data.board, "black"),
