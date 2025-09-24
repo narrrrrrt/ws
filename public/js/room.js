@@ -174,7 +174,7 @@ function renderStatus(status) {
           }
 
           // --- パスチェック ---
-          if (movesByColor[msg.data.status].length === 0) {
+          if (movesByColor[myRole].length === 0) {
             ws.send(JSON.stringify({
               event: "move",
               token: myToken,
