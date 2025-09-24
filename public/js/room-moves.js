@@ -4,6 +4,12 @@ function getValidMoves(board, color) {
   const oppDisc = color === "black" ? "W" : "B";
   const moves = [];
 
+  // --- デバッグ用に盤面全体を横一列に出力 ---
+  const flatBoard = board
+    .map(row => (typeof row === "string" ? row : row.join("")))
+    .join("");
+  debugLog(`board(${color}): ${flatBoard}`);
+
   const directions = [
     { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 },
     { dx: -1, dy: 0 },                   { dx: 1, dy: 0 },
