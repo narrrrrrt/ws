@@ -53,7 +53,16 @@ export function join_l(
       role = token === room.black ? "black" : "white"
       newToken = token
       room.board = [...Room.initialBoard]
-      room.status = "waiting"
+
+      // ステータス更新条件を追加
+      if (room.black && room.white) {
+        // 両方そろっていればゲーム開始
+        room.status = "black"
+      } else if (room.black || room.white) {
+        // 片方だけなら waiting
+        room.status = "waiting"
+      }
+
     } else {
       role = "observer"
     }
