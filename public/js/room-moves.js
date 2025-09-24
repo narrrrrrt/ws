@@ -8,7 +8,7 @@ function getValidMoves(board, color) {
   const flatBoard = board
     .map(row => (typeof row === "string" ? row : row.join("")))
     .join("");
-  debugLog(`board(${color}): ${flatBoard}`);
+  //debugLog(`board(${color}): ${flatBoard}`);
 
   const directions = [
     { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 },
@@ -53,11 +53,11 @@ function getValidMoves(board, color) {
 
       if (valid) {
         moves.push({ x, y });
-        debugLog(`valid move for ${color}: (${x},${y})`);
+        //debugLog(`valid move for ${color}: (${x},${y})`);
       }
     }
   }
 
-  debugLog(`getValidMoves(${color}) -> ${moves.length} moves`);
+  //debugLog(`getValidMoves(${color}) -> ${moves.length} moves`);
   return moves;
 }
