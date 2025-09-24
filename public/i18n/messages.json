@@ -1,0 +1,66 @@
+{
+  "youPassed": {
+    "en": "You passed.",
+    "es": "Has pasado.",
+    "de": "Du hast gepasst.",
+    "it": "Hai passato.",
+    "fr": "Vous avez passé.",
+    "ja": "パスしました。"
+  },
+  "opponentLeft": {
+    "en": "Opponent has left",
+    "es": "El oponente se ha retirado",
+    "de": "Der Gegner hat aufgegeben",
+    "it": "L'avversario ha lasciato",
+    "fr": "L'adversaire a quitté",
+    "ja": "相手が退出しました"
+  },
+  "gameOver": {
+    "en": "Game Over!",
+    "es": "¡Fin del juego!",
+    "de": "Spiel vorbei!",
+    "it": "Partita finita!",
+    "fr": "Partie terminée!",
+    "ja": "ゲーム終了！"
+  },
+  "blackWins": {
+    "en": "Black wins!",
+    "es": "¡Negras ganan!",
+    "de": "Schwarz gewinnt!",
+    "it": "Il nero vince!",
+    "fr": "Les noirs gagnent!",
+    "ja": "黒の勝ち！"
+  },
+  "whiteWins": {
+    "en": "White wins!",
+    "es": "¡Blancas ganan!",
+    "de": "Weiß gewinnt!",
+    "it": "Il bianco vince!",
+    "fr": "Les blancs gagnent!",
+    "ja": "白の勝ち！"
+  },
+  "draw": {
+    "en": "Draw!",
+    "es": "¡Empate!",
+    "de": "Unentschieden!",
+    "it": "Pareggio!",
+    "fr": "Match nul!",
+    "ja": "引き分け！"
+  },
+  "scoreFormat": {
+    "en": "Black: {black}, White: {white}",
+    "es": "Negras: {black}, Blancas: {white}",
+    "de": "Schwarz: {black}, Weiß: {white}",
+    "it": "Nero: {black}, Bianco: {white}",
+    "fr": "Noirs: {black}, Blancs: {white}",
+    "ja": "黒: {black}, 白: {white}"
+  },
+  "toLobby": {
+    "en": "To Lobby",
+    "es": "Al vestíbulo",
+    "de": "Zum Lobby",
+    "it": "Alla lobby",
+    "fr": "Vers le hall",
+    "ja": "ロビーへ"
+  }
+}

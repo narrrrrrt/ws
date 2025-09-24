@@ -14,10 +14,10 @@ function debugLog(message) {
 }
 
 // --- modal utility ---
-function showModal(message, callback) {
+function showModal(messageKey, callback, vars = {}) {
   const modal = document.getElementById("modal");
   const msgEl = document.getElementById("modal-message");
-  msgEl.textContent = message;
+  msgEl.textContent = t(messageKey, vars);
   modal.style.display = "flex";
 
   const okBtn = document.getElementById("modal-ok");
@@ -89,7 +89,13 @@ function renderStatus(status) {
   roomId = params.get("id");
   const seat = params.get("seat") || "observer";
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
+  
+  await loadMessages();
 
+  // 起動時に「ロビーへ」を差し替え
+  const lobbyLink = document.getElementById("to-lobby");
+  if (lobbyLink) lobbyLink.textContent = t("toLobby");
+  
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
   // --- token を 1秒有効にする ---
@@ -156,16 +162,20 @@ function renderStatus(status) {
             if (blackCount > whiteCount) winner = "Black wins!";
             else if (whiteCount > blackCount) winner = "White wins!";
             else winner = "Draw!";
-
-            showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
-              ws.send(JSON.stringify({ event: "join", token: myToken }));
-            });
+            
+            showModal(
+              t("gameOver") + "\n" +
+              t("scoreFormat", { black: blackCount, white: whiteCount }) + "\n" +
+              t(winnerKey), () => {
+                ws.send(JSON.stringify({ event: "join", token: myToken }));
+              }
+            );
           }  
           
         }
       } else if (msg.event === "pass") {
         // --- Pass notification from server ---
-        showModal("You passed.");
+        showModal("youPassed");
       } else if (msg.event === "leave") {
         const { board, status, black, white } = msg.data;
         if (board) renderBoard(board ,status);
@@ -173,7 +183,7 @@ function renderStatus(status) {
 
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
-          showModal("Opponent has left", () => {
+          showModal("opponentLeft", () => {
             ws.send(JSON.stringify({ event: "join", token: myToken }));
           });
         }
