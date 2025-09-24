@@ -181,9 +181,7 @@ function renderStatus(status) {
               x: null,
               y: null
             }));
-            showModal("youPassed");
           }
-          
         }
       } else if (msg.event === "pass") {
         // --- Pass notification from server ---
