@@ -1,74 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Reversi Lobby</title></head>
+  <head>
+    <meta charset="utf-8">
+    <title>Reversi Lobby</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
   <body>
     <h1>Lobby</h1>
 
-    <!-- ルームリンク -->
-    <div>
-      <h2>Room 1</h2>
-      <a href="room.html?id=1&seat=black">Black</a> |
-      <a href="room.html?id=1&seat=white">White</a> |
-      <a href="room.html?id=1&seat=observer">Observer</a> |
-      <button onclick="resetRoom(1)">Reset</button>
+    <!-- ルーム一覧 -->
+    <div id="rooms">
+      <div class="room" data-id="1">
+        <h2>Room 1</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+        <button class="reset">Reset</button>
+      </div>
+      <div class="room" data-id="2">
+        <h2>Room 2</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+        <button class="reset">Reset</button>
+      </div>
+      <div class="room" data-id="3">
+        <h2>Room 3</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+        <button class="reset">Reset</button>
+      </div>
+      <div class="room" data-id="4">
+        <h2>Room 4</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+        <button class="reset">Reset</button>
+      </div>
     </div>
-    <div>
-      <h2>Room 2</h2>
-      <a href="room.html?id=2&seat=black">Black</a> |
-      <a href="room.html?id=2&seat=white">White</a> |
-      <a href="room.html?id=2&seat=observer">Observer</a> |
-      <button onclick="resetRoom(2)">Reset</button>
-    </div>
-    <div>
-      <h2>Room 3</h2>
-      <a href="room.html?id=3&seat=black">Black</a> |
-      <a href="room.html?id=3&seat=white">White</a> |
-      <a href="room.html?id=3&seat=observer">Observer</a> |
-      <button onclick="resetRoom(3)">Reset</button>
-    </div>
-    <div>
-      <h2>Room 4</h2>
-      <a href="room.html?id=4&seat=black">Black</a> |
-      <a href="room.html?id=4&seat=white">White</a> |
-      <a href="room.html?id=4&seat=observer">Observer</a> |
-      <button onclick="resetRoom(4)">Reset</button>
-    </div>
 
-    <hr>
-
-    <!-- デバッグ用ブロードキャスト表示 -->
-    <h2>Broadcast Debug (Room 1 Observer)</h2>
-    <pre id="debug"></pre>
-
-    <script>
-      // --- Room 1 に observer として接続 ---
-      const ws = new WebSocket(`wss://${location.host}/1/ws`)
-
-      ws.addEventListener("open", () => {
-        console.log("connected as observer to room 1")
-        ws.send(JSON.stringify({ event: "join", seat: "observer" }))
-      })
-
-      ws.addEventListener("message", (evt) => {
-        try {
-          const msg = JSON.parse(evt.data)
-          console.log("recv:", msg)
-
-          const debug = document.getElementById("debug")
-          debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`
-        } catch (e) {
-          console.error("invalid message:", evt.data)
-        }
-      })
-
-      // --- Reset ボタンで部屋をリセット ---
-      function resetRoom(id) {
-        const wsTmp = new WebSocket(`wss://${location.host}/${id}/ws`)
-        wsTmp.addEventListener("open", () => {
-          wsTmp.send(JSON.stringify({ event: "reset" }))
-          wsTmp.close()
-        })
-      }
-    </script>
+    <script src="js/lobby.js"></script>
   </body>
 </html>
