@@ -67,33 +67,6 @@ function renderBoard(board, status) {
       boardEl.appendChild(cellEl);
     });
   });
-  
-  // --- 終了判定 (全員で実行する) ---
-  const blackMoves = getValidMoves(board, "black");
-  const whiteMoves = getValidMoves(board, "white");
-
-  if (blackMoves.length === 0 && whiteMoves.length === 0) {
-    const blackCount = board.flat().join("").split("B").length - 1;
-    const whiteCount = board.flat().join("").split("W").length - 1;
-    let winner;
-    if (blackCount > whiteCount) winner = "Black wins!";
-    else if (whiteCount > blackCount) winner = "White wins!";
-    else winner = "Draw!";
-
-    showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
-      ws.send(JSON.stringify({ event: "join", token: myToken }));
-    });
-    return; // 終了時はここで抜けてもOK
-  }
-
-  // --- パス判定 (手番の人だけチェック) ---
-  if (myRole && myRole === status.toLowerCase() && validMoves.length === 0) {
-    ws.send(JSON.stringify({
-      event: "move",
-      token: myToken,
-      x: null, y: null
-    }));
-  }
 }
 
 function renderStatus(status, black, white) {
@@ -162,6 +135,23 @@ function renderStatus(status, black, white) {
         } else if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
           renderStatus(msg.data.status, msg.data.black, msg.data.white);
+          
+          // --- 終了判定をここで必ず全員実行 ---
+          const blackMoves = getValidMoves(msg.data.board, "black");
+          const whiteMoves = getValidMoves(msg.data.board, "white");
+          if (blackMoves.length === 0 && whiteMoves.length === 0) {
+            const blackCount = msg.data.black;
+            const whiteCount = msg.data.white;
+            let winner;
+            if (blackCount > whiteCount) winner = "Black wins!";
+            else if (whiteCount > blackCount) winner = "White wins!";
+            else winner = "Draw!";
+
+            showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
+              ws.send(JSON.stringify({ event: "join", token: myToken }));
+            });
+          }  
+          
         }
       } else if (msg.event === "pass") {
         // --- Pass notification from server ---
