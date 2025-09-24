@@ -153,6 +153,12 @@ function renderStatus(status) {
           };
 
           // --- ゲーム終了チェック ---
+          const movesByColor = {
+            black: getValidMoves(msg.data.board, "black"),
+            white: getValidMoves(msg.data.board, "white"),
+          };
+
+          // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
             const flat = msg.data.board.join("");
             const blackCount = flat.split("B").length - 1;
