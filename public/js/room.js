@@ -78,9 +78,9 @@ function renderBoard(board, status) {
   });
 }
 
-function renderStatus(status, black, white) {
+function renderStatus(status) {
   const s = document.getElementById("status");
-  s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
+  s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
 // --- 実行部分 ---
@@ -115,10 +115,6 @@ function renderStatus(status, black, white) {
     try {
       const msg = JSON.parse(evt.data);
       if (msg.event === "ping") return;
-      //console.log("recv:", msg);
-
-      //const debug = document.getElementById("log");
-      //debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
 
       if (msg.event === "join") {
         if (msg.data.token) {
@@ -130,13 +126,12 @@ function renderStatus(status, black, white) {
         }
         if (msg.data.role) {
           myRole = msg.data.role;
-          //document.getElementById("role").textContent = "You are " + myRole;
         }
         if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
-          renderStatus(msg.data.status, msg.data.black, msg.data.white);
+          renderStatus(msg.data.status);
         }
       } else if (msg.event === "move") {
         if (msg.data.error) {
@@ -150,7 +145,7 @@ function renderStatus(status, black, white) {
           const blackCount = flat.split("B").length - 1;
           const whiteCount = flat.split("W").length - 1;
 
-          renderStatus(msg.data.status, blackCount, whiteCount);
+          renderStatus(msg.data.status);
 
           // --- 終了判定をここで必ず全員実行 ---
           const blackMoves = getValidMoves(msg.data.board, "black");
@@ -173,7 +168,7 @@ function renderStatus(status, black, white) {
       } else if (msg.event === "leave") {
         const { board, status, black, white } = msg.data;
         if (board) renderBoard(board ,status);
-        renderStatus(status, black, white);
+        renderStatus(status);
 
         if ((myRole === "black" && black && !white) ||
             (myRole === "white" && white && !black)) {
