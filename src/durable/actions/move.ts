@@ -9,7 +9,8 @@ export function moveHandle(room: Room, data: any, ws: WebSocket): void {
   const response: EventResponse = move_l(room, token, x, y)
 
   // 個別レスポンスは必ず返す
-  ws.send(JSON.stringify(response))
+  //ws.send(JSON.stringify(response))
+  room.respond(ws, response)
 
   // エラーでなければ全員にブロードキャスト
   if (!response.data?.error) {
