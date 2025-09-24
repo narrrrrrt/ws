@@ -1,0 +1,40 @@
+body { font-family: sans-serif; }
+.board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
+.cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.disc { width: 30px; height: 30px; border-radius: 50%; }
+.black { background: black; }
+.white { background: white; border: 1px solid #000; }
+pre { background: #f0f0f0; padding: 10px; }
+
+/* --- modal --- */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 300px;
+  text-align: center;
+}
+.modal button {
+  margin-top: 10px;
+  padding: 6px 12px;
+}
+.cell.hint {
+  outline: 2px dashed yellow;
+}
+
+/* 合法手ガイド用のオレンジドット */
+.cell .hint-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: orange;
+  opacity: 0.8;
+}

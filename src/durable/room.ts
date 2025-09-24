@@ -6,6 +6,8 @@ export class Room {
   white: string | null = null
   board: string[] = [...Room.initialBoard]
   status: RoomStatus = "waiting"
+  
+  lastAction: "move" | "pass" | null = null
 
   // WebSocket → token
   sessions: Map<WebSocket, string | null> = new Map()
@@ -67,7 +69,16 @@ export class Room {
       leave_l(this, token)
       this.sessions.delete(ws)
       this.broadcast("leave")
-    }, 1000)
+    }, 3000)
+  }
+  
+  removeByToken(token: string) {
+    for (const [ws, t] of this.sessions.entries()) {
+      if (t === token) {
+        this.sessions.delete(ws)
+        break // 見つかったら抜ける
+      }
+    }
   }
 
   broadcast(event: string) {

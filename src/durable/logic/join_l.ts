@@ -13,6 +13,7 @@ export function join_l(
 ): { role: Role; token: string | null } {
   let role: Role = "observer"
   let newToken: string | null = null
+  let isReload = false
 
   // case 1: 新規参加 (seat のみ)
   if (seat && !token) {
@@ -32,13 +33,15 @@ export function join_l(
   }
 
   // case 2: リロード (seat + token)
+  // case 2: リロード (seat + token)
   else if (seat && token) {
-    if (seat === "black" && room.black === token) {
-      role = "black"
+    if (
+      (seat === "black" && room.black === token) ||
+      (seat === "white" && room.white === token)
+    ) {
+      role = seat
       newToken = token
-    } else if (seat === "white" && room.white === token) {
-      role = "white"
-      newToken = token
+      isReload = true
     } else {
       role = "observer"
     }
@@ -50,14 +53,23 @@ export function join_l(
       role = token === room.black ? "black" : "white"
       newToken = token
       room.board = [...Room.initialBoard]
-      room.status = "waiting"
+
+      // ステータス更新条件を追加
+      if (room.black && room.white) {
+        // 両方そろっていればゲーム開始
+        room.status = "black"
+      } else if (room.black || room.white) {
+        // 片方だけなら waiting
+        room.status = "waiting"
+      }
+
     } else {
       role = "observer"
     }
   }
 
   // --- ステータス更新（observer 以外の場合） ---
-  if (role !== "observer") {
+  if (role !== "observer" && !isReload) {
     if (room.status === "leave") {
       // leave からの復帰は waiting に固定
       room.status = "waiting"
