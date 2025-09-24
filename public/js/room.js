@@ -88,6 +88,7 @@ function renderStatus(status) {
   const params = new URLSearchParams(location.search);
   roomId = params.get("id");
   const seat = params.get("seat") || "observer";
+  document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
 
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
