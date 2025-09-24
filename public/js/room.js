@@ -147,22 +147,22 @@ function renderStatus(status) {
           renderBoard(msg.data.board, msg.data.status);
 
           
-          // --- 石数をクライアントで数える ---
-          const flat = msg.data.board.join("");
-          const blackCount = flat.split("B").length - 1;
-          const whiteCount = flat.split("W").length - 1;
+          const movesByColor = {
+            black: getValidMoves(msg.data.board, "black"),
+            white: getValidMoves(msg.data.board, "white"),
+          };
 
-          renderStatus(msg.data.status);
+          // --- ゲーム終了チェック ---
+          if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
+            const flat = msg.data.board.join("");
+            const blackCount = flat.split("B").length - 1;
+            const whiteCount = flat.split("W").length - 1;
 
-          // --- 終了判定をここで必ず全員実行 ---
-          const blackMoves = getValidMoves(msg.data.board, "black");
-          const whiteMoves = getValidMoves(msg.data.board, "white");
-          if (blackMoves.length === 0 && whiteMoves.length === 0) {
-            let winner;
-            if (blackCount > whiteCount) winner = "Black wins!";
-            else if (whiteCount > blackCount) winner = "White wins!";
-            else winner = "Draw!";
-            
+            let winnerKey;
+            if (blackCount > whiteCount) winnerKey = "blackWins";
+            else if (whiteCount > blackCount) winnerKey = "whiteWins";
+            else winnerKey = "draw";
+
             showModal(
               t("gameOver") + "\n" +
               t("scoreFormat", { black: blackCount, white: whiteCount }) + "\n" +
@@ -170,7 +170,19 @@ function renderStatus(status) {
                 ws.send(JSON.stringify({ event: "join", token: myToken }));
               }
             );
-          }  
+            return;
+          }
+
+          // --- パスチェック ---
+          if (movesByColor[msg.data.status].length === 0) {
+            ws.send(JSON.stringify({
+              event: "move",
+              token: myToken,
+              x: null,
+              y: null
+            }));
+            showModal("youPassed");
+          }
           
         }
       } else if (msg.event === "pass") {
