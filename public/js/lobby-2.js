@@ -1,20 +1,7 @@
-(() => {
-  const sockets = new Map(); // roomId -> WebSocket
-
-  function connectRoom(roomEl) {
+(async () => {
+  document.querySelectorAll(".room").forEach(roomEl => {
     const id = roomEl.dataset.id;
-
-    // もし既存の接続があれば閉じる
-    if (sockets.has(id)) {
-      try {
-        sockets.get(id).close();
-      } catch (e) {
-        console.warn("close error:", e);
-      }
-    }
-
     const ws = new WebSocket(`wss://${location.host}/${id}/ws`);
-    sockets.set(id, ws);
 
     ws.addEventListener("open", () => {
       ws.send(JSON.stringify({ event: "join", seat: "observer" }));
@@ -56,28 +43,5 @@
         console.error("invalid message:", evt.data);
       }
     });
-  }
-
-  function reconnectAll() {
-    document.querySelectorAll(".room").forEach(roomEl => {
-      connectRoom(roomEl);
-    });
-  }
-
-  // 初回接続
-  reconnectAll();
-
-  // バックグラウンド → フォアグラウンドで再接続
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      reconnectAll();
-    }
-  });
-
-  // キャッシュから戻った場合にも対応
-  window.addEventListener("pageshow", evt => {
-    if (evt.persisted) {
-      reconnectAll();
-    }
   });
 })();
