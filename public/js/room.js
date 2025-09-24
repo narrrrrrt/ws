@@ -80,9 +80,7 @@ function renderBoard(board, status) {
 
 function renderStatus(status, black, white) {
   const s = document.getElementById("status");
-  //s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
-  
-  s.textContent = `Status: ${status},  You: ${myRole || "?"}`;
+  s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
 }
 
 // --- 実行部分 ---
@@ -145,14 +143,19 @@ function renderStatus(status, black, white) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
-          renderStatus(msg.data.status, msg.data.black, msg.data.white);
+
           
+          // --- 石数をクライアントで数える ---
+          const flat = msg.data.board.join("");
+          const blackCount = flat.split("B").length - 1;
+          const whiteCount = flat.split("W").length - 1;
+
+          renderStatus(msg.data.status, blackCount, whiteCount);
+
           // --- 終了判定をここで必ず全員実行 ---
           const blackMoves = getValidMoves(msg.data.board, "black");
           const whiteMoves = getValidMoves(msg.data.board, "white");
           if (blackMoves.length === 0 && whiteMoves.length === 0) {
-            const blackCount = msg.data.black;
-            const whiteCount = msg.data.white;
             let winner;
             if (blackCount > whiteCount) winner = "Black wins!";
             else if (whiteCount > blackCount) winner = "White wins!";
