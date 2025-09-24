@@ -4,6 +4,15 @@ let myRole = null;
 let ws = null;
 let roomId = null;
 
+// --- debug utility ---
+function debugLog(message) {
+  const debug = document.getElementById("log");
+  if (debug) {
+    debug.textContent += message + "\n";
+    debug.scrollTop = debug.scrollHeight; // 下までスクロール
+  }
+}
+
 // --- modal utility ---
 function showModal(message, callback) {
   const modal = document.getElementById("modal");
@@ -71,7 +80,9 @@ function renderBoard(board, status) {
 
 function renderStatus(status, black, white) {
   const s = document.getElementById("status");
-  s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
+  //s.textContent = `Status: ${status}, Black: ${black}, White: ${white}, You: ${myRole || "?"}`;
+  
+  s.textContent = `Status: ${status},  You: ${myRole || "?"}`;
 }
 
 // --- 実行部分 ---
@@ -106,7 +117,7 @@ function renderStatus(status, black, white) {
     try {
       const msg = JSON.parse(evt.data);
       if (msg.event === "ping") return;
-      console.log("recv:", msg);
+      //console.log("recv:", msg);
 
       //const debug = document.getElementById("log");
       //debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
@@ -121,7 +132,7 @@ function renderStatus(status, black, white) {
         }
         if (msg.data.role) {
           myRole = msg.data.role;
-          document.getElementById("role").textContent = "You are " + myRole;
+          //document.getElementById("role").textContent = "You are " + myRole;
         }
         if (msg.data.board) {
           renderBoard(msg.data.board, msg.data.status);
@@ -171,7 +182,7 @@ function renderStatus(status, black, white) {
         showModal(msg.data.reason || "An error occurred");
       }
     } catch (e) {
-      console.error("invalid message:", evt.data);
+      //console.error("invalid message:", evt.data);
     }
   });
 
