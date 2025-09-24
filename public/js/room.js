@@ -67,6 +67,34 @@ function renderBoard(board, status) {
       boardEl.appendChild(cellEl);
     });
   });
+  
+  // --- パス判定 ---
+  if (myRole && myRole === status.toLowerCase() && validMoves.length === 0) {
+    // 相手の合法手をチェック
+    const opponent = (myRole === "black") ? "white" : "black";
+    const oppMoves = getValidMoves(board, opponent);
+
+    if (oppMoves.length > 0) {
+      // 自分だけ打てない → パス送信
+      ws.send(JSON.stringify({
+        event: "move",
+        token: myToken,
+        x: null, y: null
+      }));
+    } else {
+      // 両方打てない → 終了処理
+      const blackCount = board.flat().join("").split("B").length - 1;
+      const whiteCount = board.flat().join("").split("W").length - 1;
+      let winner;
+      if (blackCount > whiteCount) winner = "Black wins!";
+      else if (whiteCount > blackCount) winner = "White wins!";
+      else winner = "Draw!";
+
+      showModal(`Game Over!\nBlack: ${blackCount}, White: ${whiteCount}\n${winner}`, () => {
+        ws.send(JSON.stringify({ event: "join", token: myToken }));
+      });
+    }
+  }
 }
 
 function renderStatus(status, black, white) {
@@ -108,8 +136,8 @@ function renderStatus(status, black, white) {
       if (msg.event === "ping") return;
       console.log("recv:", msg);
 
-      const debug = document.getElementById("log");
-      debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
+      //const debug = document.getElementById("log");
+      //debug.textContent += `[${msg.event}] ${JSON.stringify(msg.data)}\n`;
 
       if (msg.event === "join") {
         if (msg.data.token) {
@@ -136,6 +164,9 @@ function renderStatus(status, black, white) {
           renderBoard(msg.data.board, msg.data.status);
           renderStatus(msg.data.status, msg.data.black, msg.data.white);
         }
+      } else if (msg.event === "pass") {
+        // --- Pass notification from server ---
+        showModal("You passed.");
       } else if (msg.event === "leave") {
         const { board, status, black, white } = msg.data;
         if (board) renderBoard(board ,status);
