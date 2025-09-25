@@ -4,7 +4,7 @@ let myRole = null;
 let ws = null;
 let roomId = null;
 let closeFlag = false;
-let ws;
+let seat = "observer";
 
 // --- debug utility ---
 function debugLog(message) {
@@ -218,7 +218,7 @@ debugLog('setTimeout(connect, 500);')
 (async () => {
   const params = new URLSearchParams(location.search);
   roomId = params.get("id");
-  const seat = params.get("seat") || "observer";
+  seat = params.get("seat");
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
   
   await loadMessages();
