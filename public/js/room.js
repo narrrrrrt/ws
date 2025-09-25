@@ -83,30 +83,30 @@ function renderBoard(board, status) {
       const cellEl = document.createElement("div");
       cellEl.className = "cell";
 
-      // --- 中央4点 (2,2) (5,2) (2,5) (5,5) に接する16マスだけ角丸 ---
+      // --- 中央4点 (2,2) (4,2) (2,4) (4,4) に接する16マスだけ角丸 ---
       // 星 (2,2)
       if (x === 1 && y === 1) cellEl.classList.add("corner-bottom-right");
       if (x === 2 && y === 1) cellEl.classList.add("corner-bottom-left");
       if (x === 1 && y === 2) cellEl.classList.add("corner-top-right");
       if (x === 2 && y === 2) cellEl.classList.add("corner-top-left");
 
-      // 星 (5,2)
-      if (x === 4 && y === 1) cellEl.classList.add("corner-bottom-right");
-      if (x === 5 && y === 1) cellEl.classList.add("corner-bottom-left");
-      if (x === 4 && y === 2) cellEl.classList.add("corner-top-right");
-      if (x === 5 && y === 2) cellEl.classList.add("corner-top-left");
+      // 星 (4,2)
+      if (x === 3 && y === 1) cellEl.classList.add("corner-bottom-right");
+      if (x === 4 && y === 1) cellEl.classList.add("corner-bottom-left");
+      if (x === 3 && y === 2) cellEl.classList.add("corner-top-right");
+      if (x === 4 && y === 2) cellEl.classList.add("corner-top-left");
 
-      // 星 (2,5)
-      if (x === 1 && y === 4) cellEl.classList.add("corner-bottom-right");
-      if (x === 2 && y === 4) cellEl.classList.add("corner-bottom-left");
-      if (x === 1 && y === 5) cellEl.classList.add("corner-top-right");
-      if (x === 2 && y === 5) cellEl.classList.add("corner-top-left");
+      // 星 (2,4)
+      if (x === 1 && y === 3) cellEl.classList.add("corner-bottom-right");
+      if (x === 2 && y === 3) cellEl.classList.add("corner-bottom-left");
+      if (x === 1 && y === 4) cellEl.classList.add("corner-top-right");
+      if (x === 2 && y === 4) cellEl.classList.add("corner-top-left");
 
-      // 星 (5,5)
-      if (x === 4 && y === 4) cellEl.classList.add("corner-bottom-right");
-      if (x === 5 && y === 4) cellEl.classList.add("corner-bottom-left");
-      if (x === 4 && y === 5) cellEl.classList.add("corner-top-right");
-      if (x === 5 && y === 5) cellEl.classList.add("corner-top-left");
+      // 星 (4,4)
+      if (x === 3 && y === 3) cellEl.classList.add("corner-bottom-right");
+      if (x === 4 && y === 3) cellEl.classList.add("corner-bottom-left");
+      if (x === 3 && y === 4) cellEl.classList.add("corner-top-right");
+      if (x === 4 && y === 4) cellEl.classList.add("corner-top-left");
       // --- ここまで ---
 
       if (cell === "B") {
