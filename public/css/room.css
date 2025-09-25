@@ -78,13 +78,13 @@ pre {
 /* --- スマホ用調整 (幅600px以下) --- */
 @media (max-width: 600px) {
   .board {
-    grid-template-columns: repeat(8, 1fr); /* 横幅を等分 */
+    grid-template-columns: repeat(8, 1fr); /* 横を8分割 */
     grid-gap: 1px;
     margin: 10px 0;
   }
   .cell {
-    width: auto;
-    aspect-ratio: 1 / 1;  /* 正方形を保証 */
+    width: 100%;          /* 各セルはグリッド幅いっぱい */
+    aspect-ratio: 1 / 1;  /* 正方形にする */
   }
   .disc {
     width: 70%;
