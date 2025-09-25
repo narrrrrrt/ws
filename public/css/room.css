@@ -1,10 +1,43 @@
-body { font-family: sans-serif; }
-.board { display: grid; grid-template-columns: repeat(8, 40px); grid-gap: 2px; margin: 20px 0; }
-.cell { width: 40px; height: 40px; background: green; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.disc { width: 30px; height: 30px; border-radius: 50%; }
-.black { background: black; }
-.white { background: white; border: 1px solid #000; }
-pre { background: #f0f0f0; padding: 10px; }
+body { 
+  font-family: sans-serif; 
+}
+
+.board { 
+  display: grid; 
+  grid-template-columns: repeat(8, 40px); 
+  grid-gap: 2px; 
+  margin: 20px 0; 
+}
+
+.cell { 
+  width: 40px; 
+  height: 40px; 
+  background: green; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+}
+
+.disc { 
+  width: 30px; 
+  height: 30px; 
+  border-radius: 50%; 
+}
+
+.black { 
+  background: black; 
+}
+
+.white { 
+  background: white; 
+  border: 1px solid #000; 
+}
+
+pre { 
+  background: #f0f0f0; 
+  padding: 10px; 
+}
 
 /* --- modal --- */
 .modal {
@@ -15,6 +48,7 @@ pre { background: #f0f0f0; padding: 10px; }
   align-items: center;
   justify-content: center;
 }
+
 .modal-content {
   background: white;
   padding: 20px;
@@ -22,10 +56,12 @@ pre { background: #f0f0f0; padding: 10px; }
   max-width: 300px;
   text-align: center;
 }
+
 .modal button {
   margin-top: 10px;
   padding: 6px 12px;
 }
+
 .cell.hint {
   outline: 2px dashed yellow;
 }
@@ -37,4 +73,26 @@ pre { background: #f0f0f0; padding: 10px; }
   border-radius: 50%;
   background: orange;
   opacity: 0.8;
+}
+
+/* --- スマホ用調整 (幅600px以下) --- */
+@media (max-width: 600px) {
+  .board {
+    grid-template-columns: repeat(8, 1fr); /* 画面幅を8分割 */
+    grid-gap: 1px;
+    margin: 10px 0;
+  }
+  .cell {
+    width: auto;     
+    height: calc(12.5vw - 2px); /* 画面幅の1/8を高さに */
+    max-height: 60px; /* でかすぎ防止 */
+  }
+  .disc {
+    width: 70%;
+    height: 70%;
+  }
+  .cell .hint-dot {
+    width: 20%;
+    height: 20%;
+  }
 }

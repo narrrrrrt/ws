@@ -44,31 +44,3 @@ button.inactive {
   color: #666;
   cursor: not-allowed;
 }
-
-/* --- スマホ用調整 (幅600px以下) --- */
-@media (max-width: 600px) {
-  body {
-    margin: 10px;
-  }
-
-  #rooms {
-    flex-direction: column;   /* 縦並びに */
-    gap: 15px;
-  }
-
-  .room {
-    flex: 1 1 auto;
-    min-width: auto;
-    font-size: 1.2em;   /* 全体を少し大きめに */
-    padding: 15px;
-  }
-
-  .room h2 {
-    font-size: 1.4em;
-  }
-
-  button {
-    font-size: 1.1em;
-    padding: 10px 14px;
-  }
-}
