@@ -69,7 +69,7 @@ export class Room {
       leave_l(this, token)
       this.sessions.delete(ws)
       this.broadcast("leave")
-    }, 3000)
+    }, 1200)
   }
   
   removeByToken(token: string) {
