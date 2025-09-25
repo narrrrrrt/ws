@@ -75,13 +75,6 @@ pre {
   opacity: 0.8;
 }
 
-/* --- 中央4点を示す角丸マス --- */
-/* --- 中央4点を示す角丸マス --- */
-.cell.corner-top-left    { border-top-left-radius: 20%; }
-.cell.corner-top-right   { border-top-right-radius: 20%; }
-.cell.corner-bottom-left { border-bottom-left-radius: 20%; }
-.cell.corner-bottom-right{ border-bottom-right-radius: 20%; }
-
 /* --- スマホ用調整 (幅600px以下) --- */
 @media (max-width: 600px) {
   .board {

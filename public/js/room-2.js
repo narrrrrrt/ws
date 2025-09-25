@@ -40,7 +40,7 @@ function renderBoard(board, status) {
     validMoves = getValidMoves(board, myRole);
   }
   const validMap = new Set(validMoves.map(m => `${m.x},${m.y}`));
-/*
+
   board.forEach((row, y) => {
     row.split("").forEach((cell, x) => {
       const cellEl = document.createElement("div");
@@ -62,67 +62,6 @@ function renderBoard(board, status) {
       }
 
       // --- 合法手だけクリック可能 ---
-      if (validMap.has(`${x},${y}`)) {
-        cellEl.addEventListener("click", () => {
-          if (!myToken || myRole === "observer") return;
-          ws.send(JSON.stringify({
-            event: "move",
-            token: myToken,
-            x, y
-          }));
-        });
-      }
-
-      boardEl.appendChild(cellEl);
-    });
-  });
-*/
-
-  board.forEach((row, y) => {
-    row.split("").forEach((cell, x) => {
-      const cellEl = document.createElement("div");
-      cellEl.className = "cell";
-
-      // --- 中央4点 (2,2) (6,2) (2,6) (6,6) に接する16マスだけ角丸 ---
-      // 星 (2,2)
-      if (x === 1 && y === 1) cellEl.classList.add("corner-bottom-right");
-      if (x === 2 && y === 1) cellEl.classList.add("corner-bottom-left");
-      if (x === 1 && y === 2) cellEl.classList.add("corner-top-right");
-      if (x === 2 && y === 2) cellEl.classList.add("corner-top-left");
-
-      // 星 (6,2)
-      if (x === 5 && y === 1) cellEl.classList.add("corner-bottom-right");
-      if (x === 6 && y === 1) cellEl.classList.add("corner-bottom-left");
-      if (x === 5 && y === 2) cellEl.classList.add("corner-top-right");
-      if (x === 6 && y === 2) cellEl.classList.add("corner-top-left");
-
-      // 星 (2,6)
-      if (x === 1 && y === 5) cellEl.classList.add("corner-bottom-right");
-      if (x === 2 && y === 5) cellEl.classList.add("corner-bottom-left");
-      if (x === 1 && y === 6) cellEl.classList.add("corner-top-right");
-      if (x === 2 && y === 6) cellEl.classList.add("corner-top-left");
-
-      // 星 (6,6)
-      if (x === 5 && y === 5) cellEl.classList.add("corner-bottom-right");
-      if (x === 6 && y === 5) cellEl.classList.add("corner-bottom-left");
-      if (x === 5 && y === 6) cellEl.classList.add("corner-top-right");
-      if (x === 6 && y === 6) cellEl.classList.add("corner-top-left");
-      // --- ここまで ---
-
-      if (cell === "B") {
-        const d = document.createElement("div");
-        d.className = "disc black";
-        cellEl.appendChild(d);
-      } else if (cell === "W") {
-        const d = document.createElement("div");
-        d.className = "disc white";
-        cellEl.appendChild(d);
-      } else if (validMap.has(`${x},${y}`)) {
-        const dot = document.createElement("div");
-        dot.className = "hint-dot";
-        cellEl.appendChild(dot);
-      }
-
       if (validMap.has(`${x},${y}`)) {
         cellEl.addEventListener("click", () => {
           if (!myToken || myRole === "observer") return;
@@ -270,7 +209,7 @@ function renderStatus(status) {
   document.getElementById("to-lobby").addEventListener("click", (e) => {
     e.preventDefault();
     if (myToken) {
-      //ws.send(JSON.stringify({ event: "leave", token: myToken }));
+      ws.send(JSON.stringify({ event: "leave", token: myToken }));
       sessionStorage.removeItem(`room-${roomId}-token`);
     }
     window.location.href = "/";

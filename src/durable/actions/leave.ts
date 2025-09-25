@@ -15,6 +15,7 @@ export function leaveHandle(room: Room, data: any, ws: WebSocket): void {
   }
   //room.respond(ws, response)
   
+  room.touchToken(token)
   room.removeByToken(token)
 
   // 全員にブロードキャスト

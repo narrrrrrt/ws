@@ -103,7 +103,26 @@ export class Room {
     }
   }
 
-  respond(ws: WebSocket, payload: EventResponse) {
-    ws.send(JSON.stringify(payload))
-  }
+  //respond(ws: WebSocket, payload: EventResponse) {
+  //  ws.send(JSON.stringify(payload))
+  //}
+  
+  respond(ws: WebSocket, payload?: EventResponse) {
+    if (!payload) {
+      // 現在の状態を丸ごと返す
+      const current: BroadcastPayload = {
+        event: "join",
+        data: {
+          black: this.black !== null,
+          white: this.white !== null,
+          board: this.board,
+          status: this.status,
+        },
+      }
+      ws.send(JSON.stringify(current))
+    } else {
+      // 通常の指定イベントレスポンス
+      ws.send(JSON.stringify(payload))
+    }
+  }  
 }
