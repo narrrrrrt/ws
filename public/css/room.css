@@ -78,14 +78,14 @@ pre {
 /* --- スマホ用調整 (幅600px以下) --- */
 @media (max-width: 600px) {
   .board {
-    width: 100vw;          /* 画面幅いっぱい */
-    max-width: 100vh;      /* 縦が短いときは縦に合わせる */
-    aspect-ratio: 1 / 1;   /* ボード全体を正方形にする */
+    width: 95vw;          /* 画面幅の95% → 両側に2.5%ずつ余白 */
+    max-width: 95vh;      /* 縦が短いときも崩れないように */
+    aspect-ratio: 1 / 1;  /* ボードを正方形に */
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
     gap: 1px;
-    margin: 0 auto;
+    margin: 0 auto;       /* 中央寄せ */
   }
   .cell {
     width: 100%;
