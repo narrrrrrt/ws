@@ -4,7 +4,7 @@ import { leave_l } from "./logic/leave_l"
 export class Room {
   black: string | null = null
   white: string | null = null
-  board: string[] = [...Room.initialBoard]
+  board: string[] = [...Room.flatBoard]
   status: RoomStatus = "waiting"
   
   lastAction: "move" | "pass" | null = null
