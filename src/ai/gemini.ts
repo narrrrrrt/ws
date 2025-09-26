@@ -1,15 +1,6 @@
 // 2-space indent
 import { buildReversiChat } from "./prompt/reversiPrompt"
 
-function toGeminiContents(chat: any) {
-  return {
-    contents: chat.messages.map((m: any) => ({
-      role: m.role === "system" ? "user" : m.role, // system → user に変換
-      parts: [{ text: m.content }]
-    }))
-  }
-}
-
 export async function geminiHandler(
   request: Request,
   env: any,
@@ -48,7 +39,7 @@ export async function geminiHandler(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toGeminiContents(chat))
+        body: JSON.stringify(chat)
       }
     )
 
