@@ -113,7 +113,7 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
-function requestExplanation(board, status, movesByColor) {
+async function requestExplanation(board, status, movesByColor) {
   const res = await fetch("/ai", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -180,11 +180,9 @@ function connect() {
             white: getValidMoves(msg.data.board, "white"),
           };
 
-
-const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor);
-const el = document.getElementById("explain");
-if (el) el.textContent = explanation;
-
+          const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor);
+          const el = document.getElementById("explain");
+          if (el) el.textContent = explanation;
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
