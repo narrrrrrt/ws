@@ -181,9 +181,9 @@ function connect() {
           };
 
 
-const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor)
-const el = document.getElementById("explain")
-if (el) el.textContent = explanation
+const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor);
+const el = document.getElementById("explain");
+if (el) el.textContent = explanation;
 
 
           // --- ゲーム終了チェック ---
