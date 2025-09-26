@@ -71,17 +71,6 @@ export class Room {
       this.broadcast("leave")
     }, 1200)
   }
-  
-  /*
-  removeByToken(token: string) {
-    for (const [ws, t] of this.sessions.entries()) {
-      if (t === token) {
-        this.sessions.delete(ws)
-        break // 見つかったら抜ける
-      }
-    }
-  }
-  */
 
   broadcast(event: string) {
     const payload: BroadcastPayload = {
@@ -104,10 +93,6 @@ export class Room {
       }
     }
   }
-
-  //respond(ws: WebSocket, payload: EventResponse) {
-  //  ws.send(JSON.stringify(payload))
-  //}
   
   respond(ws: WebSocket, payload?: EventResponse) {
     if (!payload) {
