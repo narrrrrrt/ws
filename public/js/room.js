@@ -169,7 +169,7 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
-if (myRole === turn) {
+if (myRole === msg.data.status) {
           fetch("/ai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
