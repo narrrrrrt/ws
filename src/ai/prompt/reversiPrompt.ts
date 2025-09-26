@@ -11,13 +11,35 @@ const statusDict: Record<Lang, { black: string; white: string }> = {
   fr: { black: "Noir", white: "Blanc" },
 }
 
+const phaseDict: Record<Lang, { opening: string; midgame: string; endgame: string }> = {
+  ja: { opening: "序盤", midgame: "中盤", endgame: "終盤" },
+  en: { opening: "opening", midgame: "midgame", endgame: "endgame" },
+  es: { opening: "apertura", midgame: "medio juego", endgame: "final" },
+  de: { opening: "Anfang", midgame: "Mittelspiel", endgame: "Endspiel" },
+  it: { opening: "apertura", midgame: "medio gioco", endgame: "finale" },
+  fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "finale" },
+}
+
 const systemPromptDict: Record<Lang, string> = {
-  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。出力は200文字以内。日本語で答えてください。",
-  en: "You are a friendly Othello coach. Base your advice on facts, avoid impossible moves or unreasonable strategies. Answer concisely within 200 characters, in English.",
-  es: "Eres un entrenador amistoso de Othello. Da consejos basados en hechos, sin movimientos imposibles ni estrategias poco realistas. Responde en menos de 200 caracteres, en español.",
-  de: "Du bist ein freundlicher Othello-Trainer. Gib nur Fakten wieder, keine unmöglichen Züge oder unrealistischen Strategien. Antworte in weniger als 200 Zeichen, auf Deutsch.",
-  it: "Sei un allenatore amichevole di Othello. Dai consigli basati sui fatti, senza mosse impossibili o strategie irrealistiche. Rispondi in meno di 200 caratteri, in italiano.",
-  fr: "Tu es un coach amical d’Othello. Donne des conseils basés sur des faits, sans coups impossibles ni stratégies irréalistes. Réponds en moins de 200 caractères, en français.",
+  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。必ず友達に話しかけるように短く楽しくコメントしてください。出力は200文字以内、日本語で答えてください。",
+  en: "You are a friendly Othello coach. Give advice based on facts, avoid impossible moves or unrealistic strategies. Speak like a friend, short and fun. Answer within 200 characters, in English.",
+  es: "Eres un entrenador amistoso de Othello. Da consejos basados en hechos, sin movimientos imposibles ni estrategias poco realistas. Habla como un amigo, de forma breve y divertida. Responde en menos de 200 caracteres, en español.",
+  de: "Du bist ein freundlicher Othello-Trainer. Gib Ratschläge auf Faktenbasis, keine unmöglichen Züge oder unrealistischen Strategien. Sprich wie ein Freund, kurz und mit Spaß. Antworte in weniger als 200 Zeichen, auf Deutsch.",
+  it: "Sei un allenatore amichevole di Othello. Dai consigli basati sui fatti, senza mosse impossibili o strategie irrealistiche. Parla come un amico, in modo breve e divertente. Rispondi in meno di 200 caratteri, in italiano.",
+  fr: "Tu es un coach amical d’Othello. Donne des conseils basés sur des faits, sans coups impossibles ni stratégies irréalistes. Parle comme un ami, de manière courte et amusante. Réponds en moins de 200 caractères, en français.",
+}
+
+// 石の数を数える
+function countPieces(board: string): number {
+  return (board.match(/[BW]/g) || []).length
+}
+
+// フェーズを判定
+function detectPhase(board: string, lang: Lang): string {
+  const pieces = countPieces(board)
+  if (pieces < 20) return phaseDict[lang].opening
+  if (pieces < 50) return phaseDict[lang].midgame
+  return phaseDict[lang].endgame
 }
 
 export function buildReversiChat(
@@ -33,6 +55,7 @@ export function buildReversiChat(
   const selectedLang: Lang = systemPromptDict[lang] ? lang : fallbackLang
 
   const localizedStatus = statusDict[selectedLang][status]
+  const phase = detectPhase(board, selectedLang)
 
   let movesStr = ""
   if (movesByColor && movesByColor[status]) {
@@ -47,7 +70,7 @@ export function buildReversiChat(
       },
       {
         role: "user",
-        content: `Turn: ${localizedStatus}\nBoard:\n${board}${movesStr}`,
+        content: `Turn: ${localizedStatus}\nPhase: ${phase}\nBoard:\n${board}${movesStr}`,
       },
     ],
   }
