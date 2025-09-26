@@ -29,25 +29,34 @@ const systemPromptDict: Record<Lang, string> = {
   fr: "Tu es un coach amical d’Othello. Donne des conseils basés sur des faits, sans coups impossibles ni stratégies irréalistes. Parle comme un ami, de manière courte et amusante. Réponds en moins de 200 caractères, en français.",
 }
 
-// 石の数を数える
-function countPieces(board: string): number {
-  return (board.match(/[BW]/g) || []).length
+// 石の数を数える (string[] または string に対応)
+function countPieces(board: string[] | string): number {
+  if (Array.isArray(board)) {
+    return board.join("").split("").filter(c => c === "B" || c === "W").length
+  } else {
+    return (board.match(/[BW]/g) || []).length
+  }
 }
 
-// フェーズを判定
-function detectPhase(board: string, lang: Lang): string {
+// 局面を判定
+function detectPhase(board: string[] | string, lang: Lang): string {
   const pieces = countPieces(board)
   if (pieces < 20) return phaseDict[lang].opening
   if (pieces < 50) return phaseDict[lang].midgame
   return phaseDict[lang].endgame
 }
 
+// 有効手の整形
+function formatMoves(moves: { x: number; y: number }[]): string {
+  return moves.map(m => `(${m.x},${m.y})`).join(", ")
+}
+
 export function buildReversiChat(
   params: {
-    board: string
+    board: string[]   // board は string[]
     status: "black" | "white"
     lang: Lang
-    movesByColor?: Record<string, any>
+    movesByColor?: Record<string, { x: number; y: number }[]>
   },
   fallbackLang: Lang = "en"
 ) {
@@ -59,8 +68,11 @@ export function buildReversiChat(
 
   let movesStr = ""
   if (movesByColor && movesByColor[status]) {
-    movesStr = `\nValid moves: ${JSON.stringify(movesByColor[status])}`
+    movesStr = `\nValid moves: ${formatMoves(movesByColor[status])}`
   }
+
+  // board を AI に渡すときは一続きの文字列にして読みやすくする
+  const boardStr = Array.isArray(board) ? board.join("\n") : board
 
   return {
     messages: [
@@ -70,7 +82,7 @@ export function buildReversiChat(
       },
       {
         role: "user",
-        content: `Turn: ${localizedStatus}\nPhase: ${phase}\nBoard:\n${board}${movesStr}`,
+        content: `Turn: ${localizedStatus}\nPhase: ${phase}\nBoard:\n${boardStr}${movesStr}`,
       },
     ],
   }
