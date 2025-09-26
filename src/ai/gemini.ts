@@ -6,7 +6,8 @@ export async function geminiHandler(
   env: any,
 ): Promise<Response> {
   let chat: any = null
-  let response: any = null
+  let rawResponse: any = null  // fetch のレスポンスを保持
+  let data: any = null
 
   try {
     if (request.method !== "POST") {
@@ -34,7 +35,7 @@ export async function geminiHandler(
     )
 
     // Gemini API 呼び出し
-    response = await fetch(
+    rawResponse = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + env.GEMINI_API_KEY,
       {
         method: "POST",
@@ -43,27 +44,19 @@ export async function geminiHandler(
       }
     )
 
-    const data = await response.json()
-
-    // 候補の最初のテキストだけ取り出す
-    /*
-    response =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "(no response text)"
-*/ 
+    data = await rawResponse.json()
 
     return Response.json({
       chat,
-      response
+      response: data
     })
   } catch (err: any) {
-    response = {
-      error: (err && err.message) || String(err)
-    }
-
     return Response.json({
       chat,
-      response
+      response: data ?? null, // JSON が取れてればそれを、無ければ null
+      rawResponseStatus: rawResponse?.status ?? null,
+      rawResponseOk: rawResponse?.ok ?? null,
+      error: (err && err.message) || String(err)
     })
   }
 }
