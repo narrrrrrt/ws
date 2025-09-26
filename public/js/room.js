@@ -5,6 +5,7 @@ let ws = null;
 let roomId = null;
 let closeFlag = false;
 let seat = "observer";
+let retryCount = 0;
 
 // --- debug utility ---
 function debugLog(message) {
@@ -118,11 +119,17 @@ function connect() {
 
   ws.addEventListener("close", (event) => {
     if (closeFlag) {
-debugLog('window.location.href = "/";')
       window.location.href = "/";
     } else {
-debugLog('setTimeout(connect, 500);')
-      setTimeout(connect, 500);
+      retryCount++;
+      if (retryCount > 3) {
+        showModal("reconnectFailed", () => {
+          window.location.href = "/";
+        });
+      } else {
+        debugLog('setTimeout(connect, 500);')
+        setTimeout(connect, 500);
+      }
     }
   });
 

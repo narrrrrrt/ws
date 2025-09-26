@@ -1,4 +1,12 @@
 {
+  "reconnectFailed": {
+    "en": "Failed to reconnect. Please return to the lobby.",
+    "es": "No se pudo reconectar. Por favor, vuelve al vestíbulo.",
+    "de": "Wiederverbindung fehlgeschlagen. Bitte kehren Sie zur Lobby zurück.",
+    "it": "Riconnessione fallita. Torna alla lobby.",
+    "fr": "Échec de la reconnexion. Veuillez retourner au hall.",
+    "ja": "再接続に失敗しました。ロビーに戻ってください。"
+  },
   "youPassed": {
     "en": "You passed.",
     "es": "Has pasado.",
