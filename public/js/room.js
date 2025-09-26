@@ -169,11 +169,7 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
-/*
-          const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor);
-          const el = document.getElementById("explain");
-          if (el) el.textContent = explanation;
-*/
+if (myRole === turn) {
           fetch("/ai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -186,6 +182,7 @@ function connect() {
             if (el) el.textContent = JSON.stringify(data.response, null, 2)
             if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
           })
+}
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
