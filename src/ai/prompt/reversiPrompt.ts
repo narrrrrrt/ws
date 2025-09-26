@@ -62,15 +62,15 @@ function detectPhase(board: string[] | string, lang: Lang): string {
 
 function formatMoves(moves: Move[]): string {
   if (!moves || moves.length === 0) return ""
-  // 0始まりを1始まりに変換、キー付き形式で出力
+  // 0始まりを1始まりに変換
   return moves.map(m => `(x=${m.x + 1}, y=${m.y + 1})`).join(", ")
 }
 
 // ---- Main ----
 export function buildReversiChat(params: {
-  board: string[]              // 8 行の文字列配列
-  status: Status               // "black" | "white"
-  lang: Lang                   // 言語（必須）
+  board: string[]
+  status: Status
+  lang: Lang
   movesByColor?: Record<Status, Move[]>
 }) {
   const { board, status, lang, movesByColor } = params
@@ -86,19 +86,21 @@ export function buildReversiChat(params: {
     movesLine = `\n${l.validMoves}: ${formatMoves(mv)}`
   }
 
+  // Gemini 形式で返す
   return {
-    messages: [
-      {
-        role: "system",
-        content: systemPromptDict[lang],
-      },
+    contents: [
       {
         role: "user",
-        content:
-          `${l.turn}: ${localizedStatus}\n` +
-          `${l.phase}: ${phase}\n` +
-          `${l.board}:\n${boardStr}` +
-          movesLine,
+        parts: [
+          { text: systemPromptDict[lang] },
+          {
+            text:
+              `${l.turn}: ${localizedStatus}\n` +
+              `${l.phase}: ${phase}\n` +
+              `${l.board}:\n${boardStr}` +
+              movesLine,
+          },
+        ],
       },
     ],
   }

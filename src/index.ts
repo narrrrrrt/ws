@@ -1,4 +1,4 @@
-import { llamaHandler } from "./ai/llama";
+import { geminiHandler } from "./ai/gemini";
 const VALID_IDS = ["1", "2", "3", "4"]
 
 export default {
