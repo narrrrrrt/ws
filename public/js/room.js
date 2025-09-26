@@ -182,7 +182,8 @@ function connect() {
           .then(res => res.json())
           .then(data => {
             const el = document.getElementById("explain")
-            if (el) el.textContent = data.response || ""
+            //if (el) el.textContent = data.response || ""
+            if (el) el.textContent = JSON.stringify(data, null, 2)
           })
 
           // --- ゲーム終了チェック ---
