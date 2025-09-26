@@ -254,10 +254,10 @@ function connect() {
   // --- ロビーへボタン ---
   document.getElementById("to-lobby").addEventListener("click", (e) => {
     e.preventDefault();
-    if (myToken) {
+    //if (myToken) {
       ws.send(JSON.stringify({ event: "leave", token: myToken }));
       sessionStorage.removeItem(`room-${roomId}-token`);
-    }
+    //}
     closeFlag=true
   });
 
