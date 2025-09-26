@@ -72,6 +72,7 @@ export class Room {
     }, 1200)
   }
   
+  /*
   removeByToken(token: string) {
     for (const [ws, t] of this.sessions.entries()) {
       if (t === token) {
@@ -80,6 +81,7 @@ export class Room {
       }
     }
   }
+  */
 
   broadcast(event: string) {
     const payload: BroadcastPayload = {
