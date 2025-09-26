@@ -179,11 +179,11 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
-
+/*
           const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor);
           const el = document.getElementById("explain");
           if (el) el.textContent = explanation;
-
+*/
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
             const flat = msg.data.board.join("");
