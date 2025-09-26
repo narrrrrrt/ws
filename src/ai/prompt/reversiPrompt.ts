@@ -1,55 +1,54 @@
-// 2-space indent
-type Move = { x: number; y: number }
-type MovesByColor = { black: Move[]; white: Move[] }
+// reversiPrompt.ts
 
-function normLang(input?: string | null): "ja"|"en"|"es"|"de"|"it"|"fr" {
-  const s = (input || "en").toLowerCase()
-  const base = s.split(",")[0]?.trim() || "en"
-  const two = base.split("-")[0]
-  const supported = ["ja","en","es","de","it","fr"] as const
-  return (supported as readonly string[]).includes(two) ? (two as any) : "en"
+export type Lang = "ja" | "en" | "es" | "de" | "it" | "fr"
+
+const statusDict: Record<Lang, { black: string; white: string }> = {
+  ja: { black: "黒", white: "白" },
+  en: { black: "Black", white: "White" },
+  es: { black: "Negras", white: "Blancas" },
+  de: { black: "Schwarz", white: "Weiß" },
+  it: { black: "Nero", white: "Bianco" },
+  fr: { black: "Noir", white: "Blanc" },
 }
 
-function systemPrompt(lang: string): string {
-  const map: Record<string, string> = {
-    ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。出力は200文字以内。日本語で答えてください。",
-    en: "You are a friendly Othello coach. Only mention realistic options. Keep it under 200 characters. Reply in English.",
-    es: "Eres un entrenador de Othello. Solo menciona opciones realistas. Menos de 200 caracteres. Responde en español.",
-    de: "Du bist ein Othello-Coach. Nur realistische Optionen. Unter 200 Zeichen. Antworte auf Deutsch.",
-    it: "Sei un coach di Othello. Solo mosse realistiche. Sotto 200 caratteri. Rispondi in italiano.",
-    fr: "Tu es coach d’Othello. Donne seulement des options réalistes. Moins de 200 caractères. Réponds en français."
-  }
-  return map[lang] || map.en
+const systemPromptDict: Record<Lang, string> = {
+  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。出力は200文字以内。日本語で答えてください。",
+  en: "You are a friendly Othello coach. Base your advice on facts, avoid impossible moves or unreasonable strategies. Answer concisely within 200 characters, in English.",
+  es: "Eres un entrenador amistoso de Othello. Da consejos basados en hechos, sin movimientos imposibles ni estrategias poco realistas. Responde en menos de 200 caracteres, en español.",
+  de: "Du bist ein freundlicher Othello-Trainer. Gib nur Fakten wieder, keine unmöglichen Züge oder unrealistischen Strategien. Antworte in weniger als 200 Zeichen, auf Deutsch.",
+  it: "Sei un allenatore amichevole di Othello. Dai consigli basati sui fatti, senza mosse impossibili o strategie irrealistiche. Rispondi in meno di 200 caratteri, in italiano.",
+  fr: "Tu es un coach amical d’Othello. Donne des conseils basés sur des faits, sans coups impossibles ni stratégies irréalistes. Réponds en moins de 200 caractères, en français.",
 }
 
 export function buildReversiChat(
-  input: {
-    board: string[]
+  params: {
+    board: string
     status: "black" | "white"
-    lang?: string
-    movesByColor?: MovesByColor
+    lang: Lang
+    movesByColor?: Record<string, any>
   },
-  acceptLanguageHeader?: string | null
+  fallbackLang: Lang = "en"
 ) {
-  const lang = normLang(input.lang || acceptLanguageHeader)
-  const { board, status, movesByColor } = input
+  const { board, status, lang, movesByColor } = params
+  const selectedLang: Lang = systemPromptDict[lang] ? lang : fallbackLang
 
-  const lines: string[] = []
-  lines.push(`Turn: ${status}`)
-  lines.push(`Board:\n${board.join("\n")}`)
-  if (movesByColor) {
-    const b = (movesByColor.black || []).map(m => `(${m.x},${m.y})`).join(", ") || "-"
-    const w = (movesByColor.white || []).map(m => `(${m.x},${m.y})`).join(", ") || "-"
-    lines.push(`Valid moves (black): ${b}`)
-    lines.push(`Valid moves (white): ${w}`)
-    lines.push(`Give advice only for the side to move (${status}).`)
+  const localizedStatus = statusDict[selectedLang][status]
+
+  let movesStr = ""
+  if (movesByColor && movesByColor[status]) {
+    movesStr = `\nValid moves: ${JSON.stringify(movesByColor[status])}`
   }
-  lines.push("Give one short, friendly tip. Do not repeat the board.")
 
   return {
     messages: [
-      { role: "system", content: systemPrompt(lang) },
-      { role: "user", content: lines.join("\n") }
-    ]
+      {
+        role: "system",
+        content: systemPromptDict[selectedLang],
+      },
+      {
+        role: "user",
+        content: `Turn: ${localizedStatus}\nBoard:\n${board}${movesStr}`,
+      },
+    ],
   }
 }
