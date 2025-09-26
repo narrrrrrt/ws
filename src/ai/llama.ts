@@ -29,14 +29,16 @@ export async function llamaHandler(
       },
       request.headers.get("Accept-Language") // fallback 用
     )
-/*
+
     const response = await env.AI.run(
       "@cf/meta/llama-3-8b-instruct",
       chat
     )
-*/
-    return Response.json(chat)
-    //return Response.json(response)
+    
+    return Response.json({
+      chat,
+      response
+    })
   } catch (err: any) {
     return new Response(
       `Llama Worker error: ${(err && err.message) || String(err)}`,
