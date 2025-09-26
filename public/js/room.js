@@ -1,3 +1,5 @@
+import { detectLanguage, loadMessages, t } from "./lang.js";
+
 // --- グローバル変数 ---
 let myToken = null;
 let myRole = null;
@@ -6,6 +8,7 @@ let roomId = null;
 let closeFlag = false;
 let seat = "observer";
 let retryCount = 0;
+let lang;
 
 // --- debug utility ---
 function debugLog(message) {
@@ -223,12 +226,15 @@ function connect() {
 
 // --- 実行部分 ---
 (async () => {
-  const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search); 
   roomId = params.get("id");
   seat = params.get("seat");
+  
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
   
-  await loadMessages();
+  lang = detectLanguage(params.get("lang"));
+
+  await loadMessages(lang);
 
   // 起動時に「ロビーへ」を差し替え
   const lobbyLink = document.getElementById("to-lobby");
