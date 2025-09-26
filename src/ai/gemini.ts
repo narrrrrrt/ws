@@ -45,10 +45,13 @@ export async function geminiHandler(
     )
 
     data = await rawResponse.json()
+    
+    const text =
+  data?.candidates?.[0]?.content?.parts?.[0]?.text || "(no response text)"
 
     return Response.json({
       chat,
-      response: data
+      response: text
     })
   } catch (err: any) {
     return Response.json({
