@@ -46,9 +46,11 @@ export async function geminiHandler(
     const data = await res.json()
 
     // 候補の最初のテキストだけ取り出す
+    /*
     response =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "(no response text)"
+*/ 
 
     return Response.json({
       chat,

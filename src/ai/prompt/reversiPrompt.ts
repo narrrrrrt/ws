@@ -62,7 +62,6 @@ function detectPhase(board: string[] | string, lang: Lang): string {
 
 function formatMoves(moves: Move[]): string {
   if (!moves || moves.length === 0) return ""
-  // 0始まりを1始まりに変換
   return moves.map(m => `(x=${m.x + 1}, y=${m.y + 1})`).join(", ")
 }
 
@@ -86,22 +85,20 @@ export function buildReversiChat(params: {
     movesLine = `\n${l.validMoves}: ${formatMoves(mv)}`
   }
 
-  // Gemini 形式で返す
+  // ---- Gemini 形式（partsを1つにまとめる）----
+  const text =
+    systemPromptDict[lang] + "\n\n" +
+    `${l.turn}: ${localizedStatus}\n` +
+    `${l.phase}: ${phase}\n` +
+    `${l.board}:\n${boardStr}` +
+    movesLine
+
   return {
     contents: [
       {
         role: "user",
-        parts: [
-          { text: systemPromptDict[lang] },
-          {
-            text:
-              `${l.turn}: ${localizedStatus}\n` +
-              `${l.phase}: ${phase}\n` +
-              `${l.board}:\n${boardStr}` +
-              movesLine,
-          },
-        ],
-      },
-    ],
+        parts: [{ text }]
+      }
+    ]
   }
 }
