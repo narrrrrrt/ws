@@ -4,20 +4,10 @@ import { EventResponse } from "../types"
 
 export function leaveHandle(room: Room, data: any, ws: WebSocket): void {
   const token = data.token
-  if (!token) return
-
-  leave_l(room, token)
-
-  // 本人へのレスポンスを返す（型 EventResponse）
-  const response: EventResponse = {
-    event: "leave",
-    data: {} // leave は返すものなし
+  if (token) {
+    leave_l(room, token)
+    room.broadcast("leave")
   }
-  //room.respond(ws, response)
-  
-  room.touchToken(token)
-  room.removeByToken(token)
 
-  // 全員にブロードキャスト
-  room.broadcast("leave")
+  ws.close(4001, "leave")
 }

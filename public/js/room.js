@@ -3,6 +3,9 @@ let myToken = null;
 let myRole = null;
 let ws = null;
 let roomId = null;
+let closeFlag = false;
+let seat = "observer";
+let retryCount = 0;
 
 // --- debug utility ---
 function debugLog(message) {
@@ -40,43 +43,6 @@ function renderBoard(board, status) {
     validMoves = getValidMoves(board, myRole);
   }
   const validMap = new Set(validMoves.map(m => `${m.x},${m.y}`));
-/*
-  board.forEach((row, y) => {
-    row.split("").forEach((cell, x) => {
-      const cellEl = document.createElement("div");
-      cellEl.className = "cell";
-
-      if (cell === "B") {
-        const d = document.createElement("div");
-        d.className = "disc black";
-        cellEl.appendChild(d);
-      } else if (cell === "W") {
-        const d = document.createElement("div");
-        d.className = "disc white";
-        cellEl.appendChild(d);
-      } else if (validMap.has(`${x},${y}`)) {
-        // --- 合法手のガイドをオレンジの点で表示 ---
-        const dot = document.createElement("div");
-        dot.className = "hint-dot";
-        cellEl.appendChild(dot);
-      }
-
-      // --- 合法手だけクリック可能 ---
-      if (validMap.has(`${x},${y}`)) {
-        cellEl.addEventListener("click", () => {
-          if (!myToken || myRole === "observer") return;
-          ws.send(JSON.stringify({
-            event: "move",
-            token: myToken,
-            x, y
-          }));
-        });
-      }
-
-      boardEl.appendChild(cellEl);
-    });
-  });
-*/
 
   board.forEach((row, y) => {
     row.split("").forEach((cell, x) => {
@@ -144,39 +110,27 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
-// --- 実行部分 ---
-(async () => {
-  const params = new URLSearchParams(location.search);
-  roomId = params.get("id");
-  const seat = params.get("seat") || "observer";
-  document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
-  
-  await loadMessages();
-
-  // 起動時に「ロビーへ」を差し替え
-  const lobbyLink = document.getElementById("to-lobby");
-  if (lobbyLink) lobbyLink.textContent = t("toLobby");
-  
+function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
-  // --- token を 1秒有効にする ---
-  const saved = sessionStorage.getItem(`room-${roomId}-token`);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      if (Date.now() - parsed.savedAt < 1000) {
-        myToken = parsed.token;
-      } else {
-        sessionStorage.removeItem(`room-${roomId}-token`);
-      }
-    } catch {
-      sessionStorage.removeItem(`room-${roomId}-token`);
-    }
-  }
-
-  // --- WebSocket ---
   ws.addEventListener("open", () => {
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
+  });
+
+  ws.addEventListener("close", (event) => {
+    if (closeFlag) {
+      window.location.href = "/";
+    } else {
+      retryCount++;
+      if (retryCount > 3) {
+        showModal("reconnectFailed", () => {
+          window.location.href = "/";
+        });
+      } else {
+        debugLog('setTimeout(connect, 500);')
+        setTimeout(connect, 500);
+      }
+    }
   });
 
   ws.addEventListener("message", (evt) => {
@@ -186,7 +140,7 @@ function renderStatus(status) {
 
       if (msg.event === "join") {
         if (msg.data.token) {
-          myToken = msg.data.token;
+          myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
             token: myToken,
             savedAt: Date.now()
@@ -265,15 +219,46 @@ function renderStatus(status) {
       //console.error("invalid message:", evt.data);
     }
   });
+}
 
+// --- 実行部分 ---
+(async () => {
+  const params = new URLSearchParams(location.search);
+  roomId = params.get("id");
+  seat = params.get("seat");
+  document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
+  
+  await loadMessages();
+
+  // 起動時に「ロビーへ」を差し替え
+  const lobbyLink = document.getElementById("to-lobby");
+  if (lobbyLink) lobbyLink.textContent = t("toLobby");
+  
+  // --- token を 1秒有効にする ---
+  const saved = sessionStorage.getItem(`room-${roomId}-token`);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Date.now() - parsed.savedAt < 1000) {
+        myToken = parsed.token;
+      } else {
+        sessionStorage.removeItem(`room-${roomId}-token`);
+      }
+    } catch {
+      sessionStorage.removeItem(`room-${roomId}-token`);
+    }
+  }
+  
+  connect();
+  
   // --- ロビーへボタン ---
   document.getElementById("to-lobby").addEventListener("click", (e) => {
     e.preventDefault();
-    if (myToken) {
-      //ws.send(JSON.stringify({ event: "leave", token: myToken }));
+    //if (myToken) {
+      ws.send(JSON.stringify({ event: "leave", token: myToken }));
       sessionStorage.removeItem(`room-${roomId}-token`);
-    }
-    window.location.href = "/";
+    //}
+    closeFlag=true
   });
 
   // --- ページが閉じる直前に savedAt を更新 ---

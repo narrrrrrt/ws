@@ -4,7 +4,7 @@ import { leave_l } from "./logic/leave_l"
 export class Room {
   black: string | null = null
   white: string | null = null
-  board: string[] = [...Room.initialBoard]
+  board: string[] = [...Room.flatBoard]
   status: RoomStatus = "waiting"
   
   lastAction: "move" | "pass" | null = null
@@ -69,16 +69,7 @@ export class Room {
       leave_l(this, token)
       this.sessions.delete(ws)
       this.broadcast("leave")
-    }, 3000)
-  }
-  
-  removeByToken(token: string) {
-    for (const [ws, t] of this.sessions.entries()) {
-      if (t === token) {
-        this.sessions.delete(ws)
-        break // 見つかったら抜ける
-      }
-    }
+    }, 1200)
   }
 
   broadcast(event: string) {
@@ -102,10 +93,6 @@ export class Room {
       }
     }
   }
-
-  //respond(ws: WebSocket, payload: EventResponse) {
-  //  ws.send(JSON.stringify(payload))
-  //}
   
   respond(ws: WebSocket, payload?: EventResponse) {
     if (!payload) {
