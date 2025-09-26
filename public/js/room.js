@@ -113,6 +113,16 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
+function requestExplanation(board, status, movesByColor) {
+  const res = await fetch("/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ board, status, lang, movesByColor })
+  })
+  const data = await res.json()
+  return data.response || ""
+}
+
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
@@ -169,6 +179,12 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
+
+
+const explanation = await requestExplanation(msg.data.board, msg.data.status, movesByColor)
+const el = document.getElementById("explain")
+if (el) el.textContent = explanation
+
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
