@@ -183,7 +183,7 @@ function connect() {
           .then(data => {
             const el = document.getElementById("explain")
             const elChat = document.getElementById("chatlog")
-            if (el) el.textContent = data.response || ""
+            if (el) el.textContent = JSON.stringify(data.response, null, 2)
             if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
           })
 
