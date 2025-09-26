@@ -11,7 +11,7 @@ export default {
 
     const url = new URL(request.url)
     if (url.pathname === "/ai") {
-      return llamaHandler(request, env);
+      return geminiHandler(request, env);
     }
 
     const [roomId, ...rest] = url.pathname.split("/").filter(s => s.length > 0)
