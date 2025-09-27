@@ -84,14 +84,18 @@ pre {
 .cell.corner-bottom-right{ border-bottom-right-radius: 20%; }
 
 /* --- Response と Chat を盤と同じ幅に --- */
-#explain,
-#chatlog {
+#explain {
   white-space: pre-wrap;
   word-wrap: break-word;
   width: var(--board-size);
   margin: 0 auto 20px;
   background: #f0f0f0;
   padding: 10px;
+  
+  font-size: 14px;          /* 任意。行の高さを基準にする */
+  line-height: 1.4em;       /* 1行の高さ */
+  height: calc(1.4em * 7);  /* 7行分で固定 */
+  overflow: hidden;    
 }
 
 /* --- スマホ用調整 (幅600px以下) --- */
