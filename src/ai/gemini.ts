@@ -1,4 +1,4 @@
-// 2-space indent
+// 2-space indent 
 import { buildReversiChat } from "./prompt/reversiPrompt"
 
 export async function geminiHandler(
