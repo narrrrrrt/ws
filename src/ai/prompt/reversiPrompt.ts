@@ -75,7 +75,7 @@ function classifyCase(board: string[], moves: Move[], turnCount: number) {
 // ---- ケース別プロンプト ----
 const casePrompts: Record<Lang, Record<number, string>> = {
   ja: {
-    0: "序盤の基本戦略を意識しましょう。角は強く、辺を早く取りすぎないこと。中央を固めるのが流れを作ります。",
+    0: "序盤は石を取りすぎず、中央を意識して打つと安定します。角や辺はまだ急がず、次につながる形を作りましょう！",
     1: "今回は打てる場所がありません。パスするしかない状況です。パスに見合ったコメントを返してください。",
     2: "今回は打てる場所が1つしかありません。選択肢がない状況に触れつつ、前向きなコメントを返してください。",
     3: "今回は打てる場所が2つあります。どちらを選ぶか迷う場面です。自然にどちらかを勧めるコメントをしてください。",
@@ -85,7 +85,7 @@ const casePrompts: Record<Lang, Record<number, string>> = {
     7: "すでに勝敗は確定しています。この状況に合った短いコメントを返してください。勝ちなら称賛、負けなら労い、引き分けならユーモアを交えてください。",
   },
   en: {
-    0: "Focus on basic opening strategies. Corners are powerful, avoid taking edges too early, and build central control.",
+    0: "In the opening, don’t rush to grab too many stones. Focus on the center for stability. Corners and edges can wait--shape the board for the future!",
     1: "No legal moves available. You must pass. Provide a short comment that fits this situation.",
     2: "Only one legal move is available. Mention the lack of choice while keeping the tone positive.",
     3: "Two legal moves are available. Suggest one naturally while acknowledging the choice.",
@@ -94,7 +94,7 @@ const casePrompts: Record<Lang, Record<number, string>> = {
     6: "It's the endgame. Only a few moves remain. Give a short comment about focusing on the final stage.",
     7: "The result is already decided. Respond with a fitting short comment: praise for winning, encouragement for losing, or humor for a draw.",
   },
-  // 他の言語も必要なら同じように埋める
+  // TODO: es, de, it, fr にも同じパターンで追加可能
 }
 
 // ---- メインビルダー ----
@@ -128,7 +128,7 @@ export function buildReversiChat(params: {
   }
   lines.push(caseInstruction)
 
-  // Gemini の API 仕様に合わせる
+  // Gemini API 用のフォーマット
   return {
     contents: [
       {

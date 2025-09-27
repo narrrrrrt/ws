@@ -3,10 +3,12 @@ body {
 }
 
 .board { 
+  --board-size: calc(8 * 40px + 7 * 2px); /* 40pxセル×8 + 2pxギャップ×7 */
   display: grid; 
   grid-template-columns: repeat(8, 40px); 
   grid-gap: 2px; 
-  margin: 20px 0; 
+  margin: 20px auto; 
+  width: var(--board-size);
 }
 
 .cell { 
@@ -76,11 +78,21 @@ pre {
 }
 
 /* --- 中央4点を示す角丸マス --- */
-/* --- 中央4点を示す角丸マス --- */
 .cell.corner-top-left    { border-top-left-radius: 20%; }
 .cell.corner-top-right   { border-top-right-radius: 20%; }
 .cell.corner-bottom-left { border-bottom-left-radius: 20%; }
 .cell.corner-bottom-right{ border-bottom-right-radius: 20%; }
+
+/* --- Response と Chat を盤と同じ幅に --- */
+#explain,
+#chatlog {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: var(--board-size);
+  margin: 0 auto 20px;
+  background: #f0f0f0;
+  padding: 10px;
+}
 
 /* --- スマホ用調整 (幅600px以下) --- */
 @media (max-width: 600px) {
@@ -105,5 +117,11 @@ pre {
   .cell .hint-dot {
     width: 20%;
     height: 20%;
+  }
+
+  #explain,
+  #chatlog {
+    width: 95vw;   /* ボードと同じ幅に */
+    max-width: 95vh;
   }
 }
