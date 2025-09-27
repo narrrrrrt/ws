@@ -51,7 +51,7 @@ export async function geminiHandler(
 
     return Response.json({
       chat,
-      response: data
+      response: text
     })
   } catch (err: any) {
     return Response.json({
