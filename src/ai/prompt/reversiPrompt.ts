@@ -1,10 +1,23 @@
-// prompt/reversiPrompt.ts
-
+// --- 言語型 ---
 export type Lang = "ja" | "en" | "es" | "de" | "it" | "fr"
-type Status = "black" | "white"
-type Move = { x: number; y: number }
 
-// ---- 辞書 ----
+// --- 合法手（座標） ---
+export interface Move {
+  x: number
+  y: number
+}
+
+// --- システムプロンプト ---
+const systemDict: Record<Lang, string> = {
+  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。常に短く楽しいコメントをしてください。挨拶は不要、日本語で200文字以内。",
+  en: "You are a friendly Othello coach. Always give factual, short, and fun comments. Do not invent moves. No greetings. Respond in English under 200 characters.",
+  es: "Eres un entrenador amistoso de Othello. Da comentarios basados en hechos, cortos y divertidos. No inventes movimientos. Sin saludos. Responde en español con menos de 200 caracteres.",
+  de: "Du bist ein freundlicher Othello-Coach. Gib immer sachliche, kurze und unterhaltsame Kommentare. Keine erfundenen Züge. Keine Grüße. Antworte auf Deutsch unter 200 Zeichen.",
+  it: "Sei un allenatore amichevole di Othello. Dai commenti basati sui fatti, brevi e divertenti. Non inventare mosse. Nessun saluto. Rispondi in italiano entro 200 caratteri.",
+  fr: "Vous êtes un entraîneur amical d'Othello. Donnez toujours des commentaires factuels, courts et amusants. N'inventez pas de coups. Pas de salutations. Répondez en français sous 200 caractères.",
+}
+
+// --- 黒/白 ---
 const statusDict: Record<Lang, { black: string; white: string }> = {
   ja: { black: "黒", white: "白" },
   en: { black: "Black", white: "White" },
@@ -14,168 +27,179 @@ const statusDict: Record<Lang, { black: string; white: string }> = {
   fr: { black: "Noir", white: "Blanc" },
 }
 
+// --- フェーズ ---
 const phaseDict: Record<Lang, { opening: string; midgame: string; endgame: string }> = {
   ja: { opening: "序盤", midgame: "中盤", endgame: "終盤" },
   en: { opening: "opening", midgame: "midgame", endgame: "endgame" },
   es: { opening: "apertura", midgame: "medio juego", endgame: "final" },
-  de: { opening: "Anfang", midgame: "Mittelspiel", endgame: "Endspiel" },
+  de: { opening: "Eröffnung", midgame: "Mittelspiel", endgame: "Endspiel" },
   it: { opening: "apertura", midgame: "medio gioco", endgame: "finale" },
-  fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "finale" },
+  fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "fin de partie" },
 }
 
-// ---- システム指示 ----
-const systemDict: Record<Lang, string> = {
-  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。常に短く楽しいコメントをしてください。挨拶は不要、日本語で200文字以内。",
-  en: "You are a friendly Othello coach. Stick to facts, never suggest impossible moves or strategies. Always reply with short and fun comments. No greetings. Keep it under 200 characters in English.",
-  es: "Eres un amigo entrenador de Othello. Responde siempre con comentarios breves y divertidos basados en hechos. Sin saludos. Menos de 200 caracteres en español.",
-  de: "Du bist ein freundlicher Othello-Coach. Halte dich an die Fakten und schlage niemals unmögliche Züge oder Strategien vor. Antworte immer kurz und unterhaltsam. Keine Begrüßung. Unter 200 Zeichen auf Deutsch.",
-  it: "Sei un amico coach di Othello. Attieniti ai fatti, non suggerire mai mosse impossibili. Rispondi sempre con commenti brevi e divertenti. Nessun saluto. Sotto i 200 caratteri in italiano.",
-  fr: "Tu es un coach amical d’Othello. Reste factuel, ne propose jamais de coups impossibles. Réponds toujours avec des commentaires courts et amusants. Pas de salutations. Moins de 200 caractères en français.",
+// --- 枕言葉 ---
+const roleHeaderDict: Record<Lang, Record<"black" | "white", string>> = {
+  ja: { black: "あなたは黒のプレイヤーのコーチです。", white: "あなたは白のプレイヤーのコーチです。" },
+  en: { black: "You are the coach of the Black player.", white: "You are the coach of the White player." },
+  es: { black: "Eres el entrenador del jugador de Negras.", white: "Eres el entrenador del jugador de Blancas." },
+  de: { black: "Du bist der Coach des schwarzen Spielers.", white: "Du bist der Coach des weißen Spielers." },
+  it: { black: "Sei l'allenatore del giocatore Nero.", white: "Sei l'allenatore del giocatore Bianco." },
+  fr: { black: "Vous êtes l'entraîneur du joueur Noir.", white: "Vous êtes l'entraîneur du joueur Blanc." },
 }
 
-// ---- ヘルパー ----
-function countPieces(board: string[]): number {
-  return board.join("").replace(/-/g, "").length
-}
-
-function isCorner(move: Move): boolean {
-  const { x, y } = move
-  return (x === 0 || x === 7) && (y === 0 || y === 7)
-}
-
-function detectPhase(board: string[], lang: Lang): string {
-  const n = countPieces(board)
-  if (n < 20) return phaseDict[lang].opening
-  if (n < 50) return phaseDict[lang].midgame
-  return phaseDict[lang].endgame
-}
-
-// ---- ケース分類 ----
-function classifyCase(board: string[], moves: Move[], turnCount: number) {
-  const pieceCount = countPieces(board)
-
-  // #7 勝敗確定 (簡易版: 残りマスより石差が大きいなら)
-  const empties = 64 - pieceCount
-  const blacks = board.join("").split("B").length - 1
-  const whites = board.join("").split("W").length - 1
-  if (Math.abs(blacks - whites) > empties) return 7
-
-  // #1 パス
-  if (!moves || moves.length === 0) return 1
-
-  // #0 序盤特別 (最初の8手以内、かつ石 <=16)
-  if (turnCount < 8 && pieceCount <= 16) return 0
-
-  // #5 角
-  if (moves.some(isCorner)) return 5
-
-  // #6 終盤
-  if (pieceCount > 50) return 6
-
-  // #2 単一手
-  if (moves.length === 1) return 2
-
-  // #3 二択
-  if (moves.length === 2) return 3
-
-  // #4 通常
-  return 4
-}
-
-// ---- ケース別プロンプト ----
-const casePrompts: Record<Lang, Record<number, string>> = {
-  ja: {
-    0: "序盤の基本戦略を意識しましょう。角は強く、辺を早く取りすぎないこと。中央を固めるのが流れを作ります。",
-    1: "今回は打てる場所がありません。パスするしかない状況です。パスに見合ったコメントを返してください。",
-    2: "今回は打てる場所が1つしかありません。選択肢がない状況に触れつつ、前向きなコメントを返してください。",
-    3: "今回は打てる場所が2つあります。どちらを選ぶか迷う場面です。自然にどちらかを勧めるコメントをしてください。",
-    4: "今回は複数の合法手があります。局面に応じた戦略（序盤=展開、中盤=安定、終盤=石数調整）を短くアドバイスしてください。",
-    5: "今回の合法手の中に角があります。必ず角の価値に触れてください。『右上の角』『右下の角』など自然な言葉で説明してください。",
-    6: "ゲームは終盤です。残りの手数はわずかです。最後の数手に集中するよう短いコメントをしてください。",
-    7: "すでに勝敗は確定しています。この状況に合った短いコメントを返してください。勝ちなら称賛、負けなら労い、引き分けならユーモアを交えてください。",
+// --- ケースごとの指示 ---
+const caseDict: Record<number, Record<Lang, string>> = {
+  0: {
+    ja: "序盤です。軽い雑談を交えてコメントしてください。",
+    en: "It's the opening. Add a light, casual remark.",
+    es: "Es la apertura. Añade un comentario ligero y casual.",
+    de: "Es ist die Eröffnung. Füge eine lockere Bemerkung hinzu.",
+    it: "È l'apertura. Aggiungi un commento leggero e informale.",
+    fr: "C'est l'ouverture. Ajoutez une remarque légère et décontractée.",
   },
-  en: {
-    0: "Focus on basic opening strategies. Corners are powerful, avoid taking edges too early, and build central control.",
-    1: "No legal moves available. You must pass. Provide a short comment that fits this situation.",
-    2: "Only one legal move is available. Mention the lack of choice while keeping the tone positive.",
-    3: "Two legal moves are available. Suggest one naturally while acknowledging the choice.",
-    4: "Multiple legal moves available. Give strategic advice based on the game phase (opening=expansion, midgame=stability, endgame=stone count).",
-    5: "A corner move is available. Always highlight the value of corners. Use natural phrases like 'top-right corner' or 'bottom-left corner'.",
-    6: "It's the endgame. Only a few moves remain. Give a short comment about focusing on the final stage.",
-    7: "The result is already decided. Respond with a fitting short comment: praise for winning, encouragement for losing, or humor for a draw.",
+  1: {
+    ja: "今回は打てる手がなくパスになります。",
+    en: "No valid moves, so it's a pass.",
+    es: "No hay movimientos válidos, así que es un pase.",
+    de: "Keine gültigen Züge, also ein Pass.",
+    it: "Nessuna mossa valida, quindi è un passaggio.",
+    fr: "Aucun coup valide, donc c'est un passage.",
   },
-  es: {
-    0: "Concéntrate en las estrategias básicas de apertura. Las esquinas son poderosas, evita tomar los bordes demasiado pronto y controla el centro.",
-    1: "No hay movimientos legales disponibles. Debes pasar. Devuelve un comentario breve que encaje con esta situación.",
-    2: "Solo hay un movimiento legal disponible. Menciona la falta de opciones con un tono positivo.",
-    3: "Hay dos movimientos posibles. Recomienda uno naturalmente reconociendo la elección.",
-    4: "Hay varios movimientos posibles. Da un consejo estratégico según la fase (apertura=expansión, medio juego=estabilidad, final=conteo).",
-    5: "Hay una jugada en la esquina. Destaca siempre el valor de las esquinas. Usa frases naturales como 'esquina superior derecha'.",
-    6: "Es el final del juego. Quedan pocos movimientos. Haz un comentario breve sobre enfocarse en la recta final.",
-    7: "El resultado ya está decidido. Responde con un comentario breve apropiado: elogio si ganas, ánimo si pierdes o humor si empatas.",
+  2: {
+    ja: "選択肢は一つしかありません。",
+    en: "Only one option is available.",
+    es: "Solo hay una opción disponible.",
+    de: "Es gibt nur eine mögliche Option.",
+    it: "C'è solo una possibilità disponibile.",
+    fr: "Une seule option est disponible.",
   },
-  de: {
-    0: "Konzentriere dich auf grundlegende Eröffnungsstrategien. Ecken sind stark, vermeide es, Kanten zu früh zu nehmen, und baue zentrale Kontrolle auf.",
-    1: "Keine legalen Züge verfügbar. Du musst passen. Gib einen kurzen Kommentar, der passt.",
-    2: "Nur ein legaler Zug ist verfügbar. Erwähne die fehlende Wahl, aber bleibe positiv.",
-    3: "Zwei legale Züge verfügbar. Schlage einen vor, während du die Wahl anerkennst.",
-    4: "Mehrere legale Züge verfügbar. Gib strategischen Rat je nach Phase (Anfang=Expansion, Mittelspiel=Stabilität, Endspiel=Steine zählen).",
-    5: "Ein Eckzug ist verfügbar. Hebe immer den Wert der Ecken hervor. Verwende natürliche Phrasen wie 'rechte obere Ecke'.",
-    6: "Es ist das Endspiel. Nur wenige Züge bleiben. Mach einen kurzen Kommentar über die Konzentration auf die letzte Phase.",
-    7: "Das Ergebnis steht bereits fest. Antworte mit einem passenden kurzen Kommentar: Lob für den Sieg, Trost für die Niederlage oder Humor für ein Unentschieden.",
+  3: {
+    ja: "2つの候補があります。",
+    en: "There are two possible moves.",
+    es: "Hay dos movimientos posibles.",
+    de: "Es gibt zwei mögliche Züge.",
+    it: "Ci sono due mosse possibili.",
+    fr: "Il y a deux coups possibles.",
   },
-  it: {
-    0: "Concentrati sulle strategie di apertura di base. Gli angoli sono potenti, evita di prendere i bordi troppo presto e controlla il centro.",
-    1: "Nessuna mossa legale disponibile. Devi passare. Fornisci un breve commento che si adatti alla situazione.",
-    2: "C'è solo una mossa legale. Sottolinea la mancanza di scelta mantenendo un tono positivo.",
-    3: "Ci sono due mosse possibili. Consigliane una naturalmente riconoscendo la scelta.",
-    4: "Ci sono diverse mosse possibili. Dai un consiglio strategico in base alla fase (apertura=espansione, medio gioco=stabilità, finale=conteggio).",
-    5: "C'è una mossa d'angolo disponibile. Sottolinea sempre il valore degli angoli. Usa frasi naturali come 'angolo in alto a destra'.",
-    6: "È la fase finale. Restano solo poche mosse. Fai un breve commento sul concentrarsi sull'ultima fase.",
-    7: "Il risultato è già deciso. Rispondi con un commento breve adeguato: lode per la vittoria, incoraggiamento per la sconfitta o umorismo per il pareggio.",
+  4: {
+    ja: "選択肢が多くあります。具体的な手は挙げずに全体感をコメントしてください。",
+    en: "There are many options. Comment on the situation without listing every move.",
+    es: "Hay muchas opciones. Comenta la situación sin enumerar todos los movimientos.",
+    de: "Es gibt viele Möglichkeiten. Kommentiere die Situation, ohne alle Züge aufzulisten.",
+    it: "Ci sono molte opzioni. Commenta la situazione senza elencare tutte le mosse.",
+    fr: "Il y a de nombreuses options. Commentez la situation sans lister chaque coup.",
   },
-  fr: {
-    0: "Concentrez-vous sur les stratégies de base de l’ouverture. Les coins sont puissants, évitez de prendre les bords trop tôt et contrôlez le centre.",
-    1: "Aucun coup légal disponible. Vous devez passer. Fournissez un court commentaire adapté à cette situation.",
-    2: "Un seul coup légal est disponible. Mentionnez le manque de choix en gardant un ton positif.",
-    3: "Deux coups légaux disponibles. Suggérez-en un naturellement en reconnaissant le choix.",
-    4: "Plusieurs coups légaux disponibles. Donnez un conseil stratégique selon la phase (ouverture=expansion, milieu=stabilité, finale=comptage).",
-    5: "Un coup dans le coin est disponible. Soulignez toujours la valeur des coins. Utilisez des expressions naturelles comme 'coin supérieur droit'.",
-    6: "C’est la fin de partie. Il ne reste que quelques coups. Faites un court commentaire sur la concentration pour la fin.",
-    7: "Le résultat est déjà décidé. Répondez avec un court commentaire adapté : félicitations pour une victoire, encouragements pour une défaite ou humour pour un match nul.",
+  5: {
+    ja: "角を狙える局面です。座標ではなく角の位置で表現してください。",
+    en: "A corner is available. Refer to it by corner name, not coordinates.",
+    es: "Una esquina está disponible. Refierete a ella por nombre de esquina, no coordenadas.",
+    de: "Eine Ecke ist verfügbar. Benenne sie nach ihrer Position, nicht mit Koordinaten.",
+    it: "Un angolo è disponibile. Indicalo per nome dell'angolo, non con coordinate.",
+    fr: "Un coin est disponible. Référez-vous par le nom du coin, pas par les coordonnées.",
+  },
+  6: {
+    ja: "終盤戦です。残り少ない局面をコメントしてください。",
+    en: "It's the endgame. Comment on the final moves.",
+    es: "Es el final de la partida. Comenta sobre los últimos movimientos.",
+    de: "Es ist das Endspiel. Kommentiere die letzten Züge.",
+    it: "È la fase finale. Commenta le mosse finali.",
+    fr: "C'est la fin de partie. Commentez les derniers coups.",
+  },
+  7: {
+    ja: "勝敗がほぼ確定しています。圧勝や健闘を称えてください。",
+    en: "The game is nearly decided. Give praise or consolation.",
+    es: "La partida está casi decidida. Da elogios o consuelo.",
+    de: "Die Partie ist fast entschieden. Gib Lob oder Trost.",
+    it: "La partita è quasi decisa. Dai elogi o consolazione.",
+    fr: "La partie est presque décidée. Donnez des éloges ou des encouragements.",
   },
 }
 
-// ---- メインビルダー ----
-export function buildReversiChat(params: {
-  board: string[]
-  status: Status
-  lang: Lang
-  movesByColor?: Record<Status, Move[]>
-  turnCount: number
-}) {
-  const { board, status, lang, movesByColor, turnCount } = params
-  const phase = detectPhase(board, lang)
-  const localizedStatus = statusDict[lang][status]
-  const moves = movesByColor?.[status] || []
+// --- クロージング ---
+const closingDict: Record<Lang, string> = {
+  ja: "コメントは200文字以内、改行は最大で7行までにしてください。短く、楽しく、フレンドリーに。挨拶は不要です。",
+  en: "Keep the comment under 200 characters, with a maximum of 7 line breaks. Short, fun, and friendly. No greetings.",
+  es: "Mantén el comentario por debajo de 200 caracteres, con un máximo de 7 saltos de línea. Corto, divertido y amigable. Sin saludos.",
+  de: "Halte den Kommentar unter 200 Zeichen, mit maximal 7 Zeilenumbrüchen. Kurz, unterhaltsam und freundlich. Keine Grüße.",
+  it: "Mantieni il commento sotto i 200 caratteri, con un massimo di 7 interruzioni di riga. Breve, divertente e amichevole. Niente saluti.",
+  fr: "Gardez le commentaire sous 200 caractères, avec un maximum de 7 sauts de ligne. Court, amusant et amical. Pas de salutations.",
+}
 
-  const caseId = classifyCase(board, moves, turnCount)
-  const caseInstruction = casePrompts[lang][caseId]
-
-  const boardStr = board.join("\n")
-
-  // 合法手を渡すかどうか
-  const includeMoves = !(caseId === 0 || caseId === 1)
-
-  const lines: string[] = []
-  lines.push(`Turn: ${localizedStatus}`)
-  lines.push(`Phase: ${phase}`)
-  lines.push(`Board:\n${boardStr}`)
-  if (includeMoves && moves.length > 0) {
-    const formatted = moves.map(m => `(x=${m.x+1},y=${m.y+1})`).join(", ")
-    lines.push(`Legal moves: ${formatted}`)
+// --- 合法手（X=◯, Y=◯ 形式に変換） ---
+function moveToHumanReadable(m: Move, lang: Lang): string {
+  const pos = `X=${m.x + 1}, Y=${m.y + 1}`
+  const dict: Record<Lang, string> = {
+    ja: `候補手: ${pos}`,
+    en: `Candidate: ${pos}`,
+    es: `Jugada posible: ${pos}`,
+    de: `Möglicher Zug: ${pos}`,
+    it: `Mossa possibile: ${pos}`,
+    fr: `Coup possible: ${pos}`,
   }
-  lines.push(caseInstruction)
+  return dict[lang]
+}
+
+// --- 角を言語別に表現 ---
+function moveToCornerName(m: Move, lang: Lang): string {
+  const dict: Record<Lang, Record<string, string>> = {
+    ja: { "0,0": "左上角", "7,0": "右上角", "0,7": "左下角", "7,7": "右下角" },
+    en: { "0,0": "top-left corner", "7,0": "top-right corner", "0,7": "bottom-left corner", "7,7": "bottom-right corner" },
+    es: { "0,0": "esquina superior izquierda", "7,0": "esquina superior derecha", "0,7": "esquina inferior izquierda", "7,7": "esquina inferior derecha" },
+    de: { "0,0": "linke obere Ecke", "7,0": "rechte obere Ecke", "0,7": "linke untere Ecke", "7,7": "rechte untere Ecke" },
+    it: { "0,0": "angolo in alto a sinistra", "7,0": "angolo in alto a destra", "0,7": "angolo in basso a sinistra", "7,7": "angolo in basso a destra" },
+    fr: { "0,0": "coin supérieur gauche", "7,0": "coin supérieur droit", "0,7": "coin inférieur gauche", "7,7": "coin inférieur droit" },
+  }
+  return dict[lang][`${m.x},${m.y}`] || ""
+}
+
+// --- 本体 ---
+export function buildReversiChat(
+  lang: Lang,
+  role: "black" | "white",
+  status: "black" | "white",
+  phase: "opening" | "midgame" | "endgame",
+  caseId: number,
+  board: string[],
+  moves: Move[] = []
+) {
+  const lines: string[] = []
+
+  // 枕言葉
+  lines.push(roleHeaderDict[lang][role])
+  lines.push(`${statusDict[lang][status]}の手番、${phaseDict[lang][phase]}です。`)
+
+  // ケース別コメント
+  lines.push(caseDict[caseId][lang])
+
+  // 合法手（必要な場合のみ）
+  if (caseId === 2 && moves.length === 1) {
+    lines.push(moveToHumanReadable(moves[0], lang))
+  }
+  if (caseId === 3 && moves.length === 2) {
+    moves.forEach((m) => lines.push(moveToHumanReadable(m, lang)))
+  }
+  if (caseId === 5) {
+    moves.forEach((m) => {
+      const cornerName = moveToCornerName(m, lang)
+      if (cornerName) {
+        lines.push(`${cornerName}`)
+      }
+    })
+  }
+
+  // ボードデータの意味補足
+  lines.push(
+    lang === "ja"
+      ? "盤面データの意味: B=黒, W=白, -=空き"
+      : "Board data legend: B=Black, W=White, -=Empty"
+  )
+
+  // 実際のボード
+  lines.push("現在の盤面:")
+  lines.push(...board)
+
+  // クロージング
+  lines.push(closingDict[lang])
 
   return {
     contents: [

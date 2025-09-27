@@ -182,9 +182,9 @@ if (myRole === msg.data.status) {
           .then(res => res.json())
           .then(data => {
             const el = document.getElementById("explain")
-            //const elChat = document.getElementById("chatlog")
+            const elChat = document.getElementById("chatlog")
             if (el) el.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2)
-            //if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
+            if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
           })
 }
 
