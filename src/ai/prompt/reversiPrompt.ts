@@ -1,23 +1,9 @@
-// --- 言語型 ---
+// ---- 型定義 ----
 export type Lang = "ja" | "en" | "es" | "de" | "it" | "fr"
+type Status = "black" | "white"
+type Move = { x: number; y: number }
 
-// --- 合法手（座標） ---
-export interface Move {
-  x: number
-  y: number
-}
-
-// --- システムプロンプト ---
-const systemDict: Record<Lang, string> = {
-  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。常に短く楽しいコメントをしてください。挨拶は不要、日本語で200文字以内。",
-  en: "You are a friendly Othello coach. Always give factual, short, and fun comments. Do not invent moves. No greetings. Respond in English under 200 characters.",
-  es: "Eres un entrenador amistoso de Othello. Da comentarios basados en hechos, cortos y divertidos. No inventes movimientos. Sin saludos. Responde en español con menos de 200 caracteres.",
-  de: "Du bist ein freundlicher Othello-Coach. Gib immer sachliche, kurze und unterhaltsame Kommentare. Keine erfundenen Züge. Keine Grüße. Antworte auf Deutsch unter 200 Zeichen.",
-  it: "Sei un allenatore amichevole di Othello. Dai commenti basati sui fatti, brevi e divertenti. Non inventare mosse. Nessun saluto. Rispondi in italiano entro 200 caratteri.",
-  fr: "Vous êtes un entraîneur amical d'Othello. Donnez toujours des commentaires factuels, courts et amusants. N'inventez pas de coups. Pas de salutations. Répondez en français sous 200 caractères.",
-}
-
-// --- 黒/白 ---
+// ---- 辞書 ----
 const statusDict: Record<Lang, { black: string; white: string }> = {
   ja: { black: "黒", white: "白" },
   en: { black: "Black", white: "White" },
@@ -27,18 +13,25 @@ const statusDict: Record<Lang, { black: string; white: string }> = {
   fr: { black: "Noir", white: "Blanc" },
 }
 
-// --- フェーズ ---
 const phaseDict: Record<Lang, { opening: string; midgame: string; endgame: string }> = {
   ja: { opening: "序盤", midgame: "中盤", endgame: "終盤" },
   en: { opening: "opening", midgame: "midgame", endgame: "endgame" },
   es: { opening: "apertura", midgame: "medio juego", endgame: "final" },
-  de: { opening: "Eröffnung", midgame: "Mittelspiel", endgame: "Endspiel" },
+  de: { opening: "Anfang", midgame: "Mittelspiel", endgame: "Endspiel" },
   it: { opening: "apertura", midgame: "medio gioco", endgame: "finale" },
-  fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "fin de partie" },
+  fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "finale" },
 }
 
-// --- 枕言葉 ---
-const roleHeaderDict: Record<Lang, Record<"black" | "white", string>> = {
+const systemDict: Record<Lang, string> = {
+  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。常に短く楽しいコメントをしてください。挨拶は不要、日本語で200文字以内。",
+  en: "You are a friendly Othello coach. Stick to facts, never suggest impossible moves. Always reply with short and fun comments. No greetings. Keep it under 200 characters in English.",
+  es: "Eres un amigo entrenador de Othello. Responde con comentarios breves y divertidos basados en hechos. Sin saludos. Menos de 200 caracteres en español.",
+  de: "Du bist ein freundlicher Othello-Coach. Halte dich an die Fakten. Gib immer kurze, unterhaltsame Kommentare. Keine Begrüßung. Unter 200 Zeichen auf Deutsch.",
+  it: "Sei un amico coach di Othello. Rispondi sempre con commenti brevi e divertenti basati sui fatti. Nessun saluto. Sotto i 200 caratteri in italiano.",
+  fr: "Vous êtes un coach amical d’Othello. Donnez toujours des commentaires courts et amusants basés sur les faits. Pas de salutations. Moins de 200 caractères en français.",
+}
+
+const roleHeaderDict: Record<Lang, Record<Status, string>> = {
   ja: { black: "あなたは黒のプレイヤーのコーチです。", white: "あなたは白のプレイヤーのコーチです。" },
   en: { black: "You are the coach of the Black player.", white: "You are the coach of the White player." },
   es: { black: "Eres el entrenador del jugador de Negras.", white: "Eres el entrenador del jugador de Blancas." },
@@ -47,7 +40,74 @@ const roleHeaderDict: Record<Lang, Record<"black" | "white", string>> = {
   fr: { black: "Vous êtes l'entraîneur du joueur Noir.", white: "Vous êtes l'entraîneur du joueur Blanc." },
 }
 
-// --- ケースごとの指示 ---
+// ---- クロージング ----
+const closingDict: Record<Lang, string> = {
+  ja: "コメントは200文字以内、改行は最大で7行までにしてください。短く、楽しく、フレンドリーに。挨拶は不要です。",
+  en: "Keep the comment under 200 characters, with at most 7 line breaks. Short, fun, and friendly. No greetings.",
+  es: "Mantén el comentario por debajo de 200 caracteres, con un máximo de 7 saltos de línea. Corto, divertido y amistoso. Sin saludos.",
+  de: "Halte den Kommentar unter 200 Zeichen, mit höchstens 7 Zeilenumbrüchen. Kurz, unterhaltsam und freundlich. Keine Grüße.",
+  it: "Mantieni il commento sotto i 200 caratteri, con massimo 7 interruzioni di riga. Breve, divertente e amichevole. Nessun saluto.",
+  fr: "Gardez le commentaire sous 200 caractères, avec au maximum 7 sauts de ligne. Court, amusant et amical. Pas de salutations.",
+}
+
+// ---- ケース分類 ----
+function countPieces(board: string[]): number {
+  return board.join("").replace(/-/g, "").length
+}
+
+function isCorner(move: Move): boolean {
+  return (move.x === 0 || move.x === 7) && (move.y === 0 || move.y === 7)
+}
+
+function detectPhase(board: string[]): "opening" | "midgame" | "endgame" {
+  const n = countPieces(board)
+  if (n < 20) return "opening"
+  if (n < 50) return "midgame"
+  return "endgame"
+}
+
+function classifyCase(board: string[], moves: Move[], turnCount: number): number {
+  const pieceCount = countPieces(board)
+  const empties = 64 - pieceCount
+  const blacks = board.join("").split("B").length - 1
+  const whites = board.join("").split("W").length - 1
+  if (Math.abs(blacks - whites) > empties) return 7
+  if (!moves || moves.length === 0) return 1
+  if (turnCount < 8 && pieceCount <= 16) return 0
+  if (moves.some(isCorner)) return 5
+  if (pieceCount > 50) return 6
+  if (moves.length === 1) return 2
+  if (moves.length === 2) return 3
+  return 4
+}
+
+// ---- 候補手表現 ----
+function moveToHumanReadable(m: Move, lang: Lang): string {
+  const pos = `X=${m.x + 1}, Y=${m.y + 1}`
+  const dict: Record<Lang, string> = {
+    ja: `候補手: ${pos}`,
+    en: `Candidate: ${pos}`,
+    es: `Jugada posible: ${pos}`,
+    de: `Möglicher Zug: ${pos}`,
+    it: `Mossa possibile: ${pos}`,
+    fr: `Coup possible: ${pos}`,
+  }
+  return dict[lang]
+}
+
+function moveToCornerName(m: Move, lang: Lang): string {
+  const dict: Record<Lang, Record<string, string>> = {
+    ja: { "0,0": "左上角", "7,0": "右上角", "0,7": "左下角", "7,7": "右下角" },
+    en: { "0,0": "top-left corner", "7,0": "top-right corner", "0,7": "bottom-left corner", "7,7": "bottom-right corner" },
+    es: { "0,0": "esquina superior izquierda", "7,0": "esquina superior derecha", "0,7": "esquina inferior izquierda", "7,7": "esquina inferior derecha" },
+    de: { "0,0": "linke obere Ecke", "7,0": "rechte obere Ecke", "0,7": "linke untere Ecke", "7,7": "rechte untere Ecke" },
+    it: { "0,0": "angolo in alto a sinistra", "7,0": "angolo in alto a destra", "0,7": "angolo in basso a sinistra", "7,7": "angolo in basso a destra" },
+    fr: { "0,0": "coin supérieur gauche", "7,0": "coin supérieur droit", "0,7": "coin inférieur gauche", "7,7": "coin inférieur droit" },
+  }
+  return dict[lang][`${m.x},${m.y}`] || moveToHumanReadable(m, lang)
+}
+
+// ---- ケース別プロンプト ----
 const caseDict: Record<number, Record<Lang, string>> = {
   0: {
     ja: "序盤です。軽い雑談を交えてコメントしてください。",
@@ -115,86 +175,45 @@ const caseDict: Record<number, Record<Lang, string>> = {
   },
 }
 
-// --- クロージング ---
-const closingDict: Record<Lang, string> = {
-  ja: "コメントは200文字以内、改行は最大で7行までにしてください。短く、楽しく、フレンドリーに。挨拶は不要です。",
-  en: "Keep the comment under 200 characters, with a maximum of 7 line breaks. Short, fun, and friendly. No greetings.",
-  es: "Mantén el comentario por debajo de 200 caracteres, con un máximo de 7 saltos de línea. Corto, divertido y amigable. Sin saludos.",
-  de: "Halte den Kommentar unter 200 Zeichen, mit maximal 7 Zeilenumbrüchen. Kurz, unterhaltsam und freundlich. Keine Grüße.",
-  it: "Mantieni il commento sotto i 200 caratteri, con un massimo di 7 interruzioni di riga. Breve, divertente e amichevole. Niente saluti.",
-  fr: "Gardez le commentaire sous 200 caractères, avec un maximum de 7 sauts de ligne. Court, amusant et amical. Pas de salutations.",
-}
+// ---- メインビルダー ----
+export function buildReversiChat(params: {
+  board: string[]
+  status: Status
+  lang: Lang
+  movesByColor?: Record<Status, Move[]>
+  turnCount: number
+}) {
+  const { board, status, lang, movesByColor, turnCount } = params
+  const phase = detectPhase(board)
+  const moves = movesByColor?.[status] || []
+  const caseId = classifyCase(board, moves, turnCount)
 
-// --- 合法手（X=◯, Y=◯ 形式に変換） ---
-function moveToHumanReadable(m: Move, lang: Lang): string {
-  const pos = `X=${m.x + 1}, Y=${m.y + 1}`
-  const dict: Record<Lang, string> = {
-    ja: `候補手: ${pos}`,
-    en: `Candidate: ${pos}`,
-    es: `Jugada posible: ${pos}`,
-    de: `Möglicher Zug: ${pos}`,
-    it: `Mossa possibile: ${pos}`,
-    fr: `Coup possible: ${pos}`,
-  }
-  return dict[lang]
-}
-
-// --- 角を言語別に表現 ---
-function moveToCornerName(m: Move, lang: Lang): string {
-  const dict: Record<Lang, Record<string, string>> = {
-    ja: { "0,0": "左上角", "7,0": "右上角", "0,7": "左下角", "7,7": "右下角" },
-    en: { "0,0": "top-left corner", "7,0": "top-right corner", "0,7": "bottom-left corner", "7,7": "bottom-right corner" },
-    es: { "0,0": "esquina superior izquierda", "7,0": "esquina superior derecha", "0,7": "esquina inferior izquierda", "7,7": "esquina inferior derecha" },
-    de: { "0,0": "linke obere Ecke", "7,0": "rechte obere Ecke", "0,7": "linke untere Ecke", "7,7": "rechte untere Ecke" },
-    it: { "0,0": "angolo in alto a sinistra", "7,0": "angolo in alto a destra", "0,7": "angolo in basso a sinistra", "7,7": "angolo in basso a destra" },
-    fr: { "0,0": "coin supérieur gauche", "7,0": "coin supérieur droit", "0,7": "coin inférieur gauche", "7,7": "coin inférieur droit" },
-  }
-  return dict[lang][`${m.x},${m.y}`] || ""
-}
-
-// --- 本体 ---
-export function buildReversiChat(
-  lang: Lang,
-  role: "black" | "white",
-  status: "black" | "white",
-  phase: "opening" | "midgame" | "endgame",
-  caseId: number,
-  board: string[],
-  moves: Move[] = []
-) {
   const lines: string[] = []
 
   // 枕言葉
-  lines.push(roleHeaderDict[lang][role])
-  lines.push(`${statusDict[lang][status]}の手番、${phaseDict[lang][phase]}です。`)
+  lines.push(roleHeaderDict[lang][status])
+  lines.push(`現在は${statusDict[lang][status]}の手番、${phaseDict[lang][phase]}です。`)
 
-  // ケース別コメント
+  // ケースごとの説明
   lines.push(caseDict[caseId][lang])
 
-  // 合法手（必要な場合のみ）
+  // 候補手
   if (caseId === 2 && moves.length === 1) {
     lines.push(moveToHumanReadable(moves[0], lang))
   }
   if (caseId === 3 && moves.length === 2) {
-    moves.forEach((m) => lines.push(moveToHumanReadable(m, lang)))
+    moves.forEach(m => lines.push(moveToHumanReadable(m, lang)))
   }
   if (caseId === 5) {
-    moves.forEach((m) => {
-      const cornerName = moveToCornerName(m, lang)
-      if (cornerName) {
-        lines.push(`${cornerName}`)
-      }
-    })
+    moves.forEach(m => lines.push(moveToCornerName(m, lang)))
   }
 
-  // ボードデータの意味補足
+  // ボードデータ補足
   lines.push(
     lang === "ja"
       ? "盤面データの意味: B=黒, W=白, -=空き"
       : "Board data legend: B=Black, W=White, -=Empty"
   )
-
-  // 実際のボード
   lines.push("現在の盤面:")
   lines.push(...board)
 
