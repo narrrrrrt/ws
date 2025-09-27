@@ -95,7 +95,8 @@ pre {
   font-size: 14px;          /* 任意。行の高さを基準にする */
   line-height: 1.4em;       /* 1行の高さ */
   height: calc(1.4em * 7);  /* 7行分で固定 */
-  overflow: hidden;    
+  /*overflow: hidden;*/
+  overflow-y: auto; 
 }
 
 /* --- スマホ用調整 (幅600px以下) --- */
