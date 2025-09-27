@@ -158,6 +158,10 @@ function connect() {
         if (msg.data.status) {
           renderStatus(msg.data.status);
         }
+        if (msg.data.init) {
+          const el = document.getElementById("explain");
+          if (el) el.textContent = t("aiWillExplain");
+        } 
       } else if (msg.event === "move") {
         if (msg.data.error) {
           showModal(msg.data.error);

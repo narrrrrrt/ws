@@ -4,7 +4,7 @@ import { EventResponse } from "../types"
 
 export function joinHandle(room: Room, data: any, ws: WebSocket): void {
   const { seat, token } = data
-  const { role, token: newToken } = join_l(room, seat, token)
+  const { role, token: newToken, init } = join_l(room, seat, token)
 
   room.sessions.set(ws, newToken)
 
@@ -13,7 +13,7 @@ export function joinHandle(room: Room, data: any, ws: WebSocket): void {
   } else {
     const response: EventResponse = {
       event: "join",
-      data: { role, token: newToken }
+      data: { role, token: newToken, init}
     }
     room.respond(ws, response)
     room.broadcast("join")

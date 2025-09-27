@@ -14,6 +14,7 @@ export function join_l(
   let role: Role = "observer"
   let newToken: string | null = null
   let isReload = false
+  let init = false
 
   // case 1: 新規参加 (seat のみ)
   if (seat && !token) {
@@ -22,11 +23,13 @@ export function join_l(
       room.board = [...Room.initialBoard]
       room.black = newToken
       role = "black"
+      init = true
     } else if (seat === "white" && room.white === null) {
       newToken = generateToken()
       room.board = [...Room.initialBoard]
       room.white = newToken
       role = "white"
+      init = true
     } else {
       role = "observer"
     }
@@ -53,7 +56,8 @@ export function join_l(
       role = token === room.black ? "black" : "white"
       newToken = token
       room.board = [...Room.initialBoard]
-
+      init = true
+      
       // ステータス更新条件を追加
       if (room.black && room.white) {
         // 両方そろっていればゲーム開始
@@ -62,6 +66,7 @@ export function join_l(
         // 片方だけなら waiting
         room.status = "waiting"
       }
+
 
     } else {
       role = "observer"
@@ -85,5 +90,5 @@ export function join_l(
     room.touchToken(newToken)
   }
 
-  return { role, token: newToken }
+  return { role, token: newToken, init}
 }

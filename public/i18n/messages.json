@@ -70,5 +70,13 @@
     "it": "Alla lobby",
     "fr": "Vers le hall",
     "ja": "ロビーへ"
+  },
+  "aiWillExplain": {
+    "en": "AI will provide commentary",
+    "es": "La IA proporcionará comentarios",
+    "de": "Die KI wird Kommentare geben",
+    "it": "L'IA fornirà un commento",
+    "fr": "L'IA fournira des explications",
+    "ja": "AIが解説します"
   }
 }
