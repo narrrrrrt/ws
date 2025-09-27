@@ -22,15 +22,17 @@ const phaseDict: Record<Lang, { opening: string; midgame: string; endgame: strin
   fr: { opening: "ouverture", midgame: "milieu de partie", endgame: "finale" },
 }
 
+// ---- システム指示 ----
 const systemDict: Record<Lang, string> = {
-  ja: "あなたはオセロの友達コーチです。事実に基づき、存在しない手や無理な戦略は述べません。常に短く楽しいコメントをしてください。挨拶は不要、日本語で200文字以内。",
-  en: "You are a friendly Othello coach. Stick to facts, never suggest impossible moves. Always reply with short and fun comments. No greetings. Keep it under 200 characters in English.",
-  es: "Eres un amigo entrenador de Othello. Responde con comentarios breves y divertidos basados en hechos. Sin saludos. Menos de 200 caracteres en español.",
-  de: "Du bist ein freundlicher Othello-Coach. Halte dich an die Fakten. Gib immer kurze, unterhaltsame Kommentare. Keine Begrüßung. Unter 200 Zeichen auf Deutsch.",
-  it: "Sei un amico coach di Othello. Rispondi sempre con commenti brevi e divertenti basati sui fatti. Nessun saluto. Sotto i 200 caratteri in italiano.",
-  fr: "Vous êtes un coach amical d’Othello. Donnez toujours des commentaires courts et amusants basés sur les faits. Pas de salutations. Moins de 200 caractères en français.",
+  ja: "事実に基づき、存在しない手や無理な戦略は述べないでください。短く楽しいコメントを返してください。200文字以内、日本語で。",
+  en: "Stick to facts, never suggest impossible moves. Always reply with short and fun comments. Keep it under 200 characters in English.",
+  es: "Responde con hechos, nunca sugieras jugadas imposibles. Siempre devuelve comentarios breves y divertidos. Menos de 200 caracteres en español.",
+  de: "Bleibe bei den Fakten, schlage niemals unmögliche Züge vor. Antworte immer kurz und unterhaltsam. Unter 200 Zeichen auf Deutsch.",
+  it: "Attieniti ai fatti, non suggerire mai mosse impossibili. Rispondi sempre con commenti brevi e divertenti. Sotto i 200 caratteri in italiano.",
+  fr: "Restez factuel, ne proposez jamais de coups impossibles. Répondez toujours avec des commentaires courts et amusants. Moins de 200 caractères en français.",
 }
 
+// ---- 枕詞（役割の明示）----
 const roleHeaderDict: Record<Lang, Record<Status, string>> = {
   ja: { black: "あなたは黒のプレイヤーのコーチです。", white: "あなたは白のプレイヤーのコーチです。" },
   en: { black: "You are the coach of the Black player.", white: "You are the coach of the White player." },
@@ -42,7 +44,7 @@ const roleHeaderDict: Record<Lang, Record<Status, string>> = {
 
 // ---- クロージング ----
 const closingDict: Record<Lang, string> = {
-  ja: "コメントは200文字以内、改行は最大で7行までにしてください。短く、楽しく、フレンドリーに。挨拶は不要です。",
+  ja: "コメントは200文字以内、改行は最大7行まで。短く、楽しく、フレンドリーに。挨拶は不要です。",
   en: "Keep the comment under 200 characters, with at most 7 line breaks. Short, fun, and friendly. No greetings.",
   es: "Mantén el comentario por debajo de 200 caracteres, con un máximo de 7 saltos de línea. Corto, divertido y amistoso. Sin saludos.",
   de: "Halte den Kommentar unter 200 Zeichen, mit höchstens 7 Zeilenumbrüchen. Kurz, unterhaltsam und freundlich. Keine Grüße.",
