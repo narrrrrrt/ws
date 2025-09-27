@@ -1,15 +1,19 @@
+import { geminiHandler } from "./ai/gemini";
 const VALID_IDS = ["1", "2", "3", "4"]
 
 export default {
   async fetch(request: Request, env: any): Promise<Response> {
-    // ---- 1. アセット優先 ----
+
     const assetRes = await env.ASSETS.fetch(request.clone())
     if (assetRes.status !== 404) {
       return assetRes
     }
 
-    // ---- 2. ルームIDと残りパスを一発で分割 ----
     const url = new URL(request.url)
+    if (url.pathname === "/ai") {
+      return geminiHandler(request, env);
+    }
+
     const [roomId, ...rest] = url.pathname.split("/").filter(s => s.length > 0)
     const restPath = "/" + rest.join("/")
 

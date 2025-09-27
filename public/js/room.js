@@ -1,3 +1,5 @@
+import { detectLanguage, loadMessages, t } from "./lang.js";
+
 // --- グローバル変数 ---
 let myToken = null;
 let myRole = null;
@@ -6,6 +8,7 @@ let roomId = null;
 let closeFlag = false;
 let seat = "observer";
 let retryCount = 0;
+let lang;
 
 // --- debug utility ---
 function debugLog(message) {
@@ -166,6 +169,20 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
+if (myRole === msg.data.status) {
+          fetch("/ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ board: msg.data.board, status: msg.data.status, lang, movesByColor })
+          })
+          .then(res => res.json())
+          .then(data => {
+            const el = document.getElementById("explain")
+            //const elChat = document.getElementById("chatlog")
+            if (el) el.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2)
+            //if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
+          })
+}
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
@@ -223,12 +240,15 @@ function connect() {
 
 // --- 実行部分 ---
 (async () => {
-  const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search); 
   roomId = params.get("id");
   seat = params.get("seat");
+  
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
   
-  await loadMessages();
+  lang = detectLanguage(params.get("lang"));
+
+  await loadMessages(lang);
 
   // 起動時に「ロビーへ」を差し替え
   const lobbyLink = document.getElementById("to-lobby");
