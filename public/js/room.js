@@ -229,7 +229,7 @@ function connect() {
           if (myRole !== msg.data.status) {
             renderBoard(msg.data.board, msg.data.status);
             
-            //const nextStatus = msg.data.status === "black" ? "white" : "black";
+            const nextStatus = msg.data.status === "black" ? "white" : "black";
 
             // 次の手番の合法手を取得
             const moves = movesByColor[msg.data.status];
@@ -242,7 +242,6 @@ function connect() {
               // 次の手番でシミュレーション
               predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
               
-
 debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
 debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
               
@@ -256,7 +255,7 @@ debugLog("No valid best move (pass?)");
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 board: predictedBoard, /*msg.data.board,*/
-                status: nextStatus, /*msg.data.status,*/
+                status: msg.data.status,
                 lang,
                 movesByColor
               })
