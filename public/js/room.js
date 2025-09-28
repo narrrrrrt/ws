@@ -247,7 +247,8 @@ function connect() {
               activateTurn();
             });
           } else {
-            activateTurn();
+            //activateTurn();
+            renderBoard(msg.data.board, msg.data.status);
           }
         }
       } else if (msg.event === "pass") {
