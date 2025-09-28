@@ -117,8 +117,8 @@ function renderStatus(status) {
 function activateTurn() {
   if (
     //pending.board &&
-    pending.explain /*&&
-    myRole === pending.status*/
+    pending.explain &&
+    myRole === pending.status
   ) {
     renderBoard(pending.board, pending.status);
     explain.textContent = pending.explain;
