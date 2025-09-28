@@ -9,6 +9,13 @@ let closeFlag = false;
 let seat = "observer";
 let retryCount = 0;
 let lang;
+let pending = {
+  explain: null,
+  board: null,
+  status: null,
+};
+
+
 
 let debug, modal, msgEl, okBtn, boardEl, s, explain, chatlog;
 
@@ -107,6 +114,22 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
+function activateTurn() {
+  if (
+    pending.board &&
+    pending.explain &&
+    myRole === pending.status
+  ) {
+    renderBoard(pending.board, pending.status);
+    explain.textContent = pending.explain;
+
+    // pending をリセット
+    pending.board = null;
+    pending.explain = null;
+    pending.status = null;
+  }
+}
+
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
@@ -159,7 +182,7 @@ function connect() {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          renderBoard(msg.data.board, msg.data.status);
+          //renderBoard(msg.data.board, msg.data.status);
 
           // --- ゲーム終了チェック ---
           const movesByColor = {
@@ -199,7 +222,10 @@ function connect() {
             }));
           }
           
-          if (myRole === msg.data.status) {
+          pending.board = msg.data.board;
+          pending.status = msg.data.status;
+          if (myRole !== msg.data.status) {
+          /*
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -213,7 +239,28 @@ function connect() {
           } else {
             if (explain) explain.textContent = "";
             //if (chatlog) chatlog.textContent = "";
-          }       
+          */ 
+            fetch("/ai", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                board: msg.data.board,
+                status: msg.data.status,
+                lang,
+                movesByColor
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              pending.explain = typeof data.response === "string"
+                ? data.response
+                : JSON.stringify(data.response, null, 2);
+
+              activateTurn();
+            });
+          } else {
+            activateTurn();
+          }
         }
       } else if (msg.event === "pass") {
         // --- Pass notification from server ---
