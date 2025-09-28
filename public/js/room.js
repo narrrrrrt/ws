@@ -237,13 +237,14 @@ function connect() {
             if (bestMove) {
               predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
             }
+            const nextStatus = msg.data.status === "black" ? "white" : "black";
 
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 board: predictedBoard, /*msg.data.board,*/
-                status: msg.data.status,
+                status: nextStatus, /*msg.data.status,*/
                 lang,
                 movesByColor
               })
