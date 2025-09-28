@@ -227,6 +227,7 @@ function connect() {
           
           pending.status = msg.data.status;
           if (myRole !== msg.data.status) {
+            renderBoard(msg.data.board, msg.data.status);
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
