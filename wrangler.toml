@@ -17,10 +17,10 @@ tag = "v1"
 new_sqlite_classes = ["RoomDO"]
 
 [vars]
-HEARTBEAT_TIMEOUT = "30000"     # ハートビート (ms)
-LASTUPDATE_TIMEOUT = "300000"  # ラストアップデート (ms)
+#HEARTBEAT_TIMEOUT = "30000"     # ハートビート (ms)
+#LASTUPDATE_TIMEOUT = "300000"  # ラストアップデート (ms)
 
-GEMINI_API_KEY = "AIzaSyBW8yRK4AuG5U6n-sRI8m-1GIh3DDV8ies"
+#GEMINI_API_KEY = "xxxxxxxxxx"
 
 # Workers AI バインディング
 [ai]
