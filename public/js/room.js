@@ -120,7 +120,7 @@ function activateTurn() {
     pending.explain &&
     myRole === pending.status
   ) {
-    renderBoard(pending.board, pending.status);
+    //renderBoard(pending.board, pending.status);
     explain.textContent = pending.explain;
 
     // pending をリセット
@@ -185,7 +185,7 @@ function connect() {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          //renderBoard(msg.data.board, msg.data.status);
+          renderBoard(msg.data.board, msg.data.status);
 
           // --- ゲーム終了チェック ---
           const movesByColor = {
@@ -244,11 +244,12 @@ function connect() {
                 ? data.response
                 : JSON.stringify(data.response, null, 2);
 
-              activateTurn();
+              //activateTurn();
             });
           } else {
+            explain.textContent = pending.explain;
             //activateTurn();
-            renderBoard(msg.data.board, msg.data.status);
+            //renderBoard(msg.data.board, msg.data.status);
           }
         }
       } else if (msg.event === "pass") {
