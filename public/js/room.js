@@ -11,8 +11,8 @@ let retryCount = 0;
 let lang;
 
 // --- debug utility ---
+const debug = document.getElementById("log");
 function debugLog(message) {
-  const debug = document.getElementById("log");
   if (debug) {
     debug.textContent += message + "\n";
     debug.scrollTop = debug.scrollHeight; // 下までスクロール
@@ -20,13 +20,12 @@ function debugLog(message) {
 }
 
 // --- modal utility ---
+const modal = document.getElementById("modal");
+const msgEl = document.getElementById("modal-message");
+const okBtn = document.getElementById("modal-ok");
 function showModal(messageKey, callback, vars = {}) {
-  const modal = document.getElementById("modal");
-  const msgEl = document.getElementById("modal-message");
   msgEl.textContent = t(messageKey, vars);
   modal.style.display = "flex";
-
-  const okBtn = document.getElementById("modal-ok");
   const handler = () => {
     modal.style.display = "none";
     okBtn.removeEventListener("click", handler);
@@ -36,10 +35,9 @@ function showModal(messageKey, callback, vars = {}) {
 }
 
 // --- UI 更新関数 ---
+const boardEl = document.getElementById("board");
 function renderBoard(board, status) {
-  const boardEl = document.getElementById("board");
   boardEl.innerHTML = "";
-
   // --- 合法手を出す条件 ---
   let validMoves = [];
   if (myRole && myRole !== "observer" && myRole === status.toLowerCase()) {
@@ -108,11 +106,13 @@ function renderBoard(board, status) {
   });
 }
 
+const s = document.getElementById("status");
 function renderStatus(status) {
-  const s = document.getElementById("status");
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
+const explain = document.getElementById("explain");
+const chatlog = document.getElementById("chatlog")
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
@@ -159,8 +159,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          const el = document.getElementById("explain");
-          if (el) el.textContent = t("aiWillExplain");
+          if (explain) el.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
         if (msg.data.error) {
@@ -181,11 +180,12 @@ if (myRole === msg.data.status) {
           })
           .then(res => res.json())
           .then(data => {
-            const el = document.getElementById("explain")
-            const elChat = document.getElementById("chatlog")
-            if (el) el.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2)
-            if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2)
+            if (explain) explain.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2);
+            if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2);
           })
+} else {
+            if (explain) explain.textContent = "";
+            if (elChat) elChat.textContent = "";
 }
 
           // --- ゲーム終了チェック ---
