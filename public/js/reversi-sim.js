@@ -9,6 +9,7 @@ export function simulateMove(board, move, color) {
   const opponent = color === "black" ? "W" : "B";
   const me = color === "black" ? "B" : "W";
 
+  // 打った位置に自分の石を置く
   newBoard[move.y][move.x] = me;
 
   // 裏返し処理（8方向）
@@ -23,6 +24,7 @@ export function simulateMove(board, move, color) {
       if (newBoard[y][x] === opponent) {
         flips.push([x,y]);
       } else if (newBoard[y][x] === me) {
+        // はさんだ石を全部裏返す
         for (const [fx,fy] of flips) {
           newBoard[fy][fx] = me;
         }
@@ -35,30 +37,45 @@ export function simulateMove(board, move, color) {
     }
   }
 
+  // 新しい盤面を返す
   return newBoard.map(row => row.join(""));
 }
 
-// 候補手から「取れる石が一番多い手」を選ぶ
+// 候補手から「角優先 → 石数ゲイン最大 → 同点ならランダム」で最善手を選ぶ
 export function pickBestMove(board, moves, color) {
   if (!moves || moves.length === 0) return null;   // パス
   if (moves.length === 1) return moves[0];         // 確定
 
-  let bestMoves = [];
-  let bestScore = -1;
   const me = color === "black" ? "B" : "W";
+
+  // 角の座標
+  const corners = [
+    {x:0, y:0}, {x:7, y:0},
+    {x:0, y:7}, {x:7, y:7}
+  ];
+
+  // 角が取れるなら即決
+  for (const move of moves) {
+    if (corners.some(c => c.x === move.x && c.y === move.y)) {
+      return move;
+    }
+  }
+
+  // 通常は「増えた石の数」が最大の手
+  let bestMoves = [];
+  let bestGain = -1;
 
   for (const move of moves) {
     const newBoard = simulateMove(board, move, color);
 
-    // 「増えた石の数」をスコアにする
     const oldCount = board.join("").split(me).length - 1;
     const newCount = newBoard.join("").split(me).length - 1;
     const gain = newCount - oldCount;
 
-    if (gain > bestScore) {
-      bestScore = gain;
+    if (gain > bestGain) {
+      bestGain = gain;
       bestMoves = [move];
-    } else if (gain === bestScore) {
+    } else if (gain === bestGain) {
       bestMoves.push(move);
     }
   }
