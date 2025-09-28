@@ -233,6 +233,12 @@ function connect() {
 
             // 次の手番の合法手を取得
             const moves = movesByColor[nextStatus];
+            
+debugLog("current status: " + msg.data.status);
+debugLog("nextStatus (calculated): " + nextStatus);
+debugLog("valid moves (black): " + JSON.stringify(movesByColor.black));
+debugLog("valid moves (white): " + JSON.stringify(movesByColor.white));
+            
 
             // 次の手番の最善手を選ぶ
             const bestMove = pickBestMove(msg.data.board, moves, nextStatus);
