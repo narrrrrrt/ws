@@ -170,7 +170,7 @@ function connect() {
           myRole = msg.data.role;
         }
         if (msg.data.board) {
-          pending.board = msg.data.board; 
+          //pending.board = msg.data.board; 
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
@@ -178,7 +178,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          //pending.explain = t("aiWillExplain");
+          pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
