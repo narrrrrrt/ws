@@ -260,7 +260,7 @@ function connect() {
               pending.explain = typeof data.response === "string"
                 ? data.response
                 : JSON.stringify(data.response, null, 2);
-              pending.chatlog = data.chat;
+              pending.chatlog = JSON.stringify(data.chat, null, 2);
               
               if (pending.board) {
                 explain.textContent = pending.explain;
