@@ -11,7 +11,6 @@ let retryCount = 0;
 let lang;
 
 // --- debug utility ---
-const debug = document.getElementById("log");
 function debugLog(message) {
   if (debug) {
     debug.textContent += message + "\n";
@@ -20,9 +19,6 @@ function debugLog(message) {
 }
 
 // --- modal utility ---
-const modal = document.getElementById("modal");
-const msgEl = document.getElementById("modal-message");
-const okBtn = document.getElementById("modal-ok");
 function showModal(messageKey, callback, vars = {}) {
   msgEl.textContent = t(messageKey, vars);
   modal.style.display = "flex";
@@ -35,7 +31,6 @@ function showModal(messageKey, callback, vars = {}) {
 }
 
 // --- UI 更新関数 ---
-const boardEl = document.getElementById("board");
 function renderBoard(board, status) {
   boardEl.innerHTML = "";
   // --- 合法手を出す条件 ---
@@ -106,13 +101,10 @@ function renderBoard(board, status) {
   });
 }
 
-const s = document.getElementById("status");
 function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
-const explain = document.getElementById("explain");
-const chatlog = document.getElementById("chatlog");
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
@@ -181,11 +173,11 @@ if (myRole === msg.data.status) {
           .then(res => res.json())
           .then(data => {
             if (explain) explain.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2);
-            if (elChat) elChat.textContent = JSON.stringify(data.chat, null, 2);
+            if (chatlog) chatlog.textContent = JSON.stringify(data.chat, null, 2);
           })
 } else {
             if (explain) explain.textContent = "";
-            if (elChat) elChat.textContent = "";
+            if (chatlog) chatlog.textContent = "";
 }
 
           // --- ゲーム終了チェック ---
@@ -249,6 +241,15 @@ if (myRole === msg.data.status) {
   seat = params.get("seat");
   
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
+  
+  const debug = document.getElementById("log");
+  const modal = document.getElementById("modal");
+  const msgEl = document.getElementById("modal-message");
+  const okBtn = document.getElementById("modal-ok");
+  const boardEl = document.getElementById("board");
+  const s = document.getElementById("status");
+  const explain = document.getElementById("explain");
+  const chatlog = document.getElementById("chatlog");
   
   lang = detectLanguage(params.get("lang"));
 
