@@ -49,11 +49,16 @@ export function pickBestMove(board, moves, color) {
 
   for (const move of moves) {
     const newBoard = simulateMove(board, move, color);
-    const score = newBoard.join("").split(me).length - 1;
-    if (score > bestScore) {
-      bestScore = score;
+
+    // 「増えた石の数」をスコアにする
+    const oldCount = board.join("").split(me).length - 1;
+    const newCount = newBoard.join("").split(me).length - 1;
+    const gain = newCount - oldCount;
+
+    if (gain > bestScore) {
+      bestScore = gain;
       bestMoves = [move];
-    } else if (score === bestScore) {
+    } else if (gain === bestScore) {
       bestMoves.push(move);
     }
   }

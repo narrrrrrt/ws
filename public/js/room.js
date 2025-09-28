@@ -243,8 +243,8 @@ function connect() {
               predictedBoard = simulateMove(msg.data.board, bestMove, nextStatus);
               
 
-  debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
-  debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
+debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
+debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
               
               
             } else {
