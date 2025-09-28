@@ -170,12 +170,15 @@ function connect() {
           myRole = msg.data.role;
         }
         if (msg.data.board) {
+          pending.board = msg.data.board; 
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
+          pending.status = msg.data.status;
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
+          pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
