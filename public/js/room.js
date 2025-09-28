@@ -230,15 +230,20 @@ function connect() {
           if (myRole !== msg.data.status) {
             renderBoard(msg.data.board, msg.data.status);
             
-            const moves = movesByColor[msg.data.status];
-            const bestMove = pickBestMove(msg.data.board, moves, msg.data.status);
+            const nextStatus = msg.data.status === "black" ? "white" : "black";
+
+            // 次の手番の合法手を取得
+            const moves = movesByColor[nextStatus];
+
+            // 次の手番の最善手を選ぶ
+            const bestMove = pickBestMove(msg.data.board, moves, nextStatus);
 
             let predictedBoard = msg.data.board;
             if (bestMove) {
-              predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
+              // 次の手番でシミュレーション
+              predictedBoard = simulateMove(msg.data.board, bestMove, nextStatus);
             }
-            const nextStatus = msg.data.status === "black" ? "white" : "black";
-
+            
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
