@@ -166,21 +166,7 @@ function connect() {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
-if (myRole === msg.data.status) {
-          fetch("/ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ board: msg.data.board, status: msg.data.status, lang, movesByColor })
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (explain) explain.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2);
-            if (chatlog) chatlog.textContent = JSON.stringify(data.chat, null, 2);
-          })
-} else {
-            if (explain) explain.textContent = "";
-            if (chatlog) chatlog.textContent = "";
-}
+
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
@@ -212,6 +198,22 @@ if (myRole === msg.data.status) {
               y: null
             }));
           }
+          
+          if (myRole === msg.data.status) {
+            fetch("/ai", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ board: msg.data.board, status: msg.data.status, lang, movesByColor })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (explain) explain.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2);
+              //if (chatlog) chatlog.textContent = JSON.stringify(data.chat, null, 2);
+            })
+          } else {
+            if (explain) explain.textContent = "";
+            //if (chatlog) chatlog.textContent = "";
+          }       
         }
       } else if (msg.event === "pass") {
         // --- Pass notification from server ---
