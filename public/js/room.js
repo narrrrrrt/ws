@@ -255,7 +255,7 @@ debugLog("No valid best move (pass?)");
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 board: predictedBoard, /*msg.data.board,*/
-                status: msg.data.status,
+                status: nextStatus, /*msg.data.status,*/
                 lang,
                 movesByColor
               })
