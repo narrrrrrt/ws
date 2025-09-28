@@ -159,7 +159,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          if (explain) el.textContent = t("aiWillExplain");
+          if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
         if (msg.data.error) {
