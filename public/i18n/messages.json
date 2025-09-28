@@ -72,11 +72,11 @@
     "ja": "ロビーへ"
   },
   "aiWillExplain": {
-    "en": "AI will provide commentary",
-    "es": "La IA proporcionará comentarios",
-    "de": "Die KI wird Kommentare geben",
-    "it": "L'IA fornirà un commento",
-    "fr": "L'IA fournira des explications",
-    "ja": "AIが解説します"
+    "en": "Gemini 2.5 Flash Lite will provide commentary",
+    "es": "Gemini 2.5 Flash Lite proporcionará comentarios",
+    "de": "Gemini 2.5 Flash Lite wird Kommentare geben",
+    "it": "Gemini 2.5 Flash Lite fornirà un commento",
+    "fr": "Gemini 2.5 Flash Lite fournira des explications",
+    "ja": "Gemini 2.5 Flash Liteが解説します"
   }
 }
