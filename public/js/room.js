@@ -178,7 +178,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          pending.explain = t("aiWillExplain");
+          //pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
