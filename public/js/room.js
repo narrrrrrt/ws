@@ -14,6 +14,7 @@ let pending = {
   explain: null,
   board: null,
   status: null,
+  chatlog: null,
 };
 
 
@@ -259,9 +260,11 @@ function connect() {
               pending.explain = typeof data.response === "string"
                 ? data.response
                 : JSON.stringify(data.response, null, 2);
+              pending.chatlog = data.chat;
               
               if (pending.board) {
                 explain.textContent = pending.explain;
+                chatlog.textContent = pending.chatlog;
                 pending.explain = null;
                 renderBoard(pending.board, pending.status);
                 pending.board = null;
@@ -270,6 +273,7 @@ function connect() {
           } else {
             if (pending.explain) {
               explain.textContent = pending.explain;
+              chatlog.textContent = pending.chatlog;
               pending.explain = null;
               pending.board = null;
               renderBoard(msg.data.board, msg.data.status);
