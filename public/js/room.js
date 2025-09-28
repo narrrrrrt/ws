@@ -143,6 +143,7 @@ function connect() {
     } else {
       retryCount++;
       if (retryCount > 3) {
+        debugLog('retryCount > 3')
         showModal("reconnectFailed", () => {
           window.location.href = "/";
         });
