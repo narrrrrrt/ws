@@ -272,7 +272,7 @@ debugLog("No valid best move (pass?)");
               
               if (pending.board) {
                 explain.textContent = pending.explain;
-                chatlog.textContent = pending.chatlog;
+                if (chatlog) chatlog.textContent = pending.chatlog;
                 pending.explain = null;
                 renderBoard(pending.board, pending.status);
                 pending.board = null;
@@ -281,7 +281,7 @@ debugLog("No valid best move (pass?)");
           } else {
             if (pending.explain) {
               explain.textContent = pending.explain;
-              chatlog.textContent = pending.chatlog;
+              if (chatlog) chatlog.textContent = pending.chatlog;
               pending.explain = null;
               pending.board = null;
               renderBoard(msg.data.board, msg.data.status);
