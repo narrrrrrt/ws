@@ -17,8 +17,6 @@ let pending = {
   chatlog: null,
 };
 
-
-
 let debug, modal, msgEl, okBtn, boardEl, s, explain, chatlog;
 
 // --- debug utility ---
@@ -243,6 +241,14 @@ function connect() {
             if (bestMove) {
               // 次の手番でシミュレーション
               predictedBoard = simulateMove(msg.data.board, bestMove, nextStatus);
+              
+
+  debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
+  debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
+              
+              
+            } else {
+debugLog("No valid best move (pass?)");
             }
             
             fetch("/ai", {
