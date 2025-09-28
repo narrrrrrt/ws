@@ -1,4 +1,5 @@
 import { detectLanguage, loadMessages, t } from "./lang.js";
+import { simulateMove, pickBestMove } from "./reversi-sim.js";
 
 // --- グローバル変数 ---
 let myToken = null;
@@ -228,11 +229,20 @@ function connect() {
           pending.status = msg.data.status;
           if (myRole !== msg.data.status) {
             renderBoard(msg.data.board, msg.data.status);
+            
+            const moves = movesByColor[msg.data.status];
+            const bestMove = pickBestMove(msg.data.board, moves, msg.data.status);
+
+            let predictedBoard = msg.data.board;
+            if (bestMove) {
+              predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
+            }
+
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                board: msg.data.board,
+                board: predictedBoard, /*msg.data.board,*/
                 status: msg.data.status,
                 lang,
                 movesByColor
