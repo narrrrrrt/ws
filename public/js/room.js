@@ -10,6 +10,8 @@ let seat = "observer";
 let retryCount = 0;
 let lang;
 
+let debug, modal, msgEl, okBtn, boardEl, s, explain, chatlog;
+
 // --- debug utility ---
 function debugLog(message) {
   if (debug) {
@@ -242,14 +244,14 @@ if (myRole === msg.data.status) {
   
   document.body.innerHTML = document.body.innerHTML.replaceAll("#{id}", roomId);
   
-  const debug = document.getElementById("log");
-  const modal = document.getElementById("modal");
-  const msgEl = document.getElementById("modal-message");
-  const okBtn = document.getElementById("modal-ok");
-  const boardEl = document.getElementById("board");
-  const s = document.getElementById("status");
-  const explain = document.getElementById("explain");
-  const chatlog = document.getElementById("chatlog");
+  debug = document.getElementById("log");
+  modal = document.getElementById("modal");
+  msgEl = document.getElementById("modal-message");
+  okBtn = document.getElementById("modal-ok");
+  boardEl = document.getElementById("board");
+  s = document.getElementById("status");
+  explain = document.getElementById("explain");
+  chatlog = document.getElementById("chatlog");
   
   lang = detectLanguage(params.get("lang"));
 
