@@ -185,7 +185,7 @@ function connect() {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          renderBoard(msg.data.board, msg.data.status);
+          //renderBoard(msg.data.board, msg.data.status);
 
           // --- ゲーム終了チェック ---
           const movesByColor = {
@@ -225,7 +225,6 @@ function connect() {
             }));
           }
           
-          pending.board = msg.data.board;
           pending.status = msg.data.status;
           if (myRole !== msg.data.status) {
             fetch("/ai", {
@@ -243,13 +242,23 @@ function connect() {
               pending.explain = typeof data.response === "string"
                 ? data.response
                 : JSON.stringify(data.response, null, 2);
-
-              //activateTurn();
+              
+              if (pending.board) {
+                explain.textContent = pending.explain;
+                pending.explain = null;
+                renderBoard(pending.board, pending.status);
+                pending.board = null;
+              }
             });
           } else {
-            explain.textContent = pending.explain;
-            //activateTurn();
-            //renderBoard(msg.data.board, msg.data.status);
+            if (pending.explain) {
+              explain.textContent = pending.explain;
+              pending.explain = null;
+              pending.board = null;
+              renderBoard(msg.data.board, msg.data.status);
+            } else {
+              pending.board = msg.data.board;
+            }
           }
         }
       } else if (msg.event === "pass") {
