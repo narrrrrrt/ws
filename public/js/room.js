@@ -112,7 +112,7 @@ function renderStatus(status) {
 }
 
 const explain = document.getElementById("explain");
-const chatlog = document.getElementById("chatlog")
+const chatlog = document.getElementById("chatlog");
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
