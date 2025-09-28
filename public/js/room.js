@@ -116,7 +116,7 @@ function renderStatus(status) {
 
 function activateTurn() {
   if (
-    pending.board &&
+    //pending.board &&
     pending.explain /*&&
     myRole === pending.status*/
   ) {
@@ -174,11 +174,11 @@ function connect() {
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
-          pending.status = msg.data.status;
+          //pending.status = msg.data.status;
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          pending.explain = t("aiWillExplain");
+          //pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
@@ -228,21 +228,6 @@ function connect() {
           pending.board = msg.data.board;
           pending.status = msg.data.status;
           if (myRole !== msg.data.status) {
-          /*
-            fetch("/ai", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ board: msg.data.board, status: msg.data.status, lang, movesByColor })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (explain) explain.textContent = typeof data.response === "string" ? data.response : JSON.stringify(data.response, null, 2);
-              //if (chatlog) chatlog.textContent = JSON.stringify(data.chat, null, 2);
-            })
-          } else {
-            if (explain) explain.textContent = "";
-            //if (chatlog) chatlog.textContent = "";
-          */ 
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
