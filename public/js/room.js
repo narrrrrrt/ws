@@ -115,8 +115,6 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
-
-
 function connect() {
   try {
     ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
@@ -162,6 +160,7 @@ function connect() {
       if (msg.event === "ping") {
         
       } else if (msg.event === "join") {
+        debugLog("join");
         lastJoinAt = true;
         if (msg.data.token) {
           myToken = msg.data.token
@@ -183,6 +182,7 @@ function connect() {
         }
         if (msg.data.init) {
           //lastJoinAt = true;
+          debugLog("join init");
           pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
