@@ -169,6 +169,7 @@ function connect() {
   });
 
   ws.addEventListener("close", (event) => {
+    ws = null;
     if (closeFlag) {
       window.location.href = "/";
     } else {
@@ -181,7 +182,10 @@ function connect() {
       } else {
         //debugLog('setTimeout(connect, 500);')
         showModal("Reconnecting...", null, { withoutOk: true }); 
-        setTimeout(connect, 500);
+        setTimeout(() => {
+          if(!ws) connect();
+        }, 500);
+        //setTimeout(connect, 500);
       }
     }
   });
