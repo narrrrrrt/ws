@@ -162,6 +162,7 @@ function connect() {
       if (msg.event === "ping") {
         
       } else if (msg.event === "join") {
+        lastJoinAt = true;
         if (msg.data.token) {
           myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
@@ -181,7 +182,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          lastJoinAt = true;
+          //lastJoinAt = true;
           pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
