@@ -129,6 +129,8 @@ function connect() {
       if (Date.now() - lastPingAt > 15000) {
         debugLog("ping timeout → reconnect");
         ws.close();
+      } else {
+        debugLog("ping");
       }
     }, 5000);
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
