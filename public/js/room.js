@@ -183,10 +183,10 @@ function connect() {
         debugLog('setTimeout(connect, 500);')
         showModal("Reconnecting...", null, { withoutOk: true }); 
         setTimeout(() => {
-          if(!ws) {
+          //if(!ws) {
             myToken = null;
             connect();
-          } 
+          //} 
         }, 500);
         //setTimeout(connect, 500);
       }
