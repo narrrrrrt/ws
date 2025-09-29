@@ -126,7 +126,8 @@ function connect() {
     setTimeout(() => {
       if (!lastJoinAt) {
         debugLog("join timeout → reconnect");
-        ws.close();
+        try { ws.close(); } catch(e) {}
+        connect();
       }
     }, 5000);
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
