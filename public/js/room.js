@@ -118,7 +118,13 @@ function renderStatus(status) {
 
 
 function connect() {
-  ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
+  try {
+    ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
+  } catch (e) {
+    debugLog("WebSocket connect error:", e);
+    setTimeout(connect, 1000); // 少し待って再試行
+    return;
+  }
 
   ws.addEventListener("open", () => {
     debugLog("open");
