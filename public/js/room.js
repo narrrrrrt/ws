@@ -175,8 +175,6 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.board) {
-          lastJoinAt = true;
-          debugLog("join board");
           //pending.board = msg.data.board; 
           renderBoard(msg.data.board, msg.data.status);
         }
@@ -185,7 +183,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
-          //lastJoinAt = true;
+          lastJoinAt = true;
           debugLog("join init");
           pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
