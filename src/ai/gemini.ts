@@ -36,8 +36,8 @@ export async function geminiHandler(
 
     // Gemini API 呼び出し
     rawResponse = await fetch(
-      //"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + env.GEMINI_API_KEY,
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=" + env.GEMINI_API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + env.GEMINI_API_KEY,
+      //"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=" + env.GEMINI_API_KEY,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,7 +53,7 @@ export async function geminiHandler(
 
     return Response.json({
       chat,
-      response: data
+      response: text
     })
   } catch (err: any) {
     return Response.json({
