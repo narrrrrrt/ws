@@ -161,7 +161,7 @@ function connect() {
         
       } else if (msg.event === "join") {
         debugLog("join");
-        lastJoinAt = true;
+        //lastJoinAt = true;
         if (msg.data.token) {
           myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
@@ -173,6 +173,8 @@ function connect() {
           myRole = msg.data.role;
         }
         if (msg.data.board) {
+          lastJoinAt = true;
+          debugLog("join board");
           //pending.board = msg.data.board; 
           renderBoard(msg.data.board, msg.data.status);
         }
