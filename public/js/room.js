@@ -260,6 +260,7 @@ function connect() {
           
           pending.status = msg.data.status;
           if (myRole !== msg.data.status) {
+            explain.textContent = "";
             renderBoard(msg.data.board, msg.data.status);
             
             const nextStatus = msg.data.status === "black" ? "white" : "black";
