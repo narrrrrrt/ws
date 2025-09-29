@@ -158,11 +158,11 @@ function connect() {
     lastJoinAt = false;
     setTimeout(() => {
       if (!lastJoinAt) {
-        showModal("Reconnecting...", null, { withoutOk: true }); 
-        //debugLog("join timeout → reconnect");
-        try { ws.close(); } catch(e) {}
-        myToken = null;
-        connect();
+        //showModal("Reconnecting...", null, { withoutOk: true }); 
+        debugLog("join timeout → reconnect");
+        //try { ws.close(); } catch(e) {}
+        //myToken = null;
+        //connect();
       }
     }, 5000);
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
@@ -175,12 +175,12 @@ function connect() {
     } else {
       retryCount++;
       if (retryCount > 3) {
-        //debugLog('retryCount > 3');
+        debugLog('retryCount > 3');
         showModal("reconnectFailed", () => {
           window.location.href = "/";
         });
       } else {
-        //debugLog('setTimeout(connect, 500);')
+        debugLog('setTimeout(connect, 500);')
         showModal("Reconnecting...", null, { withoutOk: true }); 
         setTimeout(() => {
           if(!ws) connect();
