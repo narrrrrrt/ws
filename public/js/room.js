@@ -10,8 +10,7 @@ let closeFlag = false;
 let seat = "observer";
 let retryCount = 0;
 let lang;
-let lastPingAt;
-let pingChecker = null;
+let lastJoinAt;
 let pending = {
   explain: null,
   board: null,
@@ -123,14 +122,12 @@ function connect() {
 
   ws.addEventListener("open", () => {
     debugLog("open");
-    if (pingChecker) clearInterval(pingChecker);
-    lastPingAt = Date.now();
-    pingChecker = setInterval(() => {
-      if (Date.now() - lastPingAt > 15000) {
-        debugLog("ping timeout → reconnect");
+    if (pingChecker) clearInterval(joinChecker);
+    lastJoinAt = false;
+    setTimeout(() => {
+      if (!lastJoinAt) {
+        debugLog("join timeout → reconnect");
         ws.close();
-      } else {
-        debugLog("ping");
       }
     }, 5000);
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
@@ -157,7 +154,7 @@ function connect() {
     try {
       const msg = JSON.parse(evt.data);
       if (msg.event === "ping") {
-        lastPingAt = Date.now();
+        
       } else if (msg.event === "join") {
         if (msg.data.token) {
           myToken = msg.data.token
@@ -178,6 +175,7 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
+          lastJoinAt = true;
           pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
