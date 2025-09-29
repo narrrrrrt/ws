@@ -122,6 +122,7 @@ function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
   ws.addEventListener("open", () => {
+    debugLog("open");
     if (pingChecker) clearInterval(pingChecker);
     lastPingAt = Date.now();
     pingChecker = setInterval(() => {
