@@ -29,6 +29,7 @@ function debugLog(message) {
 }
 
 // --- modal utility ---
+/*
 function showModal(messageKey, callback, vars = {}) {
   msgEl.textContent = t(messageKey, vars);
   modal.style.display = "flex";
@@ -38,6 +39,33 @@ function showModal(messageKey, callback, vars = {}) {
     if (callback) callback();
   };
   okBtn.addEventListener("click", handler);
+}
+*/
+// --- modal utility ---
+function showModal(messageKey, callback, opts = {}) {
+  msgEl.textContent = t(messageKey, opts);
+
+  // OKボタンの表示/非表示切り替え
+  if (opts.withoutOk) {
+    okBtn.style.display = "none";
+  } else {
+    okBtn.style.display = "inline-block";
+  }
+
+  modal.style.display = "flex";
+
+  if (!opts.withoutOk) {
+    const handler = () => {
+      modal.style.display = "none";
+      okBtn.removeEventListener("click", handler);
+      if (callback) callback();
+    };
+    okBtn.addEventListener("click", handler);
+  }
+}
+
+function hideModal() {
+  modal.style.display = "none";
 }
 
 // --- UI 更新関数 ---
@@ -125,11 +153,13 @@ function connect() {
   }
 
   ws.addEventListener("open", () => {
-    debugLog("open");
+    //debugLog("open");
+    hideModal();
     lastJoinAt = false;
     setTimeout(() => {
       if (!lastJoinAt) {
-        debugLog("join timeout → reconnect");
+        showModal("Reconnecting...", null, { withoutOk: true }); 
+        //debugLog("join timeout → reconnect");
         try { ws.close(); } catch(e) {}
         myToken = null;
         connect();
@@ -149,7 +179,8 @@ function connect() {
           window.location.href = "/";
         });
       } else {
-        debugLog('setTimeout(connect, 500);')
+        //debugLog('setTimeout(connect, 500);')
+        showModal("Reconnecting...", null, { withoutOk: true }); 
         setTimeout(connect, 500);
       }
     }
@@ -162,7 +193,6 @@ function connect() {
         
       } else if (msg.event === "join") {
         debugLog("join");
-        //lastJoinAt = true;
         if (msg.data.token) {
           myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
@@ -175,11 +205,9 @@ function connect() {
           renderStatus(msg.data.status);
         }
         if (msg.data.board) {
-          //pending.board = msg.data.board; 
           renderBoard(msg.data.board, msg.data.status);
         }
         if (msg.data.status) {
-          //pending.status = msg.data.status;
           renderStatus(msg.data.status);
         }
         if (msg.data.init) {
@@ -192,14 +220,12 @@ function connect() {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          //renderBoard(msg.data.board, msg.data.status);
 
           // --- ゲーム終了チェック ---
           const movesByColor = {
             black: getValidMoves(msg.data.board, "black"),
             white: getValidMoves(msg.data.board, "white"),
           };
-
 
           // --- ゲーム終了チェック ---
           if (movesByColor.black.length === 0 && movesByColor.white.length === 0) {
@@ -241,8 +267,8 @@ function connect() {
             // 次の手番の合法手を取得
             const moves = movesByColor[msg.data.status];
             
-debugLog("Next status: " + nextStatus);
-debugLog("Valid moves: " + JSON.stringify(moves));          
+//debugLog("Next status: " + nextStatus);
+//debugLog("Valid moves: " + JSON.stringify(moves));          
             
             // 次の手番の最善手を選ぶ
             const bestMove = pickBestMove(msg.data.board, moves, msg.data.status);
@@ -252,12 +278,12 @@ debugLog("Valid moves: " + JSON.stringify(moves));
               // 次の手番でシミュレーション
               predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
               
-debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
-debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
+//debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
+//debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
               
               
             } else {
-debugLog("No valid best move (pass?)");
+//debugLog("No valid best move (pass?)");
             }
             
             fetch("/ai", {
