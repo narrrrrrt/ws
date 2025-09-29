@@ -122,7 +122,6 @@ function connect() {
 
   ws.addEventListener("open", () => {
     debugLog("open");
-    if (pingChecker) clearInterval(joinChecker);
     lastJoinAt = false;
     setTimeout(() => {
       if (!lastJoinAt) {
