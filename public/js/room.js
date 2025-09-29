@@ -131,6 +131,7 @@ function connect() {
       if (!lastJoinAt) {
         debugLog("join timeout → reconnect");
         try { ws.close(); } catch(e) {}
+        myToken = null;
         connect();
       }
     }, 5000);
@@ -171,6 +172,7 @@ function connect() {
         }
         if (msg.data.role) {
           myRole = msg.data.role;
+          renderStatus(msg.data.status);
         }
         if (msg.data.board) {
           lastJoinAt = true;
