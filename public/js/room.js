@@ -174,7 +174,7 @@ function connect() {
     } else {
       retryCount++;
       if (retryCount > 3) {
-        debugLog('retryCount > 3');
+        //debugLog('retryCount > 3');
         showModal("reconnectFailed", () => {
           window.location.href = "/";
         });
@@ -192,7 +192,7 @@ function connect() {
       if (msg.event === "ping") {
         
       } else if (msg.event === "join") {
-        debugLog("join");
+        //debugLog("join");
         if (msg.data.token) {
           myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
@@ -212,7 +212,7 @@ function connect() {
         }
         if (msg.data.init) {
           lastJoinAt = true;
-          debugLog("join init");
+          //debugLog("join init");
           pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
