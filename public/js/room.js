@@ -10,6 +10,8 @@ let closeFlag = false;
 let seat = "observer";
 let retryCount = 0;
 let lang;
+let lastPingAt;
+let pingChecker = null;
 let pending = {
   explain: null,
   board: null,
@@ -114,26 +116,20 @@ function renderStatus(status) {
   s.textContent = `Status: ${status}, You: ${myRole || "?"}`;
 }
 
-function activateTurn() {
-  if (
-    //pending.board &&
-    pending.explain &&
-    myRole === pending.status
-  ) {
-    //renderBoard(pending.board, pending.status);
-    explain.textContent = pending.explain;
 
-    // pending をリセット
-    pending.board = null;
-    pending.explain = null;
-    pending.status = null;
-  }
-}
 
 function connect() {
   ws = new WebSocket(`wss://${location.host}/${roomId}/ws`);
 
   ws.addEventListener("open", () => {
+    if (pingChecker) clearInterval(pingChecker);
+    lastPingAt = Date.now();
+    pingChecker = setInterval(() => {
+      if (Date.now() - lastPingAt > 15000) {
+        debugLog("ping timeout → reconnect");
+        ws.close();
+      }
+    }, 5000);
     ws.send(JSON.stringify({ event: "join", seat, token: myToken }));
   });
 
@@ -157,9 +153,9 @@ function connect() {
   ws.addEventListener("message", (evt) => {
     try {
       const msg = JSON.parse(evt.data);
-      if (msg.event === "ping") return;
-
-      if (msg.event === "join") {
+      if (msg.event === "ping") {
+        lastPingAt = Date.now();
+      } else if (msg.event === "join") {
         if (msg.data.token) {
           myToken = msg.data.token
           sessionStorage.setItem(`room-${roomId}-token`, JSON.stringify({
