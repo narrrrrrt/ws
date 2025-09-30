@@ -1,7 +1,3 @@
-export interface Env {
-  GITHUB_TOKEN: string;
-}
-
 export async function handleForm(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -23,8 +19,9 @@ ${message}
   const res = await fetch("https://api.github.com/repos/narrrrrrt/contact/issues", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github+json",
+      "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github+json",
+      "User-Agent": "ive-narrat-worker", // ★ これが必須
     },
     body: JSON.stringify({
       title: `お問い合わせ from ${name}`,
@@ -33,6 +30,7 @@ ${message}
     }),
   });
 
+  // 以下は前と同じ（多言語対応メッセージ）
   const messages: Record<string, string> = {
     ja: "送信しました。ありがとうございます！",
     en: "Your message has been sent. Thank you!",
