@@ -187,7 +187,7 @@ input[type="checkbox"]:checked + .answer-label + .quiz-answer {
 #rooms {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .room {
@@ -251,5 +251,11 @@ button.inactive {
   button {
     font-size: 1.1em;
     padding: 10px 14px;
+  }
+}
+
+@media (min-width: 1000px) {
+  #rooms {
+    grid-template-columns: repeat(4, 1fr); /* 大画面なら4列 */
   }
 }
