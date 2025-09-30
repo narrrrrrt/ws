@@ -50,7 +50,6 @@ th {
 
 /* === フォーム系 === */
 #contact-form {
-  display: none;
   margin-top: 1em;
 }
 #contact-toggle {
@@ -66,6 +65,7 @@ th {
   margin-top: 1em;
 }
 .toggle-content {
+  display: none; 
   margin-top: 1em;
 }
 #toggle-contact:checked ~ .toggle-content {
