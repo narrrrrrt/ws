@@ -100,6 +100,7 @@ export class Room {
       const current: BroadcastPayload = {
         event: "join",
         data: {
+          role: "observer",
           black: this.black !== null,
           white: this.white !== null,
           board: this.board,

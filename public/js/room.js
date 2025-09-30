@@ -220,7 +220,6 @@ function connect() {
         if (msg.data.init) {
           lastJoinAt = true;
           //debugLog("join init");
-          pending.explain = t("aiWillExplain");
           if (explain) explain.textContent = t("aiWillExplain");
         } 
       } else if (msg.event === "move") {
