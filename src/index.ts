@@ -1,4 +1,5 @@
 import { geminiHandler } from "./ai/gemini";
+import { handleForm, Env } from "./form/form";
 const VALID_IDS = ["1", "2", "3", "4"]
 
 export default {
@@ -13,7 +14,11 @@ export default {
     if (url.pathname === "/ai") {
       return geminiHandler(request, env);
     }
-
+    
+    if (url.pathname === "/mail") {
+      return handleForm(request, env);
+    }
+    
     const [roomId, ...rest] = url.pathname.split("/").filter(s => s.length > 0)
     const restPath = "/" + rest.join("/")
 
