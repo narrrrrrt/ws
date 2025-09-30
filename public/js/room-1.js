@@ -227,8 +227,7 @@ function connect() {
         if (msg.data.error) {
           showModal(msg.data.error);
         } else if (msg.data.board) {
-          renderBoard(msg.data.board, msg.data.status);
-          
+
           // --- ゲーム終了チェック ---
           const movesByColor = {
             black: getValidMoves(msg.data.board, "black"),
@@ -266,27 +265,70 @@ function connect() {
             }));
           }
           
-          if (myRole === msg.data.status) {
+          pending.status = msg.data.status;
+          if (myRole !== msg.data.status) {
+            explain.textContent = "";
+            renderBoard(msg.data.board, msg.data.status);
+            
+            const nextStatus = msg.data.status === "black" ? "white" : "black";
+
+            // 次の手番の合法手を取得
+            const moves = movesByColor[msg.data.status];
+            
+//debugLog("Next status: " + nextStatus);
+//debugLog("Valid moves: " + JSON.stringify(moves));          
+            
+            // 次の手番の最善手を選ぶ
+            const bestMove = pickBestMove(msg.data.board, moves, msg.data.status);
+
+            let predictedBoard = msg.data.board;
+            if (bestMove) {
+              // 次の手番でシミュレーション
+              predictedBoard = simulateMove(msg.data.board, bestMove, msg.data.status);
+              
+//debugLog("Best move: " + `x=${bestMove.x}, y=${bestMove.y}`);
+//debugLog("Predicted board:\n" + predictedBoard.map(r => r).join("\n"));
+              
+              
+            } else {
+//debugLog("No valid best move (pass?)");
+            }
+            
             fetch("/ai", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                board: msg.data.board,
-                status: msg.data.status,
+                board: predictedBoard, /*msg.data.board,*/
+                status: nextStatus, /*msg.data.status,*/
                 lang,
                 movesByColor
               })
             })
             .then(res => res.json())
             .then(data => {
-              explain.textContent = typeof data.response === "string"
+              pending.explain = typeof data.response === "string"
                 ? data.response
                 : JSON.stringify(data.response, null, 2);
-              if (chatlog) chatlog.textContent = JSON.stringify(data.chat, null, 2);
+              pending.chatlog = JSON.stringify(data.chat, null, 2);
+              
+              if (pending.board) {
+                explain.textContent = pending.explain;
+                if (chatlog) chatlog.textContent = pending.chatlog;
+                pending.explain = null;
+                renderBoard(pending.board, pending.status);
+                pending.board = null;
+              }
             });
           } else {
-            explain.textContent = "";
-            if (chatlog) chatlog.textContent = "";
+            if (pending.explain) {
+              explain.textContent = pending.explain;
+              if (chatlog) chatlog.textContent = pending.chatlog;
+              pending.explain = null;
+              pending.board = null;
+              renderBoard(msg.data.board, msg.data.status);
+            } else {
+              pending.board = msg.data.board;
+            }
           }
         }
       } else if (msg.event === "pass") {
