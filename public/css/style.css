@@ -69,7 +69,7 @@ th {
   display: none;
   margin-top: 1em;
 }
-#toggle-contact:checked + .toggle-label + .toggle-content {
+#toggle-contact:checked ~ .toggle-content {
   display: block;
 }
 .contact-input {
