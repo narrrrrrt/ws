@@ -23,5 +23,5 @@ new_sqlite_classes = ["RoomDO"]
 #GEMINI_API_KEY = "xxxxx"
 
 # Workers AI バインディング
-[ai]
+#[ai]
 #binding = "AI"
