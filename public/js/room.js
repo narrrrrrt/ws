@@ -1,5 +1,5 @@
 import { detectLanguage, loadMessages, t } from "./lang.js";
-import { simulateMove, pickBestMove } from "./reversi-sim.js";
+//import { simulateMove, pickBestMove } from "./reversi-sim.js";
 
 // --- グローバル変数 ---
 let myToken = null;
@@ -28,19 +28,6 @@ function debugLog(message) {
   }
 }
 
-// --- modal utility ---
-/*
-function showModal(messageKey, callback, vars = {}) {
-  msgEl.textContent = t(messageKey, vars);
-  modal.style.display = "flex";
-  const handler = () => {
-    modal.style.display = "none";
-    okBtn.removeEventListener("click", handler);
-    if (callback) callback();
-  };
-  okBtn.addEventListener("click", handler);
-}
-*/
 // --- modal utility ---
 function showModal(messageKey, callback, opts = {}) {
   msgEl.textContent = t(messageKey, opts);

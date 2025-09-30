@@ -20,7 +20,7 @@ new_sqlite_classes = ["RoomDO"]
 #HEARTBEAT_TIMEOUT = "30000"     # ハートビート (ms)
 #LASTUPDATE_TIMEOUT = "300000"  # ラストアップデート (ms)
 
-GEMINI_API_KEY = "AIzaSyBhQBuT0xTvqU_fAoyB69qWyZeZA4JdR5s"
+#GEMINI_API_KEY = "xxxxx"
 
 # Workers AI バインディング
 [ai]
