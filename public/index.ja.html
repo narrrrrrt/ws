@@ -156,7 +156,7 @@
   <input type="checkbox" id="toggle-contact" hidden>
   <label for="toggle-contact" class="toggle-label">📮 お問い合わせフォーム（クリックで表示）</label>
   <div class="toggle-content">
-    <form action="https://ive.narrat.workers.dev/mail" method="POST">
+    <form id="contact-form">
       <input type="hidden" name="lang" value="ja">
       <table>
         <tr><td>お名前：</td><td><input type="text" name="name" class="contact-input" required></td></tr>
@@ -168,10 +168,19 @@
   </div>
 </section>
 
+<!-- モーダル -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span id="modal-close" class="modal-close">&times;</span>
+    <p id="modal-message"></p>
+  </div>
+</div>
+
 <div class="footer">
   <p>© 2025 Ive NaraT. All rights reserved.</p>
 </div>
 <script src="js/script.js"></script>
 <script src="js/lobby.js"></script>
+<script src="js/contact.js"></script>
 </body>
 </html>
