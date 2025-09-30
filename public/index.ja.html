@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja" id="0">
+<head>
+  <meta charset="UTF-8">
+  <title>ive.narrat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/lang-redirector.js"></script>
+</head>
+<body>
+<form>
+  <label><input type='radio' name='lang' value='en' onclick="window.location.href='index.html?m=1&v=0'">English</label>
+  <label><input type='radio' name='lang' value='de' onclick="window.location.href='index.de.html?m=1&v=0'">Deutsch</label>
+  <label><input type='radio' name='lang' value='es' onclick="window.location.href='index.es.html?m=1&v=0'">Español</label>
+  <label><input type='radio' name='lang' value='fr' onclick="window.location.href='index.fr.html?m=1&v=0'">Français</label>
+  <label><input type='radio' name='lang' value='it' onclick="window.location.href='index.it.html?m=1&v=0'">Italiano</label>
+  <label><input type='radio' name='lang' value='ja' checked onclick="window.location.href='index.ja.html?m=1&v=0'">日本語</label>
+</form>
+
+<nav>
+  <a href="#books">書籍紹介</a>
+  <a href="#quiz">マーブルチョコクイズ</a>
+  <a href="#contact">お問い合わせ</a>
+</nav>
+<hr>
+<h1>伊部　なら丁</h1>
+<p>伊部 なら丁（いべ ならちょう、1970年〈昭和45年〉02月09日-）は、日本の作家。東京都武蔵野市生まれ。</p>
+
+<section id="books">
+  <h2>書籍紹介</h2>
+  <table>
+    <thead>
+      <tr><th>イメージ</th><th>タイトル</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><img src="aaa.jpg" alt="新訳・オズの魔法使い" width="50"></td><td>新訳・オズの魔法使い</td><td>パブリックドメインの『オズの魔法使い』を現代風に再構築。少女ドロシーとカカシ、ボディを持つAIウッドマンがゆく、エメラルドの都への旅。amazon KDPで販売中</td></tr>
+      <tr><td><img src="bbb.jpg" alt="牛と温暖化──CO₂だけじゃない温室効果ガスの現実" width="50"></td><td>牛と温暖化──CO₂だけじゃない温室効果ガスの現実</td><td>地球温暖化の犯人はCO₂だけじゃない。牛のゲップに潜む強力な温室効果ガス・メタン。その真実を知れば、あなたの食卓の風景が変わる。現在取材中</td></tr>
+      <tr><td><img src="ccc.jpg" alt="NARRATIVE" width="50"></td><td>NARRATIVE</td><td>現在執筆中</td></tr>
+      <tr><td><img src="ddd.jpg" alt="トラック女・モモコ" width="50"></td><td>トラック女子・モモコ</td><td>元ITエンジニア、今は孤高のトラック運転手。
+相棒はクラウドAIジョナサンと、ナビAI“一番星”。
+人間よりAIと話す時間のほうが長い彼女のキャビンに、今日も新しいドラマが走り込む——。只今構想中。</td></tr>
+
+
+      <tr><td><img src="ddd.jpg" alt="Vive Codingで作る！Cloudflare×AI対戦Webアプリ開発術" width="50"></td><td>Vive Codingで作る！Cloudflare×AI対戦Webアプリ開発術</td><td>プログラミング未経験者やノマド開発者、声だけで開発したいすべての人に向けた、iPad × 音声入力 × Cloudflare × AI による“新しいWebアプリ開発スタイル”の完全ガイドです。只今構想中。</td></tr>
+
+    </tbody>
+  </table>
+</section>
+
+<section id="quiz">
+  <h2>マーブルチョコクイズ集</h2>
+  <div id="quiz-selector">
+    <a href="javascript:void(0)" class="quiz-link" data-index="0">1</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="1">2</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="2">3</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="3">4</a>
+  </div>
+
+  <div id="quiz-display">
+    <!-- クイズ1 -->
+    <div class="quiz-item" data-index="0">
+      <div class="quiz-title">クイズ1：黒と白</div>
+      <div class="quiz-text">黒いマーブルチョコ3つと白いマーブルチョコ2つがあります。全部で何個ありますか？</div>
+      <div class="quiz-answer-toggle">
+        <input type="checkbox" id="answer-toggle-0" hidden>
+        <label for="answer-toggle-0" class="answer-label">📌 答えを見る（クリックで表示）</label>
+        <div class="quiz-answer">
+          <p>5個です。</p>
+          <a href="https://gpts.openai.com/gpt/YOUR-GPT-ID" target="_blank">&lt;&lt;詳しい解説はこちら&gt;&gt;</a>
+          <div class="gpts-note">※「確率を学ぼう:マーブルチョコクイズGPTs（仮）」に「クイズ1番の解説お願いします」と話しかけてみてください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイズ2 -->
+    <div class="quiz-item" data-index="1" hidden>
+      <div class="quiz-title">クイズ2：偶数はどっち？</div>
+      <div class="quiz-text">マーブルチョコが3個と4個あります。偶数はどちらですか？</div>
+      <div class="quiz-answer-toggle">
+        <input type="checkbox" id="answer-toggle-1" hidden>
+        <label for="answer-toggle-1" class="answer-label">📌 答えを見る（クリックで表示）</label>
+        <div class="quiz-answer">
+          <p>4個です。</p>
+          <a href="https://gpts.openai.com/gpt/YOUR-GPT-ID" target="_blank">&lt;&lt;詳しい解説はこちら&gt;&gt;</a>
+          <div class="gpts-note">※「確率を学ぼう:マーブルチョコクイズGPTs（仮）」に「クイズ2番の解説お願いします」と話しかけてみてください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイズ3 -->
+    <div class="quiz-item" data-index="2" hidden>
+      <div class="quiz-title">クイズ3：色の比率</div>
+      <div class="quiz-text">赤いチョコが6個、青いチョコが3個あります。赤と青の比率は？</div>
+      <div class="quiz-answer-toggle">
+        <input type="checkbox" id="answer-toggle-2" hidden>
+        <label for="answer-toggle-2" class="answer-label">📌 答えを見る（クリックで表示）</label>
+        <div class="quiz-answer">
+          <p>2対1です。</p>
+          <a href="https://gpts.openai.com/gpt/YOUR-GPT-ID" target="_blank">&lt;&lt;詳しい解説はこちら&gt;&gt;</a>
+          <div class="gpts-note">※「確率を学ぼう:マーブルチョコクイズGPTs（仮）」に「クイズ3番の解説お願いします」と話しかけてみてください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイズ4 -->
+    <div class="quiz-item" data-index="3" hidden>
+      <div class="quiz-title">クイズ4：半分に分ける</div>
+      <div class="quiz-text">10個のチョコを2人で半分に分けます。1人あたり何個になりますか？</div>
+      <div class="quiz-answer-toggle">
+        <input type="checkbox" id="answer-toggle-3" hidden>
+        <label for="answer-toggle-3" class="answer-label">📌 答えを見る（クリックで表示）</label>
+        <div class="quiz-answer">
+          <p>5個です。</p>
+          <a href="https://gpts.openai.com/gpt/YOUR-GPT-ID" target="_blank">&lt;&lt;詳しい解説はこちら&gt;&gt;</a>
+          <div class="gpts-note">※「確率を学ぼう:マーブルチョコクイズGPTs（仮）」に「クイズ4番の解説お願いします」と話しかけてみてください</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reversi">
+  <h2>対戦型リバーシ</h2>
+    <div id="rooms">
+      <div class="room" data-id="1">
+        <h2>Room 1</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+      </div>
+      <div class="room" data-id="2">
+        <h2>Room 2</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+      </div>
+      <div class="room" data-id="3">
+        <h2>Room 3</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+      </div>
+      <div class="room" data-id="4">
+        <h2>Room 4</h2>
+        <button class="seat black" data-seat="black">Black</button>
+        <button class="seat white" data-seat="white">White</button>
+        <button class="seat observer" data-seat="observer">Observer</button>
+      </div>
+    </div>
+
+</section>
+
+<section id="contact">
+  <h2>お問い合わせ</h2>
+  <p>お送りいただいたお問い合わせの回答までに、多少お時間をいただく場合がありますのでご了承ください。</p>
+  <input type="checkbox" id="toggle-contact" hidden>
+  <label for="toggle-contact" class="toggle-label">📮 お問い合わせフォーム（クリックで表示）</label>
+  <div class="toggle-content">
+    <form action="https://formsubmit.co/incoming+narrrrrrt-inbox-72314190-issue-@incoming.gitlab.com" method="POST">
+      <table>
+        <tr><td>お名前：</td><td><input type="text" name="name" class="contact-input" required></td></tr>
+        <tr><td>メールアドレス：</td><td><input type="email" name="email" class="contact-input" required></td></tr>
+        <tr><td>内容：</td><td><textarea name="message" rows="8" class="contact-input" maxlength="1000" required></textarea><br><small>※全角1000字まで</small></td></tr>
+      </table>
+      <button type="submit">送信</button>
+    </form>
+  </div>
+</section>
+
+<div class="footer">
+  <p>© 2025 Ive NaraT. All rights reserved.</p>
+</div>
+<script src="js/script.js"></script>
+<script src="js/lobby.js"></script>
+</body>
+</html>

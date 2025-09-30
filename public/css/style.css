@@ -1,7 +1,188 @@
+/* === 全体レイアウト === */
 body {
-  font-family: sans-serif;
-  margin: 20px;
+  font-family: 'Linux Libertine', Georgia, serif;
+  background-color: #f8f9fa;
+  color: #202122;
+  margin: 2em auto;
+  max-width: 960px;
+  line-height: 1.6;
 }
+h1, h2 {
+  border-bottom: 1px solid #a2a9b1;
+  font-weight: normal;
+}
+nav {
+  font-size: 0.9em;
+  margin-bottom: 1.5em;
+}
+nav a {
+  margin-right: 1em;
+  text-decoration: none;
+  color: #0645ad;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+.footer {
+  border-top: 1px solid #a2a9b1;
+  margin-top: 3em;
+  padding-top: 1em;
+  font-size: 0.8em;
+  text-align: center;
+  color: #555;
+}
+
+/* === テーブル構造 === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  background-color: #fff;
+}
+th, td {
+  border: 1px solid #a2a9b1;
+  padding: 0.5em;
+  text-align: left;
+}
+th {
+  background-color: #f3f4f5;
+}
+
+/* === フォーム系 === */
+#contact-form {
+  display: none;
+  margin-top: 1em;
+}
+#contact-toggle {
+  cursor: pointer;
+  color: #0645ad;
+  text-decoration: underline;
+}
+.toggle-label {
+  cursor: pointer;
+  color: #0645ad;
+  text-decoration: underline;
+  display: inline-block;
+  margin-top: 1em;
+}
+.toggle-content {
+  display: none;
+  margin-top: 1em;
+}
+#toggle-contact:checked + .toggle-label + .toggle-content {
+  display: block;
+}
+.contact-input {
+  width: 94%;
+  box-sizing: border-box;
+}
+form table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+form table td:first-child {
+  width: 25%;
+  min-width: 4em;
+  white-space: normal;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+/* === クイズセクション === */
+#quiz-display {
+  background-color: black;
+  color: white;
+  padding: 1em;
+  margin-top: 1em;
+  border-radius: 8px;
+  font-size: 1.1em;
+  border: 1px solid #ccc;
+}
+.quiz-title {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+.quiz-text {
+  margin-bottom: 1em;
+}
+#quiz-selector {
+  margin-bottom: 0.5em;
+}
+.quiz-link {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-right: 0.5em;
+  text-decoration: none;
+  color: #0645ad;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95em;
+  position: relative;
+}
+.quiz-link:hover {
+  background-color: #e0e0e0;
+}
+.quiz-link.active {
+  background-color: #d0e0ff;
+  font-weight: bold;
+  border: 1px solid #0645ad;
+  color: #000;
+}
+
+/* === 答えのトグル === */
+.quiz-answer-toggle {
+  margin-top: 1em;
+}
+.quiz-answer {
+  display: none;
+  background-color: #222;
+  color: white;
+  border: 1px dashed #ccc;
+  padding: 0.8em;
+  border-radius: 6px;
+  margin-top: 0.5em;
+}
+.answer-label {
+  display: inline-block;
+  cursor: pointer;
+  color: #80b3ff;
+  text-decoration: underline;
+}
+input[type="checkbox"]:checked + .answer-label + .quiz-answer {
+  display: block;
+}
+.gpts-note {
+  display: block;
+  font-size: 85%;
+  color: #aaa;
+  margin-top: 0.4em;
+}
+/* === スマホ対応 === */
+@media screen and (max-width: 600px) {
+  body {
+    font-size: 14px;
+    padding: 1em;
+  }
+  .quiz-link {
+    font-size: 0.9em;
+    padding: 3px 8px;
+  }
+  textarea {
+    font-size: 0.95em;
+  }
+}
+
+/* 詳しい解説リンクの色を答えを見ると同じに */
+.quiz-answer a {
+  color: #80b3ff;
+  text-decoration: underline;
+}
+
+
+
+
 
 #rooms {
   display: flex;
