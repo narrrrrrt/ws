@@ -233,7 +233,7 @@ button.inactive {
   }
 
   #rooms {
-    flex-direction: column;   /* 縦並びに */
+    grid-template-columns: 1fr;
     gap: 15px;
   }
 
