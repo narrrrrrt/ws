@@ -1,4 +1,4 @@
-function getValidMoves(board, color) {
+export function getValidMoves(board, color) {
   const size = 8;
   const myDisc = color === "black" ? "B" : "W";
   const oppDisc = color === "black" ? "W" : "B";

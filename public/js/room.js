@@ -1,4 +1,6 @@
 import { detectLanguage, loadMessages, t } from "./lang.js";
+import { getValidMoves } from "./room-moves.js";
+
 //import { simulateMove, pickBestMove } from "./reversi-sim.js";
 
 // --- グローバル変数 ---

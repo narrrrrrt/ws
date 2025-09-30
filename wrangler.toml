@@ -1,4 +1,4 @@
-name = "ive"
+name = "reversi"
 main = "src/index.ts"
 compatibility_date = "2023-11-01"
 
@@ -24,4 +24,4 @@ new_sqlite_classes = ["RoomDO"]
 
 # Workers AI バインディング
 [ai]
-binding = "AI"
+#binding = "AI"
