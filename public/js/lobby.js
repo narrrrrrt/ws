@@ -1,4 +1,5 @@
 (() => {
+  const lang = document.documentElement.lang;
   const sockets = new Map(); // roomId -> WebSocket
   let host = null; // null の場合は location.host を使う
 
