@@ -41,7 +41,7 @@
               btn.classList.add("active");
               btn.disabled = false;
               btn.onclick = () => {
-                window.location.href = `room.html?id=${id}&seat=${seat}`;
+                window.location.href = `room.html?id=${id}&seat=${seat}&lang=${lang}`;
               };
             }
           });
@@ -51,7 +51,7 @@
           obsBtn.classList.add("active");
           obsBtn.disabled = false;
           obsBtn.onclick = () => {
-            window.location.href = `room.html?id=${id}&seat=observer`;
+            window.location.href = `room.html?id=${id}&seat=observer&lang=${lang}`;
           };
         }
       } catch (e) {

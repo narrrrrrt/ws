@@ -33,7 +33,8 @@
       <tr><th>イメージ</th><th>タイトル</th><th>内容</th></tr>
     </thead>
     <tbody>
-      <tr><td><img src="aaa.jpg" alt="新訳・オズの魔法使い" width="50"></td><td>新訳・オズの魔法使い</td><td>パブリックドメインの『オズの魔法使い』を現代風に再構築。少女ドロシーとカカシ、ボディを持つAIウッドマンがゆく、エメラルドの都への旅。amazon KDPで販売中</td></tr>
+<tr><td><img src="images/s1.png" alt="表紙-新訳・オズの魔法使い" width="51" height="77" onclick="openModal('images/l1.jpg')"></td><td>新訳・オズの魔法使い</td><td>パブリックドメインの『オズの魔法使い』を現代風に再構築。少女ドロシーとカカシ、ボディを持つAIウッドマンがゆく、エメラルドの都への旅。amazon KDPで販売中</td></tr>
+
       <tr><td><img src="bbb.jpg" alt="牛と温暖化──CO₂だけじゃない温室効果ガスの現実" width="50"></td><td>牛と温暖化──CO₂だけじゃない温室効果ガスの現実</td><td>地球温暖化の犯人はCO₂だけじゃない。牛のゲップに潜む強力な温室効果ガス・メタン。その真実を知れば、あなたの食卓の風景が変わる。現在取材中</td></tr>
       <tr><td><img src="ccc.jpg" alt="NARRATIVE" width="50"></td><td>NARRATIVE</td><td>現在執筆中</td></tr>
       <tr><td><img src="ddd.jpg" alt="トラック女・モモコ" width="50"></td><td>トラック女子・モモコ</td><td>元ITエンジニア、今は孤高のトラック運転手。
@@ -176,11 +177,17 @@
   </div>
 </div>
 
+<div id="image-modal" class="image-modal" onclick="closeImageModal(event)">
+  <span class="image-modal-close" onclick="closeImageModal(event)">&times;</span>
+  <img class="image-modal-content" id="image-modal-img">
+</div>
+
 <div class="footer">
   <p>© 2025 Ive NaraT. All rights reserved.</p>
 </div>
 <script src="js/script.js"></script>
 <script src="js/lobby.js"></script>
 <script src="js/contact.js"></script>
+<script src="js/image-modal.js"></script>
 </body>
 </html>
