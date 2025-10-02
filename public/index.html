@@ -1,15 +1,346 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reversi Lobby</title>
-    <link rel="stylesheet" href="css/style.css">
-  </head>
-  <body>
-    <h1>Lobby</h1>
+<html lang="en" id="0">
+<head>
+  <meta charset="UTF-8">
+  <title>ive.narrat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/lang-redirector.js"></script>
+</head>
+<body>
+<form>
+  <label><input type='radio' name='lang' value='en' checked onclick="window.location.href='index.html?m=1&v=0'">English</label>
+  <label><input type='radio' name='lang' value='de' onclick="window.location.href='index.de.html?m=1&v=0'">Deutsch</label>
+  <label><input type='radio' name='lang' value='es' onclick="window.location.href='index.es.html?m=1&v=0'">Español</label>
+  <label><input type='radio' name='lang' value='fr' onclick="window.location.href='index.fr.html?m=1&v=0'">Français</label>
+  <label><input type='radio' name='lang' value='it' onclick="window.location.href='index.it.html?m=1&v=0'">Italiano</label>
+  <label><input type='radio' name='lang' value='ja' onclick="window.location.href='index.ja.html?m=1&v=0'">日本語</label>
+</form>
 
-    <!-- ルーム一覧 -->
+<nav>
+  <a href="#books">Books</a>
+  <a href="#quiz">Marble Chocolate Quiz</a>
+  <a href="#reversi">Reversi Game</a>
+  <a href="#contact">Contact</a>
+</nav>
+<hr>
+<h1>Narachō Ive</h1>
+<p>Narachō Ive (born February 9, 1970, Musashino City, Tokyo) is a Japanese author.</p>
+
+<section id="books">
+  <h2>Books</h2>
+  <table>
+    <thead>
+      <tr><th>Image</th><th>Title</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+<tr><td><img src="images/s1.png" alt="Cover - The Wizard of Oz: A Modern Retelling" width="51" height="77" onclick="openImageModal('images/l1.jpg')"></td><td>The Wizard of Oz: A Modern Retelling</td><td>A modern reimagining of the public-domain classic *The Wizard of Oz*. Follow Dorothy, the Scarecrow, and an AI-bodied Tin Woodman on their journey to the Emerald City. Available on Amazon KDP.</td></tr>
+
+<tr><td><img src="images/s2.jpeg" alt="Cover - Cows and Global Warming"  width="51" height="76" onclick="openImageModal('images/l2.png')"></td><td>Cows and Global Warming: The Reality of Greenhouse Gases Beyond CO₂</td><td>CO₂ isn’t the only culprit behind global warming. Methane, hidden in the burps of cows, is an even more powerful greenhouse gas. Once you know the truth, the way you see your dining table will change. Currently under research.</td></tr>
+
+<tr><td><img src="bbb.jpg" alt="Cover - NARATTIVE" width="50"></td><td>NARATTIVE</td><td>Currently in development.</td></tr>
+
+<tr><td><img src="images/s4.jpeg" alt="Cover - Momoko: The Trucker" width="51" height="77" onclick="openImageModal('images/l4.png')"></td><td>Momoko: The Trucker</td><td>A former IT engineer, now a solitary truck driver.  
+Her companions are Jonathan, a cloud AI, and “Ichibanboshi,” her navigation AI.  
+In her cabin, where she spends more time talking with AI than with humans, new dramas unfold every day. Currently in planning.</td></tr>
+
+<tr><td><img src="images/s5.png" alt="Cover - Vive Coding: Cloudflare × AI Battle Web App Development Guide" width="51" height="77" onclick="openImageModal('images/l5.png')"></td><td>Vive Coding: Cloudflare × AI Battle Web App Development Guide</td><td>A complete guide to a new style of web app development—using iPad, voice input, Cloudflare, and AI. For beginners, nomad developers, and anyone who wants to create apps with just their voice. Currently in planning.</td></tr>
+
+    </tbody>
+  </table>
+</section>
+
+<section id="quiz">
+  <h2>Marble Chocolate Quiz Collection</h2>
+  <div id="quiz-selector">
+    <a href="javascript:void(0)" class="quiz-link" data-index="0">1</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="1">2</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="2">3</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="3">4</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="4">5</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="5">6</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="6">7</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="7">8</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="8">9</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="9">10</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="10">11</a>
+    <a href="javascript:void(0)" class="quiz-link" data-index="11">12</a>
+  </div>
+
+  <div id="quiz-display">
+
+<!-- Quiz 1 -->
+<div class="quiz-item" data-index="0">
+  <div class="quiz-title">Quiz 1: Three Marble Chocolates</div>
+  <div class="quiz-text">
+    A bag contains 3 marble chocolates.<br>
+    You draw one, and it’s red.<br>
+    What is the probability that another red is among the remaining 2?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-0" hidden>
+    <label for="answer-toggle-0" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        - Frequentist approach: <b>5/27</b><br>
+        - Bayesian approach: <b>2/3</b><br>
+        - With posterior update: <b>5/9</b>
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 1" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 2 -->
+<div class="quiz-item" data-index="1">
+  <div class="quiz-title">Quiz 2: Five Marble Chocolates</div>
+  <div class="quiz-text">
+    A bag contains 5 marble chocolates.<br>
+    There are at most 2 red ones.<br>
+    You draw one, and it’s red.<br>
+    What is the probability that another red is among the remaining 4?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-1" hidden>
+    <label for="answer-toggle-1" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>Bayesian update calculation: <b>2/3</b></p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 2" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 3 -->
+<div class="quiz-item" data-index="2">
+  <div class="quiz-title">Quiz 3: Probability of Same Color</div>
+  <div class="quiz-text">
+    A bag contains 5 marble chocolates:<br>
+    2 red and 3 blue.<br>
+    What is the probability that 2 drawn at the same time are the same color?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-2" hidden>
+    <label for="answer-toggle-2" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        Red-Red: <b>1/10</b><br>
+        Blue-Blue: <b>3/10</b><br>
+        Total: <b>2/5</b>
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 3" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 4 -->
+<div class="quiz-item" data-index="3">
+  <div class="quiz-title">Quiz 4: Drawing Two Reds in a Row</div>
+  <div class="quiz-text">
+    A bag contains 4 marble chocolates:<br>
+    2 red and 2 blue.<br>
+    The first one drawn is red.<br>
+    Without replacing it, what is the probability that the second one is also red?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-3" hidden>
+    <label for="answer-toggle-3" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        After the first red, the bag has 1 red and 2 blue left.<br>
+        Probability of second red: <b>1/3</b>
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 4" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 5 -->
+<div class="quiz-item" data-index="4">
+  <div class="quiz-title">Quiz 5: Probability of Same Color (Paradox)</div>
+  <div class="quiz-text">
+    A large box contains 10 different colors of marble chocolates.<br>
+    If you draw 10 pieces, what is the probability that at least 1 pair has the same color?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-4" hidden>
+    <label for="answer-toggle-4" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        Probability of all different colors: <b>0.00036 (≈0.036%)</b><br>
+        Thus, probability of at least one pair same color: <b>99.96%+</b>
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 5" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 6 -->
+<div class="quiz-item" data-index="5">
+  <div class="quiz-title">Quiz 6: Self-Reproducing Chocolates (Simulation)</div>
+  <div class="quiz-text">
+    A bag contains 5 red and 5 blue chocolates.<br>
+    Repeat the following 50 times:<br>
+    (1) Draw 1 at random and replace it.<br>
+    (2) Add 1 more: 70% same color, 30% different color.<br>
+    What is the expected final ratio of red?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-5" hidden>
+    <label for="answer-toggle-5" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        No closed-form solution.<br>
+        Estimate with Monte Carlo simulation.<br>
+        Procedure: Start (red=5, blue=5) → run 50 steps → record red ratio → average results.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 6" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 7 -->
+<div class="quiz-item" data-index="6">
+  <div class="quiz-title">Quiz 7: Pigeonhole Principle</div>
+  <div class="quiz-text">
+    A bag contains 9 colors of marble chocolates.<br>
+    If you draw 10 pieces, prove that at least 2 are the same color.
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-6" hidden>
+    <label for="answer-toggle-6" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        Only 9 colors, but 10 draws → at least 1 color repeats.<br>
+        This is a logical necessity: the <b>Pigeonhole Principle</b>.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 7" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 8 -->
+<div class="quiz-item" data-index="7">
+  <div class="quiz-title">Quiz 8: Simpson’s Paradox</div>
+  <div class="quiz-text">
+    Bag A: 2 red, 8 blue (20% red)<br>
+    Bag B: 9 red, 11 blue (45% red)<br><br>
+    Each bag individually: Bag B has higher red ratio.<br>
+    Combined: 11 red, 19 blue (≈37%).<br>
+    Now Bag A appears higher. What is this phenomenon called?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-7" hidden>
+    <label for="answer-toggle-7" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        This is <b>Simpson’s Paradox</b>.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 8" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 9 -->
+<div class="quiz-item" data-index="8">
+  <div class="quiz-title">Quiz 9: Marble Chocolate Monty Hall</div>
+  <div class="quiz-text">
+    A bag contains 3 chocolates: 1 red, 2 blue.<br>
+    You pick 1.<br>
+    The host removes 1 blue.<br>
+    Should you switch? What’s the probability of winning red?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-8" hidden>
+    <label for="answer-toggle-8" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        Stay: 1/3 chance of red.<br>
+        Switch: 2/3 chance of red.<br>
+        → You should switch.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 9" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 10 -->
+<div class="quiz-item" data-index="9">
+  <div class="quiz-title">Quiz 10: Is There Another Red?</div>
+  <div class="quiz-text">
+    A bag contains some reds.<br>
+    You draw 1, and it’s red.<br>
+    What is the probability another red remains?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-9" hidden>
+    <label for="answer-toggle-9" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        Cannot be answered without assumptions.<br>
+        Example: If max 2 reds → probability = 2/3.<br>
+        If any number possible → result differs.<br>
+        Need a clear prior distribution.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 10" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 11 -->
+<div class="quiz-item" data-index="10">
+  <div class="quiz-title">Quiz 11: Dividing Chocolates</div>
+  <div class="quiz-text">
+    Divide 10 chocolates evenly between 2 people.<br>
+    How many per person?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-10" hidden>
+    <label for="answer-toggle-10" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>5 each.</p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 11" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz 12 -->
+<div class="quiz-item" data-index="11">
+  <div class="quiz-title">Quiz 12: Birthday Paradox</div>
+  <div class="quiz-text">
+    A box contains 365 colors of chocolates.<br>
+    If you draw 23, what is the probability that at least 1 pair shares the same color?
+  </div>
+  <div class="quiz-answer-toggle">
+    <input type="checkbox" id="answer-toggle-11" hidden>
+    <label for="answer-toggle-11" class="answer-label">📌 Show Answer</label>
+    <div class="quiz-answer">
+      <p>
+        All different: ≈49.3%<br>
+        At least one match: ≈<b>50.7%</b><br>
+        This is the <b>Birthday Paradox</b>.
+      </p>
+      <a href="https://chatgpt.com/g/g-68ddd8e4e4d8819186cad873a6f583f4-learn-probability-marble-chocolate-quiz-gpts?model=gpt-4o" target="_blank">&lt;&lt;See detailed explanation here&gt;&gt;</a>
+      <div class="gpts-note">Note: Try asking "Please explain Quiz 12" in "Learn Probability: Marble Chocolate Quiz GPTs".</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</section>
+
+<section id="reversi">
+  <h2>Reversi Game</h2>
     <div id="rooms">
       <div class="room" data-id="1">
         <h2>Room 1</h2>
@@ -36,7 +367,32 @@
         <button class="seat observer" data-seat="observer">Observer</button>
       </div>
     </div>
+</section>
 
-    <script src="js/lobby.js"></script>
-  </body>
+<section id="contact">
+  <h2>Contact</h2>
+  <p>Please note that it may take some time for us to respond to your inquiry.</p>
+  <input type="checkbox" id="toggle-contact" hidden>
+  <label for="toggle-contact" class="toggle-label">📮 Contact Form (Click to Show)</label>
+  <div class="toggle-content">
+    <form id="contact-form">
+      <input type="hidden" name="lang" value="en">
+      <table>
+        <tr><td>Name:</td><td><input type="text" name="name" class="contact-input" required></td></tr>
+        <tr><td>Email Address:</td><td><input type="email" name="email" class="contact-input" required></td></tr>
+        <tr><td>Message:</td><td><textarea name="message" rows="8" class="contact-input" maxlength="1000" required></textarea><br><small>※ Up to 1000 full-width characters</small></td></tr>
+      </table>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</section>
+
+<div class="footer">
+  <p>© 2025 Ive NaraT. All rights reserved.</p>
+</div>
+<script src="js/script.js"></script>
+<script src="js/lobby.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/image-modal.js"></script>
+</body>
 </html>
