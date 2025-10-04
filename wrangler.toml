@@ -24,4 +24,4 @@ new_sqlite_classes = ["RoomDO"]
 
 # Workers AI バインディング
 #[ai]
-#binding = "AI"
+#binding = "AI" 
