@@ -1,5 +1,6 @@
 import { geminiHandler } from "./ai/gemini";
 import { handleForm, Env } from "./form/form";
+import { streamDriveAudio } from "./drive/stream";
 const VALID_IDS = ["1", "2", "3", "4"]
 
 export default {
@@ -15,6 +16,10 @@ export default {
       return geminiHandler(request, env);
     }
     
+    if (url.pathname === "/m4a") {
+      return streamDriveAudio(env);
+    }
+
     if (url.pathname === "/mail") {
       return handleForm(request, env);
     }
