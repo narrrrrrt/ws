@@ -1,4 +1,4 @@
-// drive/stream.ts
+// drive/stream.ts 
 /**
  * Google Drive 上のファイル（例: M4A）を Cloudflare Workers 経由で
  * ストリーミング配信する関数
