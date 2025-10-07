@@ -1,37 +1,49 @@
-// drive/stream.ts
-/**
- * Cloudflare Workers 環境変数の動作確認用
- * - SA_EMAIL, SA_PRIVATE_KEY, DRIVE_FILE_ID の読み込み確認
- * - Base64キーが正しくデコードできるか検証
- * - 実際のストリーミングや Google API 呼び出しは行わない
- */
+export default {
+  async fetch(request, env) {
+    const result: Record<string, any> = {}
 
-export async function streamDriveAudio(env: any): Promise<Response> {
-  const saEmail = env.SA_EMAIL;
-  const driveFileId = env.DRIVE_FILE_ID;
-  const key = env.SA_PRIVATE_KEY;
-
-  const result: Record<string, any> = {
-    SA_EMAIL: saEmail ? "✅ loaded" : "❌ missing",
-    DRIVE_FILE_ID: driveFileId ? "✅ loaded" : "❌ missing",
-  };
-
-  if (key) {
     try {
-      const decoded = atob(key);
-      result.SA_PRIVATE_KEY = `✅ Base64 decoded (${decoded.length} chars)`;
-      result.SAMPLE = decoded.slice(0, 60).replace(/\n/g, "\\n") + "...";
-    } catch (e: any) {
-      result.SA_PRIVATE_KEY = `⚠️ decode failed: ${e.message}`;
-    }
-  } else {
-    result.SA_PRIVATE_KEY = "❌ missing";
-  }
+      const rawKey = env.SA_PRIVATE_KEY
+      if (!rawKey) {
+        return new Response(JSON.stringify({ error: "SA_PRIVATE_KEY not set" }, null, 2), {
+          headers: { "content-type": "application/json" },
+        })
+      }
 
-  return new Response(JSON.stringify(result, null, 2), {
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+      // 改行が含まれているかチェック
+      const hasNewlines = /[\r\n]/.test(rawKey)
+      result["has_newlines"] = hasNewlines
+
+      // 改行を除去したバージョンを作成
+      const cleanedKey = rawKey.replace(/[\r\n]/g, "")
+      result["cleaned_length"] = cleanedKey.length
+
+      // Base64 decode 試行
+      try {
+        const decoded = atob(cleanedKey)
+        result["decoded_preview"] = decoded.slice(0, 64)
+        result["decoded_length"] = decoded.length
+        result["decode_ok"] = true
+      } catch (e) {
+        result["decode_ok"] = false
+        result["decode_error"] = e.message
+      }
+
+      // 改行の位置を特定（デバッグ用）
+      const newlinePositions = []
+      for (let i = 0; i < rawKey.length; i++) {
+        if (rawKey[i] === "\n" || rawKey[i] === "\r") newlinePositions.push(i)
+      }
+      result["newline_positions_sample"] = newlinePositions.slice(0, 10)
+
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: { "content-type": "application/json" },
+      })
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: e.message, stack: e.stack }, null, 2),
+        { headers: { "content-type": "application/json" } }
+      )
+    }
+  },
 }
