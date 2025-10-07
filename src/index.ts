@@ -20,6 +20,14 @@ export default {
     if (url.pathname === "/m4a") {
       return streamDriveAudio(env);
     }
+    
+    
+    
+          } catch (err: any) {
+        return new Response(`DO error: ${err?.message || String(err)}`, {
+          status: 200,
+        })
+      }
 
     if (url.pathname === "/mail") {
       return handleForm(request, env);
@@ -29,7 +37,7 @@ export default {
     const restPath = "/" + rest.join("/")
 
     if (roomId && VALID_IDS.includes(roomId)) {
-      //try {
+      try {
         const id = env.RoomDO.idFromName(roomId)
         const stub = env.RoomDO.get(id)
 
