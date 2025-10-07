@@ -15,6 +15,7 @@ export default {
     if (url.pathname === "/ai") {
       return geminiHandler(request, env);
     }
+  try {  
     
     if (url.pathname === "/m4a") {
       return streamDriveAudio(env);
@@ -28,7 +29,7 @@ export default {
     const restPath = "/" + rest.join("/")
 
     if (roomId && VALID_IDS.includes(roomId)) {
-      try {
+      //try {
         const id = env.RoomDO.idFromName(roomId)
         const stub = env.RoomDO.get(id)
 
