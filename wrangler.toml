@@ -20,7 +20,7 @@ new_sqlite_classes = ["RoomDO"]
 #HEARTBEAT_TIMEOUT = "30000"     # ハートビート (ms)
 #LASTUPDATE_TIMEOUT = "300000"  # ラストアップデート (ms)
 
-#GEMINI_API_KEY = "xxxxxx"
+GEMINI_API_KEY = "xxxxxx"
 
 SA_EMAIL="drive-proxy@inductive-seer-474403-f5.iam.gserviceaccount.com"
 SA_PRIVATE_KEY="input from console"
