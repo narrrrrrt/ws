@@ -78,28 +78,43 @@ DQLeZS1fJgTD8LUcjYXD77g=
 
     // === Driveファイルフェッチ ===
     const driveUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`;
-    const res = await fetch(driveUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+
+    // ★ Range を Drive に中継（Safari の audio 再生に必須）
+    const driveHeaders: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    if (env.__requestRange) {
+      driveHeaders["Range"] = env.__requestRange;
+    }
+
+    const res = await fetch(driveUrl, { headers: driveHeaders });
 
     if (res.status === 404) {
       return new Response("File not found on Google Drive", { status: 404 });
     }
 
-    // === ヘッダー整形 ===
+    // === ヘッダー整形（Content-Range 等を透過）
+    //    Content-Type は明示的に audio/m4a を優先しつつ、Range関連は転写
     const outHeaders = new Headers();
     outHeaders.set("Content-Type", "audio/m4a");
     outHeaders.set("Cache-Control", "public, max-age=3600");
     outHeaders.set("Access-Control-Allow-Origin", "*");
 
-    // === ★ ストリーミング化：TransformStreamで中継 ===
+    // ★ Range 応答ヘッダーを透過
+    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length", "ETag", "Last-Modified"]) {
+      const v = res.headers.get(h);
+      if (v) outHeaders.set(h, v);
+    }
+
+    // === ストリーミング中継（TransformStream）
     if (!res.body) {
       return new Response("No body in Drive response", { status: 500 });
     }
-
     const { readable, writable } = new TransformStream();
-    res.body.pipeTo(writable); // Drive → Cloudflare → ブラウザ 逐次転送
+    // 重要: pipeTo は await しない（逐次配信）
+    res.body.pipeTo(writable);
 
+    // ★ ここで res.status をそのまま返す（200 でも 206 でも）
     return new Response(readable, {
       status: res.status,
       headers: outHeaders,
