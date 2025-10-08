@@ -1,6 +1,6 @@
 /**
  * Google Drive 上のファイルを Cloudflare Workers 経由で
- * ストリーミング配信する安全な実装（Range対応＋TransformStream版）
+ * ストリーミング配信する安全な実装（内部固定鍵版）
  *
  * index.ts から呼び出して使う:
  *   return await streamDriveAudio(env);
@@ -8,7 +8,7 @@
 
 export async function streamDriveAudio(env: any): Promise<Response> {
   try {
-    // === 内部固定 ===
+    // === 内部固定（折り返し防止） ===
     const SA_EMAIL = "drive-proxy@inductive-seer-474403-f5.iam.gserviceaccount.com";
     const DRIVE_FILE_ID = "1ECFhj_xq3n24C1JsvPoD4QbBPS-HRIxN";
     const SA_PRIVATE_KEY = `
@@ -73,16 +73,16 @@ DQLeZS1fJgTD8LUcjYXD77g=
     const accessToken = tokenData.access_token;
 
     if (!accessToken) {
-      return new Response("Token fetch failed", { status: 500 });
+      return new Response("Token fetch failed", {
+        status: 500,
+      });
     }
 
-    // === Driveファイルフェッチ（Range対応） ===
+    // === Driveファイルフェッチ ===
     const driveUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`;
-    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
-    const range = env.__requestRange || env.requestRange;
-    if (range) headers["Range"] = range;
-
-    const res = await fetch(driveUrl, { headers });
+    const res = await fetch(driveUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     if (res.status === 404) {
       return new Response("File not found on Google Drive", { status: 404 });
@@ -93,20 +93,11 @@ DQLeZS1fJgTD8LUcjYXD77g=
     outHeaders.set("Content-Type", "audio/m4a");
     outHeaders.set("Cache-Control", "public, max-age=3600");
     outHeaders.set("Access-Control-Allow-Origin", "*");
-    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length"]) {
-      const v = res.headers.get(h);
-      if (v) outHeaders.set(h, v);
-    }
 
-    // === TransformStream で即時転送 ===
-    if (!res.body) {
-      return new Response("No body", { status: 500 });
-    }
-    const { readable, writable } = new TransformStream();
-    res.body.pipeTo(writable);
-
-    return new Response(readable, { status: res.status, headers: outHeaders });
-
+    return new Response(res.body, {
+      status: res.status,
+      headers: outHeaders,
+    });
   } catch (err: any) {
     return new Response("Worker error: " + err.message, { status: 500 });
   }

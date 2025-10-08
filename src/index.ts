@@ -18,7 +18,10 @@ export default {
   try {  
     
     if (url.pathname === "/m4a") {
-      return streamDriveAudio(env);
+      //return streamDriveAudio(env);
+      const rangeHeader = request.headers.get("Range");
+  env.__requestRange = rangeHeader;
+  return await streamDriveAudio(env);
       
         /*return new Response("streamDriveAudio(env)", {
           status: 200,
