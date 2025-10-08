@@ -19,30 +19,51 @@ button {
   font-size: 18px;
   padding: 10px 20px;
   border: none;
-  background: #0078d7;
-  color: white;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-button:hover {
-  background: #005ea6;
+.play {
+  background: #0078d7;
+  color: white;
 }
+.play:hover { background: #005ea6; }
 
-#spinner {
-  font-size: 16px;
-  margin-top: 10px;
-  color: #666;
-  animation: pulse 1s infinite;
+.stop {
+  background: #d9534f;
+  color: white;
 }
+.stop:hover { background: #b52b27; }
 
 .hidden {
   display: none;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.3; }
-  50% { opacity: 1; }
-  100% { opacity: 0.3; }
+/* --- NotebookLM風アニメーション --- */
+#wave {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 30px;
+  margin-bottom: 10px;
+  gap: 4px;
+}
+
+#wave span {
+  display: block;
+  width: 4px;
+  height: 10px;
+  background: #0078d7;
+  animation: wave 1.2s infinite ease-in-out;
+}
+
+#wave span:nth-child(2) { animation-delay: -1.1s; }
+#wave span:nth-child(3) { animation-delay: -1.0s; }
+#wave span:nth-child(4) { animation-delay: -0.9s; }
+#wave span:nth-child(5) { animation-delay: -0.8s; }
+
+@keyframes wave {
+  0%, 40%, 100% { transform: scaleY(0.3); }
+  20% { transform: scaleY(1.0); }
 }
