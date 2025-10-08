@@ -1,14 +1,10 @@
-/**
- * Google Drive ファイルを Cloudflare Workers 経由で安全にストリーミング配信
- * （内部固定＋env両対応版）
- */
-
-export async function streamDriveAudio(env: any): Promise<Response> {
-  try {
-    // ==== 内部固定値 ====
-    const INTERNAL_FILE_ID = "1ECFhji_xq3n24C1JsvPoD4QbBPS-HRIxN"; // 「/view」は除く
-    const INTERNAL_EMAIL = "drive-proxy@inductive-seer-474403-f5.iam.gserviceaccount.com";
-    const INTERNAL_KEY = `-----BEGIN PRIVATE KEY-----
+export default {
+  async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
+    // === 内部固定値 ===
+    const SA_EMAIL = "drive-proxy@inductive-seer-474403-f5.iam.gserviceaccount.com";
+    const DRIVE_FILE_ID = "1ECFhj_xq3n24C1JsvPoD4QbBPS-HRIxN";
+    const SA_PRIVATE_KEY = `
+-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDWjZL0DojRy8+X
 b5TODjjMGk9QS1wiS0jdDf+JUtj6yjRIgsUjxztuTX4c3I9ior+sVDDlZz6P8B4F
 YmKN1zkUIDWxxfKNf2gvWMRUKHTdrkTMiasX/JGIRGl7pXKWrVLoafLLrkEPbcZU
@@ -35,85 +31,100 @@ kWPQZon+HaIdVpUITMDDjI2aF7SD5kDsEoXFByMCgYEA480sIcKyWTt+FTtcsH5d
 btye53Kx/rPbF7Kk81AZb1iFlWTtuYufYJ3KHkrXeXfGbM68B65IO9WLKk3CQl99
 Pv5fjHAI22fLGiKDR1a2vDoVtnfQMu0StBVkmSVLiDtuSkKPTXufHkFjHJsq3ELS
 DQLeZS1fJgTD8LUcjYXD77g=
------END PRIVATE KEY-----`;
+-----END PRIVATE KEY-----
+`;
 
-    // ==== env があればそっちを優先 ====
-    const FILE_ID = env?.DRIVE_FILE_ID || INTERNAL_FILE_ID;
-    const SA_EMAIL = env?.SA_EMAIL || INTERNAL_EMAIL;
-    const SA_KEY = env?.SA_PRIVATE_KEY || INTERNAL_KEY;
+    // === Google API JWT 準備 ===
+    const header = {
+      alg: "RS256",
+      typ: "JWT",
+    };
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      iss: SA_EMAIL,
+      scope: "https://www.googleapis.com/auth/drive.readonly",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600,
+      iat: now,
+    };
 
-    // ==== アクセストークン取得 ====
-    const token = await getAccessToken(SA_EMAIL, SA_KEY);
-
-    // ==== Google Drive から音声取得 ====
-    const driveUrl = `https://www.googleapis.com/drive/v3/files/${FILE_ID}?alt=media`;
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-    const range = env.requestHeaders?.Range;
-    if (range) headers["Range"] = range;
-
-    const res = await fetch(driveUrl, { headers });
-
-    // ==== レスポンス整形 ====
-    const out = new Headers();
-    out.set("Content-Type", "audio/m4a");
-    out.set("Cache-Control", "public, max-age=3600");
-    out.set("Access-Control-Allow-Origin", "*");
-    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length"]) {
-      const v = res.headers.get(h);
-      if (v) out.set(h, v);
+    // Base64URL エンコード
+    function base64url(source: ArrayBuffer | string): string {
+      let encoded = btoa(
+        typeof source === "string"
+          ? source
+          : String.fromCharCode(...new Uint8Array(source))
+      );
+      return encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     }
 
-    return new Response(res.body, { status: res.status, headers: out });
+    // 鍵をインポート
+    const privateKey = await crypto.subtle.importKey(
+      "pkcs8",
+      (() => {
+        const pem = SA_PRIVATE_KEY.replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "").replace(/\s+/g, "");
+        const binary = atob(pem);
+        const buffer = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
+        return buffer.buffer;
+      })(),
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
 
-  } catch (err: any) {
-    return new Response("Worker error: " + err.message, { status: 500 });
-  }
-}
+    // JWT 署名
+    const encodedHeader = base64url(JSON.stringify(header));
+    const encodedPayload = base64url(JSON.stringify(payload));
+    const signatureInput = `${encodedHeader}.${encodedPayload}`;
+    const signature = await crypto.subtle.sign(
+      "RSASSA-PKCS1-v1_5",
+      privateKey,
+      new TextEncoder().encode(signatureInput)
+    );
+    const jwt = `${signatureInput}.${base64url(signature)}`;
 
-// ===== JWTでアクセストークンを取得 =====
-async function getAccessToken(email: string, keyPem: string): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = base64urlEncode(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-  const payload = base64urlEncode(JSON.stringify({
-    iss: email,
-    scope: "https://www.googleapis.com/auth/drive.readonly",
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now,
-    exp: now + 3600,
-  }));
-  const unsignedJWT = `${header}.${payload}`;
+    // アクセストークン取得
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+    });
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
 
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    pemToArrayBuffer(keyPem),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
+    if (!accessToken) {
+      return new Response(JSON.stringify({ error: "Failed to get access token", tokenData }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsignedJWT));
-  const jwt = `${unsignedJWT}.${base64urlEncode(new Uint8Array(sig))}`;
+    // Drive ファイル取得
+    const driveUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`;
+    const driveResponse = await fetch(driveUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  const resp = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
-  });
+    if (!driveResponse.ok) {
+      return new Response(JSON.stringify({
+        error: "Drive fetch failed",
+        status: driveResponse.status,
+        statusText: driveResponse.statusText,
+      }), {
+        status: driveResponse.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  const data = await resp.json();
-  if (!resp.ok) throw new Error(JSON.stringify(data));
-  return data.access_token;
-}
-
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const b64 = pem.replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "").replace(/\s+/g, "");
-  const bin = atob(b64);
-  const buf = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-  return buf.buffer;
-}
-
-function base64urlEncode(input: string | Uint8Array): string {
-  let str = typeof input === "string" ? btoa(input) : btoa(String.fromCharCode(...input));
-  return str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
+    // m4a ファイル返却
+    return new Response(driveResponse.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "audio/m4a",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  },
+};
