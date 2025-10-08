@@ -73,7 +73,9 @@ DQLeZS1fJgTD8LUcjYXD77g=
     const accessToken = tokenData.access_token;
 
     if (!accessToken) {
-      return new Response("Token fetch failed", { status: 500 });
+      return new Response("Token fetch failed", {
+        status: 500,
+      });
     }
 
     // === Driveファイルフェッチ ===
@@ -92,19 +94,10 @@ DQLeZS1fJgTD8LUcjYXD77g=
     outHeaders.set("Cache-Control", "public, max-age=3600");
     outHeaders.set("Access-Control-Allow-Origin", "*");
 
-    // === ★ ストリーミング化：TransformStreamで中継 ===
-    if (!res.body) {
-      return new Response("No body in Drive response", { status: 500 });
-    }
-
-    const { readable, writable } = new TransformStream();
-    res.body.pipeTo(writable); // Drive → Cloudflare → ブラウザ 逐次転送
-
-    return new Response(readable, {
+    return new Response(res.body, {
       status: res.status,
       headers: outHeaders,
     });
-
   } catch (err: any) {
     return new Response("Worker error: " + err.message, { status: 500 });
   }
