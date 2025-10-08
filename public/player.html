@@ -2,16 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Streaming Audio Player (NotebookLM風)</title>
+  <title>Streaming Audio Player (Compact)</title>
   <link rel="stylesheet" href="css/player.css">
 </head>
 <body>
-  <h2>🎵 NotebookLM風 オーディオテスト</h2>
-
   <div id="playerContainer">
+    <button id="playPauseBtn" class="play" aria-label="Play">▶</button>
     <div id="wave" class="hidden"></div>
-    <button id="playBtn" class="play">▶ 再生</button>
-    <button id="stopBtn" class="hidden stop">■ 停止</button>
     <audio id="player" preload="none"></audio>
   </div>
 

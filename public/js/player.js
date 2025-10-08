@@ -1,50 +1,48 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const btnPlay = document.getElementById("playBtn");
-  const btnStop = document.getElementById("stopBtn");
-  const wave = document.getElementById("wave");
+  const btn = document.getElementById("playBtn");
+  const spinner = document.getElementById("spinner");
   const audio = document.getElementById("player");
 
-  // 波形エレメント動的生成
-  for (let i = 0; i < 5; i++) {
-    const span = document.createElement("span");
-    wave.appendChild(span);
-  }
-
-  btnPlay.addEventListener("click", async () => {
-    // すでに再生中なら無視
-    if (!audio.paused && !audio.ended) return;
-
-    btnPlay.classList.add("hidden");
-    btnStop.classList.remove("hidden");
-    wave.classList.remove("hidden");
-
+  btn.addEventListener("click", async () => {
     if (!audio.src) {
-      audio.src = "/m4a"; // Cloudflare Worker経由の音源
+      // 🔽 Cloudflare Worker経由のエンドポイント
+      audio.src = "/m4a"; 
     }
+
+    // 再生中なら一時停止
+    if (!audio.paused && !audio.ended) {
+      audio.pause();
+      btn.textContent = "▶ 再生";
+      return;
+    }
+
+    // 再生開始
+    btn.classList.add("hidden");
+    spinner.classList.remove("hidden");
 
     try {
       await audio.play();
-      // 再生開始を待たずにアニメを出し続ける（NotebookLM風）
     } catch (err) {
-      console.error("再生エラー:", err);
-      btnPlay.classList.remove("hidden");
-      btnStop.classList.add("hidden");
-      wave.classList.add("hidden");
+      console.error("再生開始エラー:", err);
+      spinner.classList.add("hidden");
+      btn.classList.remove("hidden");
     }
   });
 
-  btnStop.addEventListener("click", () => {
-    audio.pause();
-    audio.currentTime = 0; // 頭出し
-    wave.classList.add("hidden");
-    btnStop.classList.add("hidden");
-    btnPlay.classList.remove("hidden");
+  // 再生開始時
+  audio.addEventListener("playing", () => {
+    spinner.classList.add("hidden");
+    btn.classList.remove("hidden");
+    btn.textContent = "⏸ 一時停止";
   });
 
-  // 再生完了時もリセット
+  // 一時停止時
+  audio.addEventListener("pause", () => {
+    btn.textContent = "▶ 再生";
+  });
+
+  // 再生完了時
   audio.addEventListener("ended", () => {
-    wave.classList.add("hidden");
-    btnStop.classList.add("hidden");
-    btnPlay.classList.remove("hidden");
+    btn.textContent = "▶ 再生";
   });
 });
