@@ -1,33 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const playBtn = document.getElementById("playBtn");
-  const wave = document.getElementById("wave");
+  const btn = document.getElementById("playBtn");
   const audio = document.getElementById("audio");
+  let state = "idle"; // idle | loading | playing | paused
 
-  // 波形バーを生成（初期は非表示）
-  for (let i = 0; i < 5; i++) {
-    const bar = document.createElement("span");
-    wave.appendChild(bar);
-  }
-  wave.classList.add("hidden");
+  const setLoading = () => {
+    btn.innerHTML = "";
+    const loader = document.createElement("div");
+    loader.className = "loader";
+    for (let i = 0; i < 3; i++) loader.appendChild(document.createElement("span"));
+    btn.appendChild(loader);
+  };
 
-  playBtn.addEventListener("click", async () => {
-    // ▶を消して波を表示
-    playBtn.classList.add("hidden");
-    wave.classList.remove("hidden");
+  const setPlayIcon = () => btn.textContent = "▶";
+  const setPauseIcon = () => btn.textContent = "⏸";
 
-    try {
-      // iOSのオーディオ再生許可を確保（無音トリガー）
-      await audio.play();
-    } catch {}
-
-    // 音声ソース設定 → 再生
-    if (!audio.src) {
-      audio.src = "/m4a"; // Cloudflare Worker のエンドポイント
-      try { await audio.play(); } catch {}
+  btn.addEventListener("click", async () => {
+    if (state === "idle" || state === "paused") {
+      setLoading();
+      state = "loading";
+      try {
+        await audio.play();
+        setPauseIcon();
+        state = "playing";
+      } catch (e) {
+        setPlayIcon();
+        state = "idle";
+      }
+    } else if (state === "playing") {
+      audio.pause();
+      setPlayIcon();
+      state = "paused";
     }
   });
 
-  // 再生完了しても波は出たまま
-  audio.addEventListener("ended", () => {});
-  audio.addEventListener("error", () => {});
+  // イベント監視（ローディング → 再生開始 → 終了 → エラー）
+  audio.addEventListener("waiting", () => { if (state !== "loading") setLoading(); });
+  audio.addEventListener("playing", () => { setPauseIcon(); state = "playing"; });
+  audio.addEventListener("pause", () => { setPlayIcon(); state = "paused"; });
+  audio.addEventListener("ended", () => { setPlayIcon(); state = "idle"; });
+  audio.addEventListener("error", () => { setPlayIcon(); state = "idle"; });
 });
