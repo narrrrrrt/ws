@@ -19,6 +19,9 @@ html, body {
   cursor: pointer;
   color: #111;
   padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ローディング中のドットアニメーション */
