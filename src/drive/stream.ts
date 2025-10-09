@@ -89,14 +89,16 @@ DQLeZS1fJgTD8LUcjYXD77g=
     }
 
     // === ヘッダー整形 ===
-    const outHeaders = new Headers();
-    outHeaders.set("Content-Type", "audio/m4a");
-    outHeaders.set("Cache-Control", "public, max-age=3600");
-    outHeaders.set("Access-Control-Allow-Origin", "*");
-    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length"]) {
-      const v = res.headers.get(h);
-      if (v) outHeaders.set(h, v);
-    }
+const outHeaders = new Headers();
+outHeaders.set("Content-Type", "audio/mp4");
+outHeaders.set("Accept-Ranges", "bytes");
+outHeaders.set("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length");
+outHeaders.set("Cache-Control", "public, max-age=3600");
+outHeaders.set("Access-Control-Allow-Origin", "*");
+for (const h of ["Content-Range", "Content-Length"]) {
+  const v = res.headers.get(h);
+  if (v) outHeaders.set(h, v);
+}
 
     // === TransformStream で即時転送 ===
     if (!res.body) {

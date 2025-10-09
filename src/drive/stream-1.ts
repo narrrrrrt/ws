@@ -1,6 +1,6 @@
 /**
  * Google Drive 上のファイルを Cloudflare Workers 経由で
- * ストリーミング配信する安全な実装（内部固定鍵版）
+ * ストリーミング配信する安全な実装（Range対応＋TransformStream版）
  *
  * index.ts から呼び出して使う:
  *   return await streamDriveAudio(env);
@@ -8,7 +8,7 @@
 
 export async function streamDriveAudio(env: any): Promise<Response> {
   try {
-    // === 内部固定（折り返し防止） ===
+    // === 内部固定 ===
     const SA_EMAIL = "drive-proxy@inductive-seer-474403-f5.iam.gserviceaccount.com";
     const DRIVE_FILE_ID = "1ECFhj_xq3n24C1JsvPoD4QbBPS-HRIxN";
     const SA_PRIVATE_KEY = `
@@ -76,49 +76,36 @@ DQLeZS1fJgTD8LUcjYXD77g=
       return new Response("Token fetch failed", { status: 500 });
     }
 
-    // === Driveファイルフェッチ ===
+    // === Driveファイルフェッチ（Range対応） ===
     const driveUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`;
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
+    const range = env.__requestRange || env.requestRange;
+    if (range) headers["Range"] = range;
 
-    // ★ Range を Drive に中継（Safari の audio 再生に必須）
-    const driveHeaders: Record<string, string> = {
-      Authorization: `Bearer ${accessToken}`,
-    };
-    if (env.__requestRange) {
-      driveHeaders["Range"] = env.__requestRange;
-    }
-
-    const res = await fetch(driveUrl, { headers: driveHeaders });
+    const res = await fetch(driveUrl, { headers });
 
     if (res.status === 404) {
       return new Response("File not found on Google Drive", { status: 404 });
     }
 
-    // === ヘッダー整形（Content-Range 等を透過）
-    //    Content-Type は明示的に audio/m4a を優先しつつ、Range関連は転写
+    // === ヘッダー整形 ===
     const outHeaders = new Headers();
     outHeaders.set("Content-Type", "audio/m4a");
     outHeaders.set("Cache-Control", "public, max-age=3600");
     outHeaders.set("Access-Control-Allow-Origin", "*");
-
-    // ★ Range 応答ヘッダーを透過
-    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length", "ETag", "Last-Modified"]) {
+    for (const h of ["Content-Range", "Accept-Ranges", "Content-Length"]) {
       const v = res.headers.get(h);
       if (v) outHeaders.set(h, v);
     }
 
-    // === ストリーミング中継（TransformStream）
+    // === TransformStream で即時転送 ===
     if (!res.body) {
-      return new Response("No body in Drive response", { status: 500 });
+      return new Response("No body", { status: 500 });
     }
     const { readable, writable } = new TransformStream();
-    // 重要: pipeTo は await しない（逐次配信）
     res.body.pipeTo(writable);
 
-    // ★ ここで res.status をそのまま返す（200 でも 206 でも）
-    return new Response(readable, {
-      status: res.status,
-      headers: outHeaders,
-    });
+    return new Response(readable, { status: res.status, headers: outHeaders });
 
   } catch (err: any) {
     return new Response("Worker error: " + err.message, { status: 500 });
