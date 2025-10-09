@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Simple Audio Player</title>
+  <title>Minimal Wave Player</title>
   <link rel="stylesheet" href="css/player.css">
 </head>
 <body>
   <div id="player">
     <button id="playBtn" aria-label="Play">▶</button>
     <div id="wave" class="hidden"></div>
-    <audio id="audio" preload="none"></audio>
+    <audio id="audio" preload="none" playsinline></audio>
   </div>
   <script src="js/player.js"></script>
 </body>

@@ -3,34 +3,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const wave = document.getElementById("wave");
   const audio = document.getElementById("audio");
 
-  // 動的に波形バーを生成
+  // 波形バーを生成（初期は非表示）
   for (let i = 0; i < 5; i++) {
     const bar = document.createElement("span");
     wave.appendChild(bar);
   }
+  wave.classList.add("hidden");
 
   playBtn.addEventListener("click", async () => {
-    // ボタンを隠して波形を表示
+    // ▶を消して波を表示
     playBtn.classList.add("hidden");
     wave.classList.remove("hidden");
 
-    if (!audio.src) {
-      audio.src = "/m4a"; // Cloudflare Workerから配信される音声
-    }
-
     try {
+      // iOSのオーディオ再生許可を確保（無音トリガー）
       await audio.play();
-    } catch (err) {
-      console.error("再生エラー:", err);
-      // 再生失敗したら元に戻す
-      wave.classList.add("hidden");
-      playBtn.classList.remove("hidden");
+    } catch {}
+
+    // 音声ソース設定 → 再生
+    if (!audio.src) {
+      audio.src = "/m4a"; // Cloudflare Worker のエンドポイント
+      try { await audio.play(); } catch {}
     }
   });
 
-  // 再生終了後は初期状態に戻す
-  audio.addEventListener("ended", () => {
-    wave.classList.add("hidden");
-    playBtn.classList.remove("hidden");
-  });
+  // 再生完了しても波は出たまま
+  audio.addEventListener("ended", () => {});
+  audio.addEventListener("error", () => {});
 });
