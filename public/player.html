@@ -2,16 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Streaming Audio Player (Compact)</title>
-  <link rel="stylesheet" href="/css/player.css">
+  <title>Simple Audio Player</title>
+  <link rel="stylesheet" href="css/player.css">
 </head>
 <body>
-  <div id="playerContainer">
-    <button id="playPauseBtn" class="play" aria-label="Play">▶</button>
+  <div id="player">
+    <button id="playBtn" aria-label="Play">▶</button>
     <div id="wave" class="hidden"></div>
-    <audio id="player" preload="none"></audio>
+    <audio id="audio" preload="none"></audio>
   </div>
-
   <script src="js/player.js"></script>
 </body>
 </html>
