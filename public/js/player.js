@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const setPlayIcon = () => btn.textContent = "▶";
-  const setPauseIcon = () => btn.textContent = "▌▌";
+  const setPauseIcon = () => btn.textContent = "‖";
 
   btn.addEventListener("click", async () => {
     if (state === "idle" || state === "paused") {
