@@ -1,48 +1,43 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("playBtn");
-  const spinner = document.getElementById("spinner");
+  const btn = document.getElementById("playPauseBtn");
+  const wave = document.getElementById("wave");
   const audio = document.getElementById("player");
 
+  // 動的に5本のバーを生成
+  for (let i = 0; i < 5; i++) {
+    const bar = document.createElement("span");
+    wave.appendChild(bar);
+  }
+
   btn.addEventListener("click", async () => {
-    if (!audio.src) {
-      // 🔽 Cloudflare Worker経由のエンドポイント
-      audio.src = "/m4a"; 
-    }
+    if (audio.paused || audio.ended) {
+      // 再生開始
+      btn.textContent = "⏸";
+      wave.classList.remove("hidden");
+      wave.classList.remove("paused");
 
-    // 再生中なら一時停止
-    if (!audio.paused && !audio.ended) {
+      if (!audio.src) {
+        audio.src = "/m4a"; // Cloudflare Worker側の音源URL
+      }
+
+      try {
+        await audio.play();
+      } catch (err) {
+        console.error("再生エラー:", err);
+        btn.textContent = "▶";
+        wave.classList.add("hidden");
+      }
+    } else {
+      // 一時停止
       audio.pause();
-      btn.textContent = "▶ 再生";
-      return;
-    }
-
-    // 再生開始
-    btn.classList.add("hidden");
-    spinner.classList.remove("hidden");
-
-    try {
-      await audio.play();
-    } catch (err) {
-      console.error("再生開始エラー:", err);
-      spinner.classList.add("hidden");
-      btn.classList.remove("hidden");
+      btn.textContent = "▶";
+      wave.classList.add("paused"); // 波形を静止
     }
   });
 
-  // 再生開始時
-  audio.addEventListener("playing", () => {
-    spinner.classList.add("hidden");
-    btn.classList.remove("hidden");
-    btn.textContent = "⏸ 一時停止";
-  });
-
-  // 一時停止時
-  audio.addEventListener("pause", () => {
-    btn.textContent = "▶ 再生";
-  });
-
-  // 再生完了時
+  // 再生終了時はリセット
   audio.addEventListener("ended", () => {
-    btn.textContent = "▶ 再生";
+    btn.textContent = "▶";
+    wave.classList.add("hidden");
   });
 });
