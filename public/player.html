@@ -2,56 +2,34 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Wave Audio Player</title>
+<title>Audio Debug Player</title>
 <style>
-html,body{
-  height:100%;margin:0;
-  background:#fff;
-  font-family:ui-monospace,monospace;
-}
-#player{
-  display:flex;align-items:center;justify-content:center;
-  gap:12px;height:60vh;
-}
-#playBtn{
-  font-size:42px;line-height:1;
-  background:none;border:none;cursor:pointer;
-  color:#111;padding:0 8px;
-}
-.wave{
-  display:inline-flex;align-items:flex-end;gap:4px;height:32px;
-}
-.wave>span{
-  width:4px;height:10px;background:#111;border-radius:2px;
-  transform-origin:bottom center;
-  animation:wave 1.2s infinite ease-in-out;
-}
+html,body{margin:0;padding:0;background:#fff;font-family:ui-monospace,monospace;}
+#player{display:flex;align-items:center;justify-content:center;gap:12px;height:50vh;}
+#playBtn{font-size:42px;line-height:1;background:none;border:none;cursor:pointer;color:#111;padding:0 8px;}
+.wave{display:inline-flex;align-items:flex-end;gap:4px;height:32px;}
+.wave>span{width:4px;height:10px;background:#111;border-radius:2px;transform-origin:bottom center;
+animation:wave 1.2s infinite ease-in-out;}
 .wave>span:nth-child(2){animation-delay:-1.1s}
 .wave>span:nth-child(3){animation-delay:-1.0s}
 .wave>span:nth-child(4){animation-delay:-0.9s}
 .wave>span:nth-child(5){animation-delay:-0.8s}
-@keyframes wave{
-  0%,40%,100%{transform:scaleY(0.3)}
-  20%{transform:scaleY(1.0)}
-}
-#debug{
-  font-size:12px;color:#222;background:#f7f7f7;
-  border-top:1px solid #e5e5e5;padding:8px;
-  height:35vh;overflow:auto;white-space:pre-wrap;
-}
+@keyframes wave{0%,40%,100%{transform:scaleY(0.3)}20%{transform:scaleY(1.0)}}
+#debug{font-size:12px;color:#222;background:#fafafa;border-top:1px solid #e5e5e5;padding:8px;
+height:50vh;overflow:auto;white-space:pre-wrap;}
 </style>
 </head>
 <body>
 <div id="player">
   <button id="playBtn" aria-label="Play">▶</button>
-  <!-- 🎧 最初からソースを埋め込む -->
-  <audio id="audio" src="/m4a" preload="metadata" playsinline></audio>
+  <!-- テスト用：最初は読み込まない -->
+  <audio id="audio" src="/m4a" preload="none" playsinline></audio>
 </div>
 <div id="debug"></div>
 
 <script>
+const dbg = document.getElementById("debug");
 const log = msg => {
-  const dbg = document.getElementById("debug");
   const t = new Date().toLocaleTimeString("ja-JP",{hour12:false});
   dbg.textContent += `[${t}] ${msg}\n`;
   dbg.scrollTop = dbg.scrollHeight;
@@ -61,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("playBtn");
   const audio = document.getElementById("audio");
 
-  log("ready. audio preloaded metadata only.");
+  log("ready. preload='none'");
 
   btn.addEventListener("click", async () => {
     log("▶ clicked");
@@ -69,20 +47,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const wave = document.createElement("div");
     wave.className = "wave";
-    for (let i = 0; i < 5; i++) wave.appendChild(document.createElement("span"));
+    for (let i=0;i<5;i++) wave.appendChild(document.createElement("span"));
     document.getElementById("player").appendChild(wave);
-    log("wave element created");
+    log("wave created");
 
     try {
       await audio.play();
-      log("audio.play() triggered");
+      log("audio.play() called");
     } catch (e) {
       log("play() failed: " + e.name);
     }
   });
 
-  ["play","playing","canplay","waiting","stalled","pause","ended","error"]
-    .forEach(ev => audio.addEventListener(ev,()=>log("event: "+ev)));
+  // 全主要イベントを監視
+  [
+    "loadstart","loadedmetadata","loadeddata","canplay","canplaythrough",
+    "play","playing","pause","waiting","stalled","progress","ended","error"
+  ].forEach(ev => audio.addEventListener(ev,()=>log("event: "+ev)));
 });
 </script>
 </body>
