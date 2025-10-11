@@ -1,6 +1,7 @@
 (() => {
   const sockets = new Map(); // roomId -> WebSocket
-  let host = "ive.narrat.workers.dev"; // null の場合は location.host を使う
+  const host = "ive.narrat.workers.dev"; // null の場合は location.host を使う
+  const url = host ? `https://${host}/` : "";
 
   function connectRoom(roomEl) {
     const id = roomEl.dataset.id;
@@ -41,7 +42,7 @@
               btn.classList.add("active");
               btn.disabled = false;
               btn.onclick = () => {
-                window.location.href = `room.html?id=${id}&seat=${seat}`;
+                window.location.href = `${url}room.html?id=${id}&seat=${seat}`;
               };
             }
           });
@@ -51,7 +52,7 @@
           obsBtn.classList.add("active");
           obsBtn.disabled = false;
           obsBtn.onclick = () => {
-            window.location.href = `room.html?id=${id}&seat=observer`;
+            window.location.href = `${url}room.html?id=${id}&seat=observer`;
           };
         }
       } catch (e) {
